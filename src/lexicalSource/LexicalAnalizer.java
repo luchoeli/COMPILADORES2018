@@ -65,7 +65,7 @@ public class LexicalAnalizer {
 	}
 	public void initilize(){
 		this.sMatrix=new MatrixState();
-
+		
 		//IDENTIFICADOR
 		this.idTokens.put("ID",(int)ID);
 		//CONSTANTES
@@ -559,4 +559,5 @@ public class LexicalAnalizer {
 	public ArrayList<String> getProblems() {
 		return (ArrayList<String>) this.problems;
 	}
+	
 }

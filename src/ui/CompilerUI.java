@@ -1,5 +1,5 @@
 package ui;
-
+import sintacticSource.*;
 import java.awt.EventQueue;
 
 import javax.swing.JFileChooser;
@@ -267,7 +267,7 @@ public class CompilerUI {
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+							
 				String program = textArea.getText();
 				LexicalAnalizer analizer = new LexicalAnalizer(program);
 				int idToken=-1;
@@ -293,7 +293,8 @@ public class CompilerUI {
 					data[3]=""+token.getNroLine();
 					dtm.addRow(data);
 				}
-				
+				Parser parser = new Parser();
+				parser.Parse();
 			}
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
