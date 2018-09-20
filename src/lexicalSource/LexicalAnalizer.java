@@ -98,13 +98,13 @@ public class LexicalAnalizer {
 		this.idTokens.put("else", (int)ELSE);
 		this.idTokens.put("end_if", (int)END_IF);
 		this.idTokens.put("print", (int)PRINT);		
-		this.idTokens.put("int", (int)INT);
-		this.idTokens.put("void", (int)VOID);
-		this.idTokens.put("case", (int)CASE);
+		this.idTokens.put("int", (int)INT);  // no va
+		this.idTokens.put("void", (int)VOID); 
+		this.idTokens.put("case", (int)CASE);  
 		this.idTokens.put("usinteger", (int)USINTEGER);
 		this.idTokens.put("do", (int)DO);
 		this.idTokens.put("double", (int)DOUBLE);
-		this.idTokens.put("while", (int)WHILE);
+		this.idTokens.put("while", (int)WHILE);   // no va
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -484,34 +484,55 @@ public class LexicalAnalizer {
 	}
 
 	private String getType(int id) {
-		if ((274<=id)&&(id<=287)){
-			return "PALABRA RESERVADA";
-		}
-		if ((267<=id)&&(id<=273)){
-			return "SIMBOLO";
-		}
-		if ((id==260)){
-			return "ASIGNACION";
-		}
-		if ((260<id)&&(id<=266)){
-			return "COMPARADOR";
-		}
-		if ((256<=id)&&(id<=259)){
-			return "OPERADOR";
-		}
-		if (id==288){
-			return "ID";
-		}
-		if (id==289){
-			return "CTE";
-		}
-		if (id==290){
-			return "EOF";
-		}
+		//Tipos de tokens
 		
-		return null;
+		switch(id){
+		case IF: return "PALABRA RESERVADA";
+		case THEN: return "PALABRA RESERVADA";
+		case ELSE: return "PALABRA RESERVADA";
+		case END_IF: return "PALABRA RESERVADA";
+		case PRINT: return "PALABRA RESERVADA";
+		case INT: return "PALABRA RESERVADA";
+		case BEGIN: return "PALABRA RESERVADA";
+		case END: return "PALABRA RESERVADA";
+		case USINTEGER: return "PALABRA RESERVADA";
+		case DOUBLE: return "PALABRA RESERVADA";
+		case LONG: return "PALABRA RESERVADA";
+		case GLOBAL: return "PALABRA RESERVADA";
+		case WHILE: return "PALABRA RESERVADA";
+		
+		case ID: return "IDENTIFICADOR";
+		
+		case CTE: return "CONSTANTE";
+		
+		case CADENA: return "CADENA";
+		
+		case ASIGNACION: return "ASIGNACION";
+		
+		case '<': return "COMPARADOR";
+		case '>': return "COMPARADOR";
+		case '=': return "COMPARADOR";
+		case MENORIGUAL: return "COMPARADOR";
+		case MAYORIGUAL: return "COMPARADOR";
+		case IGUALIGUAL: return "COMPARADOR";
+		case DISTINTO: return "COMPARADOR";
+		
+		case '+': return "OPERADOR";
+		case '-': return "OPERADOR";
+		case '*': return "OPERADOR";
+		case '/': return "OPERADOR";
+		
+		case '(': return "SIMBOLO";
+		case ')': return "SIMBOLO";
+		case ',': return "SIMBOLO";
+		case ';': return "SIMBOLO";
+		case '{': return "SIMBOLO";
+		case '}': return "SIMBOLO";
+		case '\'': return "SIMBOLO";
+		default: return "EOF";
+				
+		}		
 	}
-
 	private int getID(String buffer) {
 		int value=-1;
 		if (this.idTokens.containsKey(buffer)){
