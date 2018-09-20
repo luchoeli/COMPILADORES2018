@@ -9,6 +9,7 @@ import semanticSource.*;
 
 public class LexicalAnalizer {
 	
+	
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
 	private List<TableRecord> symbolTable=new ArrayList<TableRecord>();
