@@ -10,6 +10,32 @@ import semanticSource.*;
 public class LexicalAnalizer {
 	
 	
+	public final static short ID=257;
+	public final static short CTE=258;
+	public final static short CADENA=259;
+	public final static short IF=260;
+	public final static short THEN=261;
+	public final static short ELSE=262;
+	public final static short ENDIF=263;
+	public final static short BEGIN=264;
+	public final static short END=265;
+	public final static short PRINT=266;
+	public final static short INT=267;
+	public final static short LONG=268;
+	public final static short UNSIGNED=269;
+	public final static short GLOBAL=270;
+	public final static short WHILE=271;
+	public final static short MAYORIGUAL=272;
+	public final static short MENORIGUAL=273;
+	public final static short IGUALIGUAL=274;
+	public final static short DISTINTO=275;
+	public final static short EOF=276;
+	
+	public final static int maxInt=32767;
+	public final static int minInt=-32768;
+	//----------------//
+	public final static long maxUInt=4294967295L;
+	public final static long minUInt=0;
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
 	private List<TableRecord> symbolTable=new ArrayList<TableRecord>();
