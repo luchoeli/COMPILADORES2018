@@ -8,8 +8,7 @@ import java.util.List;
 import semanticSource.*;
 
 public class LexicalAnalizer {
-	// lucho branch
-//pupi branch
+	
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
 	private List<TableRecord> symbolTable=new ArrayList<TableRecord>();
