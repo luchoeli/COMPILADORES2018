@@ -9,20 +9,19 @@ import semanticSource.*;
 
 public class LexicalAnalizer {
 	
-	
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
 	public final static short IF=260;
 	public final static short THEN=261;
 	public final static short ELSE=262;
-	public final static short ENDIF=263;
+	public final static short END_IF=263;
 	public final static short BEGIN=264;
 	public final static short END=265;
 	public final static short PRINT=266;
 	public final static short INT=267;
 	public final static short LONG=268;
-	public final static short UNSIGNED=269;
+	public final static short USINTEGER=269;
 	public final static short GLOBAL=270;
 	public final static short WHILE=271;
 	public final static short MAYORIGUAL=272;
@@ -30,6 +29,12 @@ public class LexicalAnalizer {
 	public final static short IGUALIGUAL=274;
 	public final static short DISTINTO=275;
 	public final static short EOF=276;
+	
+	public final static short ASIGNACION=277;
+	public final static short VOID=278;
+	public final static short CASE=279;
+	public final static short DO=280;
+	public final static short DOUBLE=281;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
@@ -62,46 +67,44 @@ public class LexicalAnalizer {
 		this.sMatrix=new MatrixState();
 
 		//IDENTIFICADOR
-		this.idTokens.put("ID",288);
+		this.idTokens.put("ID",(int)ID);
 		//CONSTANTES
-		this.idTokens.put("CTE",289);		
+		this.idTokens.put("CTE",(int)CTE);		
 		//OPERADORES
-		this.idTokens.put("+", 256);
-		this.idTokens.put("-", 257);
-		this.idTokens.put("*", 258);
-		this.idTokens.put("/", 259);
+		this.idTokens.put("+", (int)'+');
+		this.idTokens.put("-", (int)'-');
+		this.idTokens.put("*", (int)'*');
+		this.idTokens.put("/", (int)'/');
 		//ASIGNACION
-		this.idTokens.put(":=", 260);
+		this.idTokens.put(":=", (int)ASIGNACION);
 		//COMPARADORES
-		this.idTokens.put(">", 261);
-		this.idTokens.put("<", 262);		
-		this.idTokens.put(">=", 263);
-		this.idTokens.put("<=", 264);
-		this.idTokens.put("=", 265);
-		this.idTokens.put("!=", 266);
+		this.idTokens.put(">", (int)'>');
+		this.idTokens.put("<", (int)'<');		
+		this.idTokens.put(">=", (int)MAYORIGUAL);
+		this.idTokens.put("<=", (int)MENORIGUAL);
+		this.idTokens.put("=", (int)'=');
+		this.idTokens.put("!=", (int)DISTINTO);
 		//SIMBOLOS		
-		this.idTokens.put("(", 267);
-		this.idTokens.put(")", 268);
-		this.idTokens.put(",", 269);
-		this.idTokens.put(";", 270);
-		this.idTokens.put("{", 271);
-		this.idTokens.put("}", 272);
-		this.idTokens.put("'", 273);
+		this.idTokens.put("(", (int)'(');
+		this.idTokens.put(")", (int)')');
+		this.idTokens.put(",", (int)',');
+		this.idTokens.put(";", (int)';');
+		this.idTokens.put("{", (int)'{');
+		this.idTokens.put("}", (int)'}');
+		this.idTokens.put("'", (int)'\'');
 		//PALABRAS RESERVADAS
-		this.idTokens.put("if", 274);
-		this.idTokens.put("then", 275);
-		this.idTokens.put("else", 276);
-		this.idTokens.put("end_if", 277);
-		this.idTokens.put("print", 278);		
-		this.idTokens.put("int", 279);
-		this.idTokens.put("void", 280);
-		this.idTokens.put("case", 281);
-		this.idTokens.put("usinteger", 282);
-		this.idTokens.put("do", 283);
-		this.idTokens.put("double", 284);
-//		this.idTokens.put("WHILE", 285);
-//		this.idTokens.put("FUN", 286);
-//		this.idTokens.put("RETURN", 287);
+		this.idTokens.put("if", (int)IF);
+		this.idTokens.put("then", (int)THEN);
+		this.idTokens.put("else", (int)ELSE);
+		this.idTokens.put("end_if", (int)END_IF);
+		this.idTokens.put("print", (int)PRINT);		
+		this.idTokens.put("int", (int)INT);
+		this.idTokens.put("void", (int)VOID);
+		this.idTokens.put("case", (int)CASE);
+		this.idTokens.put("usinteger", (int)USINTEGER);
+		this.idTokens.put("do", (int)DO);
+		this.idTokens.put("double", (int)DOUBLE);
+		this.idTokens.put("while", (int)WHILE);
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -409,71 +412,44 @@ public class LexicalAnalizer {
 			return 3;
 		}
 
-		switch(c){ 
-		
-		case 'D':
-			return 13; 
-		case '*':
-			return 11; 
-		case '/':
-			return 11; 
-		case '-':
-			return 18; 
-		case '+':
-			return 10; 
-		case '(':
-			return 7; 
-		case ')':
-			return 7; 
-		case ',':
-			return 7; 
-		case ';':
-			return 7; 
-		case 32:  // espacio en blanco
-			return 16; 
-		case '\n':
-			return 12;
-		case '\t':
-			return 16;
-		case '_':
-			return 0; 
-		case 'i':
-			return 9; 
-		case 'u':
-			return 8;
-		case ':':
-			return 4;
-		case '=':
-			return 6; 
-		case '<':
-			return 5; 
-		case '>':
-			return 5;
-		case '!':
-			return 5;
-		case '.':
-			return 15;
-		case '{':
-			return 7;
-		case '}':
-			return 7;  
-		case 39:	// Es el '
-			return 14; 
-		
-		case 0:		//null
-			return 18;
+		switch(c){ 		
+			case 'D': return 13; 
+			case '*': return 11; 
+			case '/': return 11; 
+			case '-': return 18; 
+			case '+': return 10; 
+			case '(': return 7; 
+			case ')': return 7; 
+			case ',': return 7; 
+			case ';': return 7; 
+			case 32: return 16; // espacio en blanco
+			case '\n': return 12;
+			case '\t': return 16;
+			case '_': return 0; 
+			case 'i': return 9; 
+			case 'u': return 8;
+			case ':': return 4;
+			case '=': return 6; 
+			case '<': return 5; 
+			case '>': return 5;
+			case '!': return 5;
+			case '.': return 15;
+			case '{': return 7;
+			case '}': return 7;  
+			case 39: return 14; // ' 	
+			case 0: return 18; // NULL
 		}
 		
 		
-		if ((c>=65)&&(c<=90)){ // mayusculas
+		if ((c>='A')&&(c<='Z')){ // mayusculas
 			return 2;		
 		}
 		
-		if ((c>=97)&&(c<=122)){ // minusculas
+		if ((c>='a')&&(c<='z')){ // minusculas
 			return 1;
 		}
 		
-		return 17;  // otros ??????????
+		return 17;  // otros 
 			
 	}
 	

@@ -1,0 +1,5 @@
+%{
+	import lexicalSource.*;
+%}
+
+%token
