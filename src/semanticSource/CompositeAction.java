@@ -18,7 +18,7 @@ public class CompositeAction implements SemanticAction{
 	
 	public boolean execute(String buffer, char c){
 		for (SemanticAction action : semanticActions){
-			System.out.println("ASC: "+action.toString()+"\n");
+			//System.out.println("ASC: "+action.toString()+"\n");
 			if (!action.execute(buffer, c)){
 				return false;
 			}

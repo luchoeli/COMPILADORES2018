@@ -26,8 +26,6 @@ public class MatrixState {
 
 
 	public int get(int state, int colum) {
-		System.out.println("estado" + state);
-		System.out.println("columna" + colum);
 		return matrix[state][colum];
 	}
 	

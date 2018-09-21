@@ -266,6 +266,11 @@ final static String yyrule[] = {
 
 public LexicalAnalizer lexico;
 
+public Parser(String programa) {
+    lexico = new LexicalAnalizer(programa);
+
+}
+
 public int yylex() {
 	int token = lexico.getToken(); 
 	if (token != -1)
@@ -275,14 +280,18 @@ public int yylex() {
 }
 
 public void yyerror(String errormsg){
-	
+
 }
 
 public int Parse(){
 	return yyparse();
 }
+
+public LexicalAnalizer getAnalizer(){
+	return lexico;
+}
 	
-//#line 214 "Parser.java"
+//#line 223 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -440,7 +449,7 @@ case 2:
 //#line 37 "especificacion.y"
 {System.out.println("AAAAAAAAAAAAA");}
 break;
-//#line 367 "Parser.java"
+//#line 376 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

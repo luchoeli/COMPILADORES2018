@@ -1,4 +1,3 @@
-
 %{
 	package sintacticSource;
 	import lexicalSource.*;
@@ -53,6 +52,11 @@ tipo	:	 USINTEGER
 
 public LexicalAnalizer lexico;
 
+public Parser(String programa) {
+    lexico = new LexicalAnalizer(programa);
+
+}
+
 public int yylex() {
 	int token = lexico.getToken(); 
 	if (token != -1)
@@ -62,10 +66,14 @@ public int yylex() {
 }
 
 public void yyerror(String errormsg){
-	
+
 }
 
 public int Parse(){
 	return yyparse();
+}
+
+public LexicalAnalizer getAnalizer(){
+	return lexico;
 }
 	

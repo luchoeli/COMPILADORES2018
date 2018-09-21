@@ -32,7 +32,12 @@
 %%
 /*reglas gramaticales*/	
 
-programa:	  sent_declarativas 
+programa:	list_sentencias;
+
+list_sentencias: sent_declarativa 
+				 | sent_ejecutable 
+				 | list_sentencias sent_declarativa
+				 | list_sentencias sent_ejecutable
 			  
 sent_declarativas	:	declaracion_variable ','{System.out.println("AAAAAAAAAAAAA");}
 					|	sent_declarativas',' declaracion_variable
@@ -52,6 +57,11 @@ tipo	:	 USINTEGER
 
 public LexicalAnalizer lexico;
 
+public Parser(String programa) {
+    lexico = new LexicalAnalizer(programa);
+
+}
+
 public int yylex() {
 	int token = lexico.getToken(); 
 	if (token != -1)
@@ -61,10 +71,14 @@ public int yylex() {
 }
 
 public void yyerror(String errormsg){
-	
+
 }
 
 public int Parse(){
 	return yyparse();
+}
+
+public LexicalAnalizer getAnalizer(){
+	return lexico;
 }
 	

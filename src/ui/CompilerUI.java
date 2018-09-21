@@ -267,9 +267,13 @@ public class CompilerUI {
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-							
+				//TODO aksa -------------//			
 				String program = textArea.getText();
-				LexicalAnalizer analizer = new LexicalAnalizer(program);
+				Parser parser = new Parser(program);
+				parser.Parse();
+				LexicalAnalizer analizer = parser.getAnalizer();
+				//-----------//
+				
 				int idToken=-1;
 				while (idToken!=290){
 					idToken=analizer.getToken();
@@ -293,8 +297,7 @@ public class CompilerUI {
 					data[3]=""+token.getNroLine();
 					dtm.addRow(data);
 				}
-				Parser parser = new Parser();
-				parser.Parse();
+				
 			}
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
