@@ -32,6 +32,8 @@ public class LexicalAnalizer {
 	public final static short EOF=276;
 	*/
 	//#### end semantic value section ####
+	
+	
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
@@ -49,15 +51,15 @@ public class LexicalAnalizer {
 	public final static short READONLY=271;
 	public final static short WRITE=272;
 	public final static short PASS=273;
-	public final static short MAYORIGUAL=274;
-	public final static short MENORIGUAL=275;
-	public final static short IGUAL=276;
-	public final static short DISTINTO=277;
-	public final static short EOF=278;
+	public final static short RETURN=274;
+	public final static short MAYORIGUAL=275;
+	public final static short MENORIGUAL=276;
+	public final static short IGUAL=277;
+	public final static short DISTINTO=278;
+	public final static short EOF=279;
 	public final static short YYERRCODE=256;
 	
-	public final static short ASIGNACION=279;
-	public final static short VOID=278;
+	public final static short ASIGNACION=280;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
@@ -119,8 +121,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("if", (int)IF);
 		this.idTokens.put("then", (int)THEN);
 		this.idTokens.put("else", (int)ELSE);
-		this.idTokens.put("end_if", (int)END_IF);
-		this.idTokens.put("void", (int)VOID); 
+		this.idTokens.put("end_if", (int)END_IF); 
 		this.idTokens.put("case", (int)CASE);  
 		this.idTokens.put("usinteger", (int)USINTEGER);
 		this.idTokens.put("do", (int)DO);
