@@ -71,6 +71,15 @@ public class CompilerUI {
 	private DefaultTableModel dtm;
 	private DefaultTableModel tableDtm;
 	
+	
+	private String namefile="untitled";
+
+	private static final Color yellow = new Color(255,210,55);
+	private static final Color red = new Color(255,120,104);
+	Highlighter.HighlightPainter painterLines = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
+	Highlighter.HighlightPainter painterTextArea_red = new DefaultHighlighter.DefaultHighlightPainter(red);
+	Highlighter.HighlightPainter painterTextArea_yellow = new DefaultHighlighter.DefaultHighlightPainter(yellow);
+
 	/**
 	 * Launch the application.
 	 */
@@ -320,31 +329,63 @@ public class CompilerUI {
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				clear();
 				//TODO aksa -------------//			
 				String program = textArea.getText();
 				Table table=new Table();
 				Parser parser = new Parser(program,table);
 				parser.Parse();
-				
 				//-----------//
 				
 				//Ininicializo estructuras para mostrar las salidas.
 				LexicalAnalizer analizer = parser.getAnalizer();
-		        ArrayList<SintacticStructure> structures = parser.getReglas();
+				//LexicalAnalizer analizer = new LexicalAnalizer(program, table);
 				ArrayList<Token> tokens=analizer.getTokens();
+				
+				System.out.println("CANT TOK: "+tokens.size());
+		        ArrayList<SintacticStructure> structures = parser.getReglas();
 				ArrayList<Error> errors = analizer.getErrors();
+				
 				errors.addAll(parser.getErrors());
 				Collections.sort(errors);
 				ArrayList<TableRecord> records = table.getElements();
 				problems.setText(null);
 				
-				int idToken=-1;
-				while (idToken!=290){
-					idToken=analizer.getToken();
+				
+				
+				for(Error error : errors){
+					drawLine(error.nroLine-1, error.severity);
+					problems.setText(problems.getText() + error.description + "En linea: "+error.nroLine+"\n");
+				}
+				
+
+				//Panel tokens agrego filas a la tabla.
+				for(Token token : tokens){
+					String[] data=new String[4];
+					data[0]=""+token.getId();
+					data[1]=token.getType();
+					data[2]=token.getLexema();
+					data[3]=""+token.getNroLine();
+					dtm.addRow(data);
+				}
+				
+				for (SintacticStructure struc : structures){
+					String[] data=new String[4];
+					data[0]=""+struc.getLine();
+					data[1]=struc.getType();
+					data[2]=struc.getDescription();
+					structDtm.addRow(data);
 				}
 				
 				
 				
+				for (TableRecord tr : records){
+					String[] data=new String[3];
+					data[0]=tr.getType();
+					data[1]=tr.getLexema();
+		            data[2]=tr.getAmbito();
+				}
+		
 			}
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
@@ -434,31 +475,37 @@ public class CompilerUI {
 		//panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{textArea, btnNewButton, btnOpen, btnRun, tabbedPane, Problems, scrollPane_Problems, problems, Console, scrollPane_Console, console, Tokens, scrollPane_Tokens, table, scrollPane, lines}));
 		
 	}
-	
-	/**
-	 * Pinta en el area de texto una linea. 
-	 * @param numberLine Linea a pintar.
-	 */
-	private void drawLine(int numberLine){
-		Highlighter.HighlightPainter painterTextArea;
-		Highlighter.HighlightPainter painterLines;
-        try {
-        	//PINTA LINEA EN AREA DE TEXTO
-			int startLineText = textArea.getLineStartOffset(numberLine);
-			int endLineText = textArea.getLineEndOffset(numberLine);
-			Color line=new Color(255,120,104);
-			painterTextArea = new DefaultHighlighter.DefaultHighlightPainter(line);
-			textArea.getHighlighter().addHighlight(startLineText, endLineText, painterTextArea);
-			// PINTA LINEA EN LA COLUMNA LINEA
-			int startLineLines = lines.getLineStartOffset(numberLine);
-			int endLineLines=lines.getLineEndOffset(numberLine);
-			painterLines = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
-			lines.getHighlighter().addHighlight(startLineLines, endLineLines, painterLines);
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
+	private void clear(){
+		String text=this.textArea.getText();
+		this.textArea.setText(null);
+		this.textArea.setText(text);
+	}
+
+
+	private void drawLine(int numberLine, int severity){
+
+	try {
+        //PINTA LINEA EN AREA DE TEXTO
+		int startLineText = textArea.getLineStartOffset(numberLine);
+		int endLineText = textArea.getLineEndOffset(numberLine);
+		switch(severity){
+			case Error.error:
+				textArea.getHighlighter().addHighlight(startLineText, endLineText,painterTextArea_red);
+			case Error.warning:
+				textArea.getHighlighter().addHighlight(startLineText, endLineText,painterTextArea_yellow);
+		}
+
+		// PINTA LINEA EN LA COLUMNA LINEA
+		int startLineLines = lines.getLineStartOffset(numberLine);
+		int endLineLines = lines.getLineEndOffset(numberLine);
+		painterLines = new DefaultHighlighter.DefaultHighlightPainter(Color.RED);
+		lines.getHighlighter().addHighlight(startLineLines, endLineLines, painterLines);
+
+	} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 	}
+
 }

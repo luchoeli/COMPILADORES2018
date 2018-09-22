@@ -95,11 +95,9 @@ list_sentencias: sent_declarativa
 			  
 sent_declarativa	:	declaracion_variable ','{System.out.println("AAAAAAAAAAAAA");}
 					|	declaracion_funcion ','
-					|	sent_declarativa',' declaracion_variable
-					|	sent_declarativa',' declaracion_funcion
 					;
 					
-declaracion_variable	:	tipo list_variables 
+declaracion_variable	:	tipo list_variables {System.out.println("DECLARACION DE VARIABLES");}
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
@@ -109,7 +107,7 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  ;
 
 						  
-list_variables		:	list_variables ';' ID 
+list_variables		:	list_variables ';' ID {System.out.println("WEPA");}
 					|	ID ;
 
 tipo	:	 USINTEGER
@@ -119,6 +117,7 @@ tipo	:	 USINTEGER
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
+				 | asignacion ','
 				 ;
 
 sent_control	: CASE '(' ID ')' 
@@ -131,6 +130,9 @@ linea_control	: linea_control CTE ':' DO bloque_de_sentencias
 sent_seleccion :	IF '('condicion')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
 			   |	IF '('condicion')' bloque_de_sentencias
 			   ;
+/* esto va en las de control.. pero me genera ambiguedad VER
+bloque_sin_declaracion : '{'list_sentencias'}'
+*/				   ;
 
 condicion : expresion_logica comparador expresion_logica
 		  ;
@@ -159,7 +161,10 @@ termino : termino '*' factor
 		;
 
 imprimir	:	PRINT '('CADENA')'
-			;	
+			;
+			
+asignacion 	:	ID ':=' expresion 
+			;
 
 /*chequear factor*/
 factor : CTE
@@ -168,6 +173,7 @@ factor : CTE
 
 bloque_de_sentencias : '{'list_sentencias'}'
 					 ;
+
 			
 %%
 /**/
@@ -181,14 +187,16 @@ public Parser(String programa, Table table) {
 	this.table = table;
 }
 
-public int yylex() {
-	int token = lexico.getToken(); 
-	if (token != -1)
-		return token;
-	else
-	 	return -1;
-}
+private int yylex() {
+	Token token=lexico.getToken();
 
+	if (token!=null){
+	    yylval = new ParserVal(token);
+	    return token.getId();
+	}
+
+	return 0;
+}
 public void yyerror(String errormsg){
 
 }
