@@ -1,5 +1,5 @@
 package ui;
-
+import sintacticSource.*;
 import java.awt.EventQueue;
 
 import javax.swing.JFileChooser;
@@ -267,9 +267,13 @@ public class CompilerUI {
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+				//TODO aksa -------------//			
 				String program = textArea.getText();
-				LexicalAnalizer analizer = new LexicalAnalizer(program);
+				Parser parser = new Parser(program);
+				parser.Parse();
+				LexicalAnalizer analizer = parser.getAnalizer();
+				//-----------//
+				
 				int idToken=-1;
 				while (idToken!=290){
 					idToken=analizer.getToken();

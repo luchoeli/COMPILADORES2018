@@ -9,6 +9,7 @@ import semanticSource.*;
 
 public class LexicalAnalizer {
 	
+	/*
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
@@ -29,12 +30,36 @@ public class LexicalAnalizer {
 	public final static short IGUALIGUAL=274;
 	public final static short DISTINTO=275;
 	public final static short EOF=276;
+	*/
+	//#### end semantic value section ####
 	
-	public final static short ASIGNACION=277;
-	public final static short VOID=278;
-	public final static short CASE=279;
-	public final static short DO=280;
-	public final static short DOUBLE=281;
+	
+	public final static short ID=257;
+	public final static short CTE=258;
+	public final static short CADENA=259;
+	public final static short IF=260;
+	public final static short THEN=261;
+	public final static short ELSE=262;
+	public final static short END_IF=263;
+	public final static short BEGIN=264;
+	public final static short END=265;
+	public final static short USINTEGER=266;
+	public final static short DOUBLE=267;
+	public final static short WHILE=268;
+	public final static short CASE=269;
+	public final static short DO=270;
+	public final static short READONLY=271;
+	public final static short WRITE=272;
+	public final static short PASS=273;
+	public final static short RETURN=274;
+	public final static short MAYORIGUAL=275;
+	public final static short MENORIGUAL=276;
+	public final static short IGUAL=277;
+	public final static short DISTINTO=278;
+	public final static short EOF=279;
+	public final static short YYERRCODE=256;
+	
+	public final static short ASIGNACION=280;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
@@ -65,7 +90,7 @@ public class LexicalAnalizer {
 	}
 	public void initilize(){
 		this.sMatrix=new MatrixState();
-
+		
 		//IDENTIFICADOR
 		this.idTokens.put("ID",(int)ID);
 		//CONSTANTES
@@ -96,10 +121,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("if", (int)IF);
 		this.idTokens.put("then", (int)THEN);
 		this.idTokens.put("else", (int)ELSE);
-		this.idTokens.put("end_if", (int)END_IF);
-		this.idTokens.put("print", (int)PRINT);		
-		this.idTokens.put("int", (int)INT);  // no va
-		this.idTokens.put("void", (int)VOID); 
+		this.idTokens.put("end_if", (int)END_IF); 
 		this.idTokens.put("case", (int)CASE);  
 		this.idTokens.put("usinteger", (int)USINTEGER);
 		this.idTokens.put("do", (int)DO);
@@ -360,7 +382,7 @@ public class LexicalAnalizer {
 			if (isRead()){
 				if (posRead<in.length()){  //leo todo el file
 					this.lastChar=in.charAt(posRead);
-					System.out.println("pos read: "+posRead+" lastchar:"+this.lastChar);
+					//System.out.println("pos read: "+posRead+" lastchar:"+this.lastChar);
 					posRead++;
 				}
 				else{
@@ -371,11 +393,11 @@ public class LexicalAnalizer {
 			this.setRead(true);
 			int colum=getColum(lastChar);
 			if (colum==12){
-				System.out.println("SALTO DE LINEA. "+"ESTADO: "+state);
+				//System.out.println("SALTO DE LINEA. "+"ESTADO: "+state);
 			}			
 			newState=sMatrix.get(state,colum); 
 			
-			System.out.println("si ESTADO "+state+"  SIMBOLO "+colum+" ---> nuevo estado: "+newState);
+			//System.out.println("si ESTADO "+state+"  SIMBOLO "+colum+" ---> nuevo estado: "+newState);
 			/*
 			try {
 				Thread.sleep (500);
@@ -385,7 +407,7 @@ public class LexicalAnalizer {
 			*/
 			SemanticAction a = aMatrix.get(state,colum);
 			if (a!=null){
-				System.out.println("AS: "+a.toString()+"\n");
+				//System.out.println("AS: "+a.toString()+"\n");
 				a.execute(buffer,lastChar);
 			}
 			if (newState==FINAL_STATE){
@@ -491,14 +513,14 @@ public class LexicalAnalizer {
 		case THEN: return "PALABRA RESERVADA";
 		case ELSE: return "PALABRA RESERVADA";
 		case END_IF: return "PALABRA RESERVADA";
-		case PRINT: return "PALABRA RESERVADA";
-		case INT: return "PALABRA RESERVADA";
+		//case PRINT: return "PALABRA RESERVADA";
+		//case INT: return "PALABRA RESERVADA";
 		case BEGIN: return "PALABRA RESERVADA";
 		case END: return "PALABRA RESERVADA";
 		case USINTEGER: return "PALABRA RESERVADA";
 		case DOUBLE: return "PALABRA RESERVADA";
-		case LONG: return "PALABRA RESERVADA";
-		case GLOBAL: return "PALABRA RESERVADA";
+		//case LONG: return "PALABRA RESERVADA";
+		//case GLOBAL: return "PALABRA RESERVADA";
 		case WHILE: return "PALABRA RESERVADA";
 		
 		case ID: return "IDENTIFICADOR";
@@ -514,7 +536,6 @@ public class LexicalAnalizer {
 		case '=': return "COMPARADOR";
 		case MENORIGUAL: return "COMPARADOR";
 		case MAYORIGUAL: return "COMPARADOR";
-		case IGUALIGUAL: return "COMPARADOR";
 		case DISTINTO: return "COMPARADOR";
 		
 		case '+': return "OPERADOR";
@@ -559,4 +580,6 @@ public class LexicalAnalizer {
 	public ArrayList<String> getProblems() {
 		return (ArrayList<String>) this.problems;
 	}
+	
+	
 }
