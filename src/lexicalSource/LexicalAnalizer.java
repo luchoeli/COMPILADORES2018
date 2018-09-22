@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+
 import sintacticSource.Error;
 import semanticSource.*;
 
@@ -52,14 +53,15 @@ public class LexicalAnalizer {
 	public final static short WRITE=272;
 	public final static short PASS=273;
 	public final static short RETURN=274;
-	public final static short MAYORIGUAL=275;
-	public final static short MENORIGUAL=276;
-	public final static short IGUAL=277;
-	public final static short DISTINTO=278;
-	public final static short EOF=279;
+	public final static short PRINT=275;
+	public final static short MAYORIGUAL=276;
+	public final static short MENORIGUAL=277;
+	public final static short IGUAL=278;
+	public final static short DISTINTO=279;
+	public final static short EOF=280;
 	public final static short YYERRCODE=256;
 	
-	public final static short ASIGNACION=280;
+	public final static short ASIGNACION=281;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
@@ -68,7 +70,6 @@ public class LexicalAnalizer {
 	public final static long minUInt=0;
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
-	private List<TableRecord> symbolTable=new ArrayList<TableRecord>();
 	private List<Error> errors = new ArrayList<Error>();
 	private int line=1;
 	private boolean read=true;
@@ -94,7 +95,7 @@ public class LexicalAnalizer {
 		this.sMatrix=new MatrixState();
 		
 		//IDENTIFICADOR
-		this.idTokens.put("ID",(int)ID);
+		this.idTokens.put("IDENTIFICADOR",(int)ID);
 		//CONSTANTES
 		this.idTokens.put("CTE",(int)CTE);		
 		//OPERADORES
@@ -129,6 +130,9 @@ public class LexicalAnalizer {
 		this.idTokens.put("do", (int)DO);
 		this.idTokens.put("double", (int)DOUBLE);
 		this.idTokens.put("while", (int)WHILE);   // no va
+		this.idTokens.put("readonly",(int)READONLY);
+		this.idTokens.put("pass",(int)PASS);
+		this.idTokens.put("write",(int)WRITE);
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -376,7 +380,35 @@ public class LexicalAnalizer {
 		this.buffer = buffer;
 	}
 	
-	public int getToken() { //in es String entrada
+	public Token getToken() { //in es String entrada
+		int state = 0;
+		int newState = 0;
+		int column = -1;
+		boolean corte = false;
+		while(!corte){
+			if (isRead()){ //Si tengo que leer el último caracter.
+				if (posRead<in.length()){
+					this.lastChar = in.charAt(posRead);
+					posRead++;
+				}else{
+					lastChar = '\0';
+					corte = true;
+				}
+			}
+			this.setRead(true);
+			column = getColum(lastChar);	
+			newState = sMatrix.get(state,column);
+			SemanticAction a = aMatrix.get(state,column);
+			if (a!=null){a.execute(buffer,lastChar);}
+			if (newState==FINAL_STATE){				
+				int pos = tokens.size()-1;
+				return (tokens.get(pos));
+				
+			}
+			state=newState;			
+		}
+		return null;
+		/*
 		int state=0;
 		int newState=0;
 		boolean corte=false;
@@ -406,7 +438,7 @@ public class LexicalAnalizer {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			*/
+			
 			SemanticAction a = aMatrix.get(state,colum);
 			if (a!=null){
 				//System.out.println("AS: "+a.toString()+"\n");
@@ -423,6 +455,7 @@ public class LexicalAnalizer {
 			state=newState;			
 		}
 		return -1;
+		*/
 	}
 	
 	public ArrayList<Token> getTokens() {
@@ -509,7 +542,7 @@ public class LexicalAnalizer {
 		int id = getID(buffer);
 		String type = getType(id);
 		TableRecord record=null;
-		if (type == "ID") {
+		if (type == "IDENTIFICADOR") {
 			 record = this.addIdentificadorToTable(new TableRecord(buffer,id));
 		}else if (type == "CTE") {
 			String value[] = buffer.split("_");
@@ -576,7 +609,7 @@ public class LexicalAnalizer {
 			{if (buffer.contains("_ui")|| buffer.contains(".")){
 				value = this.idTokens.get("CTE");
 			}
-			else{value=this.idTokens.get("ID");}			
+			else{value=this.idTokens.get("IDENTIFICADOR");}			
 			}
 		
 		return value;
