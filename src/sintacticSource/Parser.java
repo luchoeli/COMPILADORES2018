@@ -386,7 +386,7 @@ final static String yyrule[] = {
 };
 
 //#line 172 "especificacion.y"
-
+/**/
 public LexicalAnalizer lexico;
 public ArrayList<String> errors = new ArrayList<String>();
 public ArrayList<String> salidaSintactico = new ArrayList<String>();
