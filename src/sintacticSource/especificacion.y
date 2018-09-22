@@ -169,7 +169,7 @@ bloque_de_sentencias : '{'list_sentencias'}'
 					 ;
 			
 %%
-
+/**/
 public LexicalAnalizer lexico;
 public ArrayList<String> errors = new ArrayList<String>();
 public ArrayList<String> salidaSintactico = new ArrayList<String>();
