@@ -1,14 +1,35 @@
 package lexicalSource;
 
 public class TableRecord {
-	private String lexema;
-	private String type;
-	private int total;
+	private String lexema; 
+	private int idToken;
+	private String type; // Tipo de identificador o constante ( INT o UNSIGNED LONG)
+	private int ref; // Cantidad de referencias.
+	private boolean useAmb;
+	private String ambito;
+	private String value = "0";
 	
-	TableRecord(String lexema, String type){
-		this.lexema=lexema;
-		this.type=type;
-		this.total=1;
+	public TableRecord(String lexema, int idToken){
+		this.lexema = lexema;
+		this.setIdToken(idToken);
+		this.ref = 1;
+		this.useAmb = false;
+	}
+
+	public TableRecord(String lexema, int idToken, String value){
+		this.lexema = lexema;
+		this.setIdToken(idToken);
+		this.ref = 1;
+		this.useAmb = false;
+		this.value = value;
+	}
+
+	public void setValue(String value){
+		this.value = value;
+	}
+
+	public String getValue(){
+		return this.value;
 	}
 	
 	public void setType(String type) {
@@ -20,24 +41,40 @@ public class TableRecord {
 	public String getLexema() {
 		return lexema;
 	}
-	
 	public void setLexema(String lexema) {
 		this.lexema = lexema;
 	}
-	public int getTotal(){
-		return total;
+	public int getRef(){
+		return ref;
 	}
 	
 	public void increment(){
-		this.total+=1;
+		this.ref+=1;
 	}
 	
-	@Override
-	public boolean equals(Object o){
-		if (this==o)return true;
-		if (!(o instanceof TableRecord))return false;
-		TableRecord aComparar=(TableRecord)o;
-		return (aComparar.getLexema().equals(lexema) && aComparar.getType().equals(type));		
+	public void decrement(){
+		this.ref-=1;
 	}
+
+	public boolean isAmbit() {
+		return useAmb;
+	}
+
+	public void setAmbit(boolean useAmb) {
+		this.useAmb = useAmb;
+	}
+
+	public int getIdToken() {
+		return idToken;
+	}
+
+	public void setIdToken(int idToken) {
+		this.idToken = idToken;
+	}
+
+	public String getAmbito() {return ambito;}
+
+	public void setAmbito(String ambito) {this.ambito = ambito; }
+
 
 }

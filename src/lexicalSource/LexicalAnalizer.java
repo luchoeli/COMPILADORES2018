@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
+import sintacticSource.Error;
 import semanticSource.*;
 
 public class LexicalAnalizer {
@@ -69,8 +69,7 @@ public class LexicalAnalizer {
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
 	private List<TableRecord> symbolTable=new ArrayList<TableRecord>();
-	private List<String> problems = new ArrayList<String>();
-	private List<Integer> linesProblems = new ArrayList<Integer>();	
+	private List<Error> errors = new ArrayList<Error>();
 	private int line=1;
 	private boolean read=true;
 	private char lastChar;
@@ -81,10 +80,13 @@ public class LexicalAnalizer {
 	//private File file; <<-- El archivo, para ir leyendo.
 	private int posRead=0;
 	private String in;
+	private Table table;
 	
 	
-	public LexicalAnalizer(String in){//POR PARAMETRO EL ARCHIVO.
+	
+	public LexicalAnalizer(String in, Table table){//POR PARAMETRO EL ARCHIVO.
 		this.in=in;
+		this.table = table;
 		initilize();
 		
 	}
@@ -475,20 +477,29 @@ public class LexicalAnalizer {
 			
 	}
 	
-	@SuppressWarnings("unused")
-	private TableRecord addSymbolToTable(TableRecord a){ 
-		int size=this.symbolTable.size();
-		int position=symbolTable.indexOf(a);
-		if (position==-1){
-			this.symbolTable.add(a);
+	
+	private TableRecord addIdentificadorToTable(TableRecord a){
+		String key =a.getLexema();
+		//Si no existe lo agrego, y lo retorno.
+		if (!table.containsLexema(key)){
+			table.put(key,a);
 			return a;
 		}
-		else{
-			symbolTable.get(position).increment();
-			return symbolTable.get(position);			
-		}
-		
+		return a;
 	}
+	
+	private TableRecord addConstanteToTable(TableRecord a){
+		String key = a.getLexema();
+		if (table.contains(key)){
+			//Si existe incremento el número de referencias.
+			TableRecord out= table.get(key);
+			out.increment();
+			return out;
+		}
+		table.put(key, a);
+		return a;
+	}
+	
 	
 	public boolean isKeyWord(String buffer){
 		return idTokens.containsKey(buffer);
@@ -498,8 +509,11 @@ public class LexicalAnalizer {
 		int id = getID(buffer);
 		String type = getType(id);
 		TableRecord record=null;
-		if ((type == "ID") || (type == "CTE")){
-			 record = this.addSymbolToTable(new TableRecord(buffer,type));
+		if (type == "ID") {
+			 record = this.addIdentificadorToTable(new TableRecord(buffer,id));
+		}else if (type == "CTE") {
+			String value[] = buffer.split("_");
+			record = this.addConstanteToTable(new TableRecord(buffer,id,value[0]));
 		}
 		Token t=new Token(id,buffer,this.line,type,record);	
 		tokens.add(t);		
@@ -567,7 +581,7 @@ public class LexicalAnalizer {
 		
 		return value;
 	}
-
+	/*
 	public void addProblem(String e, int line) {
 		this.linesProblems.add(line);
 		this.problems.add(e);		
@@ -580,6 +594,22 @@ public class LexicalAnalizer {
 	public ArrayList<String> getProblems() {
 		return (ArrayList<String>) this.problems;
 	}
+	*/
+
+	public void addError(String des, int line) {
+		// Agrega un error y en que linea sucedio .
+		this.errors.add(new Error(des,line));		
+	}
+	public void addError(String des, int line, int severity) {
+		// Agrega un error y en que linea sucedio .
+		Error e = new Error(des,line);
+		e.severity = severity;		
+		this.errors.add(e);		
+	}
+	public ArrayList<Error> getErrors() {
+		return (ArrayList<Error>) this.errors;
+	}
+	
 	
 	
 }

@@ -1,5 +1,9 @@
 package ui;
 import sintacticSource.*;
+import sintacticSource.Error;
+
+
+
 import java.awt.EventQueue;
 
 import javax.swing.JFileChooser;
@@ -38,15 +42,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.ScrollPaneConstants;
 
 import lexicalSource.LexicalAnalizer;
+import lexicalSource.TableRecord;
 import lexicalSource.Token;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
+
+import lexicalSource.Table;
+
 import java.awt.Component;
 
 
@@ -58,7 +67,10 @@ public class CompilerUI {
 	private JTextArea lines;
 	private JTextArea problems;
 	private JTextArea console;
-
+	private DefaultTableModel structDtm;
+	private DefaultTableModel dtm;
+	private DefaultTableModel tableDtm;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -162,8 +174,8 @@ public class CompilerUI {
 		
 		String[] colums={"ID","Tipo","Lexema","Linea"};		
 		final DefaultTableModel dtm=new DefaultTableModel(null,colums);
-		JTable table = new JTable(dtm);
-		scrollPane_Tokens.setViewportView(table);
+		JTable table_Tok = new JTable(dtm);
+		scrollPane_Tokens.setViewportView(table_Tok);
 		GroupLayout gl_Tokens = new GroupLayout(Tokens);
 		gl_Tokens.setHorizontalGroup(
 			gl_Tokens.createParallelGroup(Alignment.LEADING)
@@ -171,11 +183,52 @@ public class CompilerUI {
 		);
 		gl_Tokens.setVerticalGroup(
 			gl_Tokens.createParallelGroup(Alignment.LEADING)
-				.addComponent(scrollPane_Tokens, GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+				.addComponent(scrollPane_Tokens, GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
 		);
 		Tokens.setLayout(gl_Tokens);
+	// -------------------------------- PANEL ESTRUCTURAS ------------------------------------------
+		JPanel Estructuras = new JPanel();
+		tabbedPane.addTab("Estructuras", null, Estructuras, null);
+		JScrollPane scrollPane_Estructuras= new JScrollPane();
+		scrollPane_Estructuras.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		String[] strucColumns={"Linea","Tipo","Descripcion"};
+		structDtm=new DefaultTableModel(null,strucColumns);
+		JTable table_Estruc= new JTable(structDtm);
+		scrollPane_Estructuras.setViewportView(table_Estruc);
+		GroupLayout gl_Estructuras = new GroupLayout(Estructuras);
+		gl_Estructuras.setHorizontalGroup(
+				gl_Estructuras.createParallelGroup(Alignment.LEADING)
+				.addComponent(scrollPane_Estructuras, GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
+		);
+		gl_Estructuras.setVerticalGroup(
+			gl_Estructuras.createParallelGroup(Alignment.LEADING)
+				.addComponent(scrollPane_Estructuras, GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
+		);
+		Estructuras.setLayout(gl_Estructuras);
+	// -------------------------------- PANEL TABLA SIMBOLOS ------------------------------------------
 
-
+		JPanel tablaSimbolos = new JPanel();
+		tabbedPane.addTab("Tabla Simbolos", null, tablaSimbolos, null);
+		JScrollPane scrollPane_TS= new JScrollPane();
+		scrollPane_TS.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		String[] tableColumns={"Tipo","Nombre","Name Mangling"};
+		tableDtm=new DefaultTableModel(null,tableColumns);
+		JTable table_TS = new JTable(tableDtm);
+		scrollPane_TS.setViewportView(table_TS);
+		GroupLayout gl_TS = new GroupLayout(tablaSimbolos);
+		gl_TS.setHorizontalGroup(
+				gl_TS.createParallelGroup(Alignment.LEADING)
+				.addComponent(scrollPane_TS, GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
+		);
+		gl_TS.setVerticalGroup(
+				gl_TS.createParallelGroup(Alignment.LEADING)
+				.addComponent(scrollPane_TS, GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
+		);
+		tablaSimbolos.setLayout(gl_TS);
+		
+		
 		
 		//-------------------------------------- TEXT AREA -----------------------------------------
 		
@@ -269,34 +322,28 @@ public class CompilerUI {
 			public void actionPerformed(ActionEvent arg0) {
 				//TODO aksa -------------//			
 				String program = textArea.getText();
-				Parser parser = new Parser(program);
+				Table table=new Table();
+				Parser parser = new Parser(program,table);
 				parser.Parse();
-				LexicalAnalizer analizer = parser.getAnalizer();
+				
 				//-----------//
+				
+				//Ininicializo estructuras para mostrar las salidas.
+				LexicalAnalizer analizer = parser.getAnalizer();
+		        ArrayList<SintacticStructure> structures = parser.getReglas();
+				ArrayList<Token> tokens=analizer.getTokens();
+				ArrayList<Error> errors = analizer.getErrors();
+				errors.addAll(parser.getErrors());
+				Collections.sort(errors);
+				ArrayList<TableRecord> records = table.getElements();
+				problems.setText(null);
 				
 				int idToken=-1;
 				while (idToken!=290){
 					idToken=analizer.getToken();
 				}
-				ArrayList<Token> tokens=analizer.getTokens();
-				ArrayList<Integer> linesProblems=analizer.getLinesProblems();
-				ArrayList<String> listProblems = analizer.getProblems();
-				for(Integer line : linesProblems){
-					System.out.println("LINEA "+line);
-					drawLine(line-1);
-				}
-				problems.setText(null);
-				for(String problem : listProblems){
-					problems.setText(problems.getText() + problem + "\n");
-				}
-				for(Token token : tokens){
-					String[] data=new String[4];
-					data[0]=""+token.getId();
-					data[1]=token.getType();
-					data[2]=token.getLexema();
-					data[3]=""+token.getNroLine();
-					dtm.addRow(data);
-				}
+				
+				
 				
 			}
 		});
@@ -384,7 +431,7 @@ public class CompilerUI {
 					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
 		);
 		panel.setLayout(gl_panel);
-		panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{textArea, btnNewButton, btnOpen, btnRun, tabbedPane, Problems, scrollPane_Problems, problems, Console, scrollPane_Console, console, Tokens, scrollPane_Tokens, table, scrollPane, lines}));
+		//panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{textArea, btnNewButton, btnOpen, btnRun, tabbedPane, Problems, scrollPane_Problems, problems, Console, scrollPane_Console, console, Tokens, scrollPane_Tokens, table, scrollPane, lines}));
 		
 	}
 	

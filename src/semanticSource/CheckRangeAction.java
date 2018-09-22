@@ -1,6 +1,9 @@
 package semanticSource;
 import lexicalSource.*;
+import sintacticSource.Error;
 import java.util.logging.Logger;
+
+
 import java.util.logging.Level;
 public class CheckRangeAction extends SimpleSemanticAction{
 	private double max, min;
@@ -30,7 +33,7 @@ public class CheckRangeAction extends SimpleSemanticAction{
 		if (error){
 			
 			System.out.println("Error Lexico en linea: "+this.analizer.getLine()+". Constante entera "+buffer+" fuera de rango.");
-			this.analizer.addProblem("Error Lexico en linea: "+this.analizer.getLine()+". Constante entera "+buffer+" fuera de rango.",this.analizer.getLine());
+			this.analizer.addError("Error Lexico: "+ Error.intRange(), this.analizer.getLine());
 			return false;   
 		}
 		return true;

@@ -1,4 +1,5 @@
 package semanticSource;
+import sintacticSource.Error;
 import lexicalSource.*;
 
 public class PrintErrorAction extends SimpleSemanticAction{
@@ -9,7 +10,7 @@ public class PrintErrorAction extends SimpleSemanticAction{
 		
 	public boolean execute(String buffer, char c){
 		int lines=this.analizer.getLine();
-		this.analizer.addProblem("Error Lexico en linea "+lines+": Caracter invalido :" + c, lines);
+		this.analizer.addError("Error Lexico:"+Error.charUndefined(), lines);
 		buffer= "";
 		this.analizer.setBuffer(buffer);
 		return true;

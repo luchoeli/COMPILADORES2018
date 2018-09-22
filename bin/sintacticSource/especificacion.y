@@ -2,6 +2,7 @@
 	package sintacticSource;
 	import lexicalSource.*;
 	import java.util.ArrayList;
+	import sintacticSource.Error;
 %}
 
 %token
@@ -24,6 +25,7 @@
 		WRITE
 		PASS
 		RETURN //*
+		PRINT
 		
 		/* Comparadores */
 		MAYORIGUAL
@@ -38,9 +40,9 @@
 Programa:
 
 *Programa constituido por un conjunto de sentencias, que pueden ser declarativas o ejecutables.
-Las sentencias declarativas pueden aparecer en cualquier lugar del código fuente, exceptuando los bloques de las sentencias de control.
+Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fuente, exceptuando los bloques de las sentencias de control.
 
-*El programa no tendrá ningún delimitador.
+*El programa no tendrÃ¡ ningÃºn delimitador.
 
 *Cada sentencia debe terminar con " , ".
 
@@ -54,23 +56,23 @@ Las sentencias declarativas pueden aparecer en cualquier lugar del código fuent
 	Donde <retorno> es expresion
 
 *Sentencias ejecutables:
-	*Cláusula de selección (if). Cada rama de la selección será un bloque de sentencias. La condición será una comparación entre expresiones aritméticas, variables o constantes, y debe escribirse entre ( ). La estructura de la selección será, entonces:
+	*ClÃ¡usula de selecciÃ³n (if). Cada rama de la selecciÃ³n serÃ¡ un bloque de sentencias. La condiciÃ³n serÃ¡ una comparaciÃ³n entre expresiones aritmÃ©ticas, variables o constantes, y debe escribirse entre ( ). La estructura de la selecciÃ³n serÃ¡, entonces:
 	if (<condicion>) <bloque_de_sentencias> else <bloque_de_sentencias> end_if
 	El bloque para el else puede estar ausente.
 
-	* Un bloque de sentencias puede estar constituido por una sola sentencia, o un conjunto de sentencias delimitadas por ‘{‘ y ‘}’.
+	* Un bloque de sentencias puede estar constituido por una sola sentencia, o un conjunto de sentencias delimitadas por â€˜{â€˜ y â€˜}â€™.
 
-	* Sentencia de control según tipo especial asignado al grupo. (Temas 7 al 10 del Trabajo práctico 1)
-	Debe permitirse anidamiento de sentencias de control. Por ejemplo, puede haber una iteración dentro de una rama de una selección.
-	* Sentencia de salida de mensajes por pantalla. El formato será print(cadena). Las cadenas de caracteres sólo podrán ser usadas en esta sentencia, y tendrán el formato asignado al grupo en el Trabajo Práctico 1.
-	* Los operandos de las expresiones aritméticas pueden ser variables, constantes, u otras expresiones aritméticas.
-	No se permiten anidamientos de expresiones con paréntesis.
+	* Sentencia de control segÃºn tipo especial asignado al grupo. (Temas 7 al 10 del Trabajo prÃ¡ctico 1)
+	Debe permitirse anidamiento de sentencias de control. Por ejemplo, puede haber una iteraciÃ³n dentro de una rama de una selecciÃ³n.
+	* Sentencia de salida de mensajes por pantalla. El formato serÃ¡ print(cadena). Las cadenas de caracteres sÃ³lo podrÃ¡n ser usadas en esta sentencia, y tendrÃ¡n el formato asignado al grupo en el Trabajo PrÃ¡ctico 1.
+	* Los operandos de las expresiones aritmÃ©ticas pueden ser variables, constantes, u otras expresiones aritmÃ©ticas.
+	No se permiten anidamientos de expresiones con parÃ©ntesis.
 	
-	*Incorporar la invocación de funciones, con la siguiente sintaxis:
+	*Incorporar la invocaciÃ³n de funciones, con la siguiente sintaxis:
 		ID(<nombre_parametro>;<lista_permisos>),
 
 	Donde <lista_permisos> puede ser: readonly / write / pass / write ; pass
-	La invocación puede aparecer en cualquier lugar donde pueda aparecer una expresión aritmética.
+	La invocaciÃ³n puede aparecer en cualquier lugar donde pueda aparecer una expresiÃ³n aritmÃ©tica.
 
 *Sentencias de control
 	case do (tema 10 en TP1)
@@ -80,8 +82,8 @@ Las sentencias declarativas pueden aparecer en cualquier lugar del código fuent
 			...
 			valorN: do <bloque> .
 		} .
-	Nota: Los valores valor1, valor2, etc., sólo podrán ser constantes del mismo tipo que la variable.
-	La restricción de tipo será chequeada en la etapa 3 del trabajo práctico.
+	Nota: Los valores valor1, valor2, etc., sÃ³lo podrÃ¡n ser constantes del mismo tipo que la variable.
+	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
 ------------------------------------------------------------------------------------------------------------*/
 programa:	list_sentencias;
 
@@ -115,7 +117,16 @@ tipo	:	 USINTEGER
 			
 
 sent_ejecutable  : sent_seleccion ','
+				 | sent_control ','
+				 | imprimir ','
 				 ;
+
+sent_control	: CASE '(' ID ')' 
+				'{' linea_control '}' ;
+
+linea_control	: linea_control CTE ':' DO bloque_de_sentencias  
+				| CTE ':' DO bloque_de_sentencias 
+				;
 
 sent_seleccion :	IF '('condicion')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
 			   |	IF '('condicion')' bloque_de_sentencias
@@ -147,22 +158,27 @@ termino : termino '*' factor
 		| factor
 		;
 
+imprimir	:	PRINT '('CADENA')'
+			;	
+
 /*chequear factor*/
 factor : CTE
+	   | ID
 	   ;
 
 bloque_de_sentencias : '{'list_sentencias'}'
 					 ;
 			
 %%
-
+/**/
 public LexicalAnalizer lexico;
-public ArrayList<String> errors = new ArrayList<String>();
-public ArrayList<String> salidaSintactico = new ArrayList<String>();
+public Table table;
+public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
+public ArrayList<Error> errors = new ArrayList<Error>();
 
-public Parser(String programa) {
-    lexico = new LexicalAnalizer(programa);
-
+public Parser(String programa, Table table) {
+    lexico = new LexicalAnalizer(programa, table);
+	this.table = table;
 }
 
 public int yylex() {
@@ -184,12 +200,24 @@ public int Parse(){
 public LexicalAnalizer getAnalizer(){
 	return lexico;
 }
-/*
-private void addError(String e) {
-	this.errors.add("ERROR SINTACTICO: " + e + "LINEA: " + lexico.getLinea());
+
+public void setRegla(int line, String type, String desc){
+	SintacticStructure structure  = new SintacticStructure(line,type,desc);
+	this.structures.add(structure);
+
 }
 
-private void addSalida(String e) {
-	this.salidaSintactico.add(e + " LINEA: " + lexico.getLinea());
+public void addError(String e, int line){
+	this.errors.add(new Error(e,line));	
 }
-*/
+
+public ArrayList<Error> getErrors(){
+	return errors;
+}
+
+public ArrayList<SintacticStructure> getReglas(){
+	return structures;
+}
+public LexicalAnalizer getLexical(){
+	return lexico;
+}
