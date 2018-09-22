@@ -3,7 +3,7 @@ package semanticSource;
 import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import sintacticSource.Error;
 import lexicalSource.*;
 
 
@@ -30,7 +30,7 @@ public class CheckRangeActionUnsigned extends SimpleSemanticAction {
     		Logger.getLogger(CheckRangeActionUnsigned.class.getName()).log(Level.SEVERE, null, ex);
     	}
 		if (error){
-			this.analizer.addProblem("Error Lexico en linea: "+this.analizer.getLine()+". Constante entera sin signo "+buffer+" fuera de rango.",this.analizer.getLine());
+			this.analizer.addError("Error Lexico:"+ Error.unsignedLongRange(), this.analizer.getLine());
 			return false;   
 		}
 		return true;

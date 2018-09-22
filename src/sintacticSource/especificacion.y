@@ -2,6 +2,7 @@
 	package sintacticSource;
 	import lexicalSource.*;
 	import java.util.ArrayList;
+	import sintacticSource.Error;
 %}
 
 %token
@@ -171,12 +172,13 @@ bloque_de_sentencias : '{'list_sentencias'}'
 %%
 /**/
 public LexicalAnalizer lexico;
-public ArrayList<String> errors = new ArrayList<String>();
-public ArrayList<String> salidaSintactico = new ArrayList<String>();
+public Table table;
+public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
+public ArrayList<Error> errors = new ArrayList<Error>();
 
-public Parser(String programa) {
-    lexico = new LexicalAnalizer(programa);
-
+public Parser(String programa, Table table) {
+    lexico = new LexicalAnalizer(programa, table);
+	this.table = table;
 }
 
 public int yylex() {
@@ -198,12 +200,24 @@ public int Parse(){
 public LexicalAnalizer getAnalizer(){
 	return lexico;
 }
-/*
-private void addError(String e) {
-	this.errors.add("ERROR SINTACTICO: " + e + "LINEA: " + lexico.getLinea());
+
+public void setRegla(int line, String type, String desc){
+	SintacticStructure structure  = new SintacticStructure(line,type,desc);
+	this.structures.add(structure);
+
 }
 
-private void addSalida(String e) {
-	this.salidaSintactico.add(e + " LINEA: " + lexico.getLinea());
+public void addError(String e, int line){
+	this.errors.add(new Error(e,line));	
 }
-*/
+
+public ArrayList<Error> getErrors(){
+	return errors;
+}
+
+public ArrayList<SintacticStructure> getReglas(){
+	return structures;
+}
+public LexicalAnalizer getLexical(){
+	return lexico;
+}
