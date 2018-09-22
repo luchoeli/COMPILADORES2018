@@ -133,6 +133,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("readonly",(int)READONLY);
 		this.idTokens.put("pass",(int)PASS);
 		this.idTokens.put("write",(int)WRITE);
+		this.idTokens.put("return",(int)RETURN);
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -408,54 +409,7 @@ public class LexicalAnalizer {
 			state=newState;			
 		}
 		return null;
-		/*
-		int state=0;
-		int newState=0;
-		boolean corte=false;
-		while(!corte){  
-			if (isRead()){
-				if (posRead<in.length()){  //leo todo el file
-					this.lastChar=in.charAt(posRead);
-					//System.out.println("pos read: "+posRead+" lastchar:"+this.lastChar);
-					posRead++;
-				}
-				else{
-					lastChar='\0'; // termine de leer el file(String) in
-					corte=true;
-				}
-			}
-			this.setRead(true);
-			int colum=getColum(lastChar);
-			if (colum==12){
-				//System.out.println("SALTO DE LINEA. "+"ESTADO: "+state);
-			}			
-			newState=sMatrix.get(state,colum); 
-			
-			//System.out.println("si ESTADO "+state+"  SIMBOLO "+colum+" ---> nuevo estado: "+newState);
-			/*
-			try {
-				Thread.sleep (500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			SemanticAction a = aMatrix.get(state,colum);
-			if (a!=null){
-				//System.out.println("AS: "+a.toString()+"\n");
-				a.execute(buffer,lastChar);
-			}
-			if (newState==FINAL_STATE){
-				// FIXME YYVAL ES DEL PARSER
-				//A LA VARIABLE YYLVAL <- tokens.get().getRecord();	
-				if (tokens.size() !=0)
-					return (tokens.get(tokens.size()-1)).getId();  // devuelvo el id del ultimo token?
-				else 
-					return-1;
-			}
-			state=newState;			
-		}
-		return -1;
-		*/
+		
 	}
 	
 	public ArrayList<Token> getTokens() {
@@ -560,15 +514,17 @@ public class LexicalAnalizer {
 		case THEN: return "PALABRA RESERVADA";
 		case ELSE: return "PALABRA RESERVADA";
 		case END_IF: return "PALABRA RESERVADA";
-		//case PRINT: return "PALABRA RESERVADA";
+		case PRINT: return "PALABRA RESERVADA";
 		//case INT: return "PALABRA RESERVADA";
 		case BEGIN: return "PALABRA RESERVADA";
 		case END: return "PALABRA RESERVADA";
 		case USINTEGER: return "PALABRA RESERVADA";
 		case DOUBLE: return "PALABRA RESERVADA";
+		case RETURN: return "PALABRA RESERVADA";
 		//case LONG: return "PALABRA RESERVADA";
 		//case GLOBAL: return "PALABRA RESERVADA";
-		case WHILE: return "PALABRA RESERVADA";
+		//case WHILE: return "PALABRA RESERVADA";
+		
 		
 		case ID: return "IDENTIFICADOR";
 		
