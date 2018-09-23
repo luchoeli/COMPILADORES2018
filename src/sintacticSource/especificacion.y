@@ -3,6 +3,8 @@
 	import lexicalSource.*;
 	import java.util.ArrayList;
 	import sintacticSource.Error;
+	import java.util.Enumeration;
+	import java.util.Vector;
 %}
 
 %token
@@ -97,7 +99,10 @@ sent_declarativa	:	declaracion_variable ','{System.out.println("AAAAAAAAAAAAA");
 					|	declaracion_funcion ','
 					;
 					
-declaracion_variable	:	tipo list_variables {System.out.println("DECLARACION DE VARIABLES");}
+declaracion_variable	:	tipo list_variables {
+												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion", ((Token)$1.obj).getLexema());
+												 //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
+												 }
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
@@ -111,20 +116,34 @@ list_variables		:	list_variables ';' ID {System.out.println("WEPA");}
 					|	ID ;
 
 tipo	:	 USINTEGER
-			|DOUBLE;
+		|	DOUBLE
+			;
 			
 
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
 				 | asignacion ','
+				 | invocacion ','
+				 ;
+				 
+invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'
+
+nombre_parametro :	ID
+				 |  CTE
 				 ;
 
-sent_control	: CASE '(' ID ')' 
-				'{' linea_control '}' ;
+lista_permisos	: READONLY
+				| WRITE
+				| PASS
+				| WRITE ';' PASS
+				;
 
-linea_control	: linea_control CTE ':' DO bloque_de_sentencias  
-				| CTE ':' DO bloque_de_sentencias 
+sent_control	: CASE '(' ID ')' 
+				  '{' linea_control '}' ;
+
+linea_control	: 	CTE ':' DO bloque_de_sentencias ','
+				|	linea_control CTE ':' DO bloque_de_sentencias  ','
 				;
 
 sent_seleccion :	IF '('condicion')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
@@ -163,7 +182,7 @@ termino : termino '*' factor
 imprimir	:	PRINT '('CADENA')'
 			;
 			
-asignacion 	:	ID ':=' expresion 
+asignacion 	:	ID ':=' expresion  {setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+"="+((Token)$3.obj).getLexema());}
 			;
 
 /*chequear factor*/
@@ -228,4 +247,31 @@ public ArrayList<SintacticStructure> getReglas(){
 }
 public LexicalAnalizer getLexical(){
 	return lexico;
+}
+
+public void updateTable(Vector<Token> tokens, String type){
+	Enumeration e = tokens.elements();
+	while (e.hasMoreElements()){
+		Token token = (Token)e.nextElement();
+		TableRecord tr = token.getRecord();
+		String lexema = tr.getLexema();
+		String newKey = lexema;// + getAlcance(alcance);
+		if (!(table.contains(newKey))){
+			tr.decrement();
+			if (tr.getRef()==0){
+				table.remove(lexema);
+			}
+			TableRecord newTr = new TableRecord(lexema, tr.getIdToken());
+			newTr.setAmbito(newKey);
+			table.put(newKey, newTr);		
+			if (newTr.getType()== null){
+				newTr.setType(type);
+			}
+			token.setRecord(newTr);
+
+		}else{
+			this.addError("Error sintactico: Ya existe una variable declarada con el mismo nombre.", token.getNroLine());
+		}
+		
+	}
 }

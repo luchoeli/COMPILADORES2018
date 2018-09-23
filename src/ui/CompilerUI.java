@@ -344,6 +344,7 @@ public class CompilerUI {
 				
 				System.out.println("CANT TOK: "+tokens.size());
 		        ArrayList<SintacticStructure> structures = parser.getReglas();
+		        System.out.println("CANT REGLAS: "+structures.size());
 				ArrayList<Error> errors = analizer.getErrors();
 				
 				errors.addAll(parser.getErrors());
