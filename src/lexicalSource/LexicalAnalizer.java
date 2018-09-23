@@ -9,32 +9,7 @@ import sintacticSource.Error;
 import semanticSource.*;
 
 public class LexicalAnalizer {
-	
-	/*
-	public final static short ID=257;
-	public final static short CTE=258;
-	public final static short CADENA=259;
-	public final static short IF=260;
-	public final static short THEN=261;
-	public final static short ELSE=262;
-	public final static short END_IF=263;
-	public final static short BEGIN=264;
-	public final static short END=265;
-	public final static short PRINT=266;
-	public final static short INT=267;
-	public final static short LONG=268;
-	public final static short USINTEGER=269;
-	public final static short GLOBAL=270;
-	public final static short WHILE=271;
-	public final static short MAYORIGUAL=272;
-	public final static short MENORIGUAL=273;
-	public final static short IGUALIGUAL=274;
-	public final static short DISTINTO=275;
-	public final static short EOF=276;
-	*/
-	//#### end semantic value section ####
-	
-	
+		
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
@@ -158,7 +133,7 @@ public class LexicalAnalizer {
 		SemanticAction SA9=new AddCharacterAction(this); // AGREGA CARACTER
 		SemanticAction SA10=new PrintErrorAction(this); //IMPRIME UN ERROR.
 		SemanticAction SA20=new DiscardBuffer(this);
-		
+
 		SemanticAction SA11= new CompositeAction(); 
 		((CompositeAction)SA11).add(SA1); //INICIALIZA BUFFER Y AGREGA CARACTER.
 		((CompositeAction)SA11).add(SA8); //CREA TOKEN
@@ -200,12 +175,17 @@ public class LexicalAnalizer {
 		((CompositeAction)SA19).add(SA20);//DESCARTA ULTIMO CARACTER DEL BUFFER
 		((CompositeAction)SA19).add(SA7);//linea ++
 		
+		SemanticAction SA21 = new CompositeAction ();
+		((CompositeAction)SA21).add(SA10); //error
+		((CompositeAction)SA21).add(SA7);//linea ++
+		
+		
 		//FIXME ver si donde puse SA10(error) va SA18(ultimoChar al inicio y error)
 		//ESTADO 0
 		this.aMatrix.put(0,0, SA1);this.aMatrix.put(0,1, SA1);this.aMatrix.put(0,2, SA18);this.aMatrix.put(0,3, SA1);
 		this.aMatrix.put(0,4, SA1);this.aMatrix.put(0,5, SA1);this.aMatrix.put(0,6, SA11);this.aMatrix.put(0,7, SA11);
 		this.aMatrix.put(0,8, SA1);this.aMatrix.put(0,9, SA1);this.aMatrix.put(0,10, SA11);this.aMatrix.put(0,11, SA11);
-		this.aMatrix.put(0,12, SA7);this.aMatrix.put(0,13, SA18);this.aMatrix.put(0,14, SA0);this.aMatrix.put(0,15, SA1);
+		this.aMatrix.put(0,12, SA7);this.aMatrix.put(0,13, SA10);this.aMatrix.put(0,14, SA0);this.aMatrix.put(0,15, SA1);
 		this.aMatrix.put(0,17, SA18);this.aMatrix.put(0,18, SA11);
 		
 		//ESTADO 1  Los identificadores con longitud mayor deber�n ser informados como error, y el token err�neo deber� ser descartado.
@@ -333,16 +313,16 @@ public class LexicalAnalizer {
 		this.aMatrix.put(14, 12, SA7);
 	
 		//ESTADO 15	
-		for(int i=0;i<=18;i++){ 
-			if (i==12) { // 
-				this.aMatrix.put(15, i, SA10); // 
-			} else
-				if (i==14){ //'
-					this.aMatrix.put(15, i, SA8); //
-				}else
-					this.aMatrix.put(15, i, SA9);
-			
-		}
+			for(int i=0;i<=18;i++){ 
+				if (i==12) { // 
+					this.aMatrix.put(15, i, SA21); // 
+				} else
+					if (i==14){ //'
+						this.aMatrix.put(15, i, SA8); //
+					}else
+						this.aMatrix.put(15, i, SA9);
+				
+			}
 		//ESTADO 16
 		for(int i=0;i<=18;i++){ 
 			if (i==12) { // \n
@@ -524,6 +504,8 @@ public class LexicalAnalizer {
 		//case LONG: return "PALABRA RESERVADA";
 		//case GLOBAL: return "PALABRA RESERVADA";
 		//case WHILE: return "PALABRA RESERVADA";
+		case CASE: return "PALABRA RESERVADA";
+		case DO: return "PALABRA RESERVADA";
 		
 		
 		case ID: return "IDENTIFICADOR";
@@ -570,20 +552,6 @@ public class LexicalAnalizer {
 		
 		return value;
 	}
-	/*
-	public void addProblem(String e, int line) {
-		this.linesProblems.add(line);
-		this.problems.add(e);		
-	}
-
-	public ArrayList<Integer> getLinesProblems() {
-		return (ArrayList<Integer>) this.linesProblems;
-	}
-
-	public ArrayList<String> getProblems() {
-		return (ArrayList<String>) this.problems;
-	}
-	*/
 
 	public void addError(String des, int line) {
 		// Agrega un error y en que linea sucedio .
