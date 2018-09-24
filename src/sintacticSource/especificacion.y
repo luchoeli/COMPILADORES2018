@@ -100,7 +100,7 @@ sent_declarativa	:	declaracion_variable ','
 					;
 					
 declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
-												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion", ((Token)$1.obj).getLexema());
+												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
 						;
@@ -109,6 +109,7 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  list_sentencias // conjunto de sentencias declarativas y ejecutables
 					  RETURN '(' expresion ')'
 					  '}'
+					  {setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());}
 					  ;
 
 						  
@@ -128,6 +129,8 @@ sent_ejecutable  : sent_seleccion ','
 				 ;
 				 
 invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'
+			{setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());}
+			;
 
 nombre_parametro :	ID
 				 |  CTE
