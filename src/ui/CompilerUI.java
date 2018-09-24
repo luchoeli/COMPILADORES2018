@@ -70,6 +70,7 @@ public class CompilerUI {
 	private DefaultTableModel structDtm;
 	private DefaultTableModel dtm;
 	private DefaultTableModel tableDtm;
+	private JTable table_Tok;
 	
 	
 	private String namefile="untitled";
@@ -183,7 +184,7 @@ public class CompilerUI {
 		
 		String[] colums={"ID","Tipo","Lexema","Linea"};		
 		final DefaultTableModel dtm=new DefaultTableModel(null,colums);
-		JTable table_Tok = new JTable(dtm);
+		table_Tok = new JTable(dtm);
 		scrollPane_Tokens.setViewportView(table_Tok);
 		GroupLayout gl_Tokens = new GroupLayout(Tokens);
 		gl_Tokens.setHorizontalGroup(

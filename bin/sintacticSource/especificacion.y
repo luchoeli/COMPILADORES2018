@@ -151,18 +151,21 @@ linea_control	: 	CTE ':' DO bloque_de_sentencias','
 				;
 
 
-sent_seleccion :	IF '('condicion')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
-			   |	IF '('condicion')' bloque_de_sentencias
+sent_seleccion :	IF '('expresion_logica')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
+			   |	IF '('expresion_logica')' bloque_de_sentencias
+			    {setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", ((Token)$1.obj).getLexema());}
 			   ;
 /* esto va en las de control.. pero me genera ambiguedad VER
 bloque_sin_declaracion : '{'list_sentencias'}'
 */				   ;
 
+/*
 condicion : expresion_logica comparador expresion_logica
 		  ;
+*/
 
 
-expresion_logica : expresion comparador expresion
+expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Token)$2.obj).getLexema());}
 				 ;
 
 comparador : MAYORIGUAL
