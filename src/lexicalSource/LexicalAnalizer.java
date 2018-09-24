@@ -384,7 +384,8 @@ public class LexicalAnalizer {
 			if (a!=null){a.execute(buffer,lastChar);}
 			if (newState==FINAL_STATE){				
 				int pos = tokens.size()-1;
-				return (tokens.get(pos));
+				if (pos>=0)
+					return (tokens.get(pos));
 				
 			}
 			state=newState;			
