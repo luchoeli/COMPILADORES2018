@@ -508,6 +508,9 @@ public class LexicalAnalizer {
 		//case WHILE: return "PALABRA RESERVADA";
 		case CASE: return "PALABRA RESERVADA";
 		case DO: return "PALABRA RESERVADA";
+		case READONLY: return "PALABRA RESERVADA";
+		case WRITE: return "PALABRA RESERVADA";
+		case PASS: return "PALABRA RESERVADA";
 		
 		
 		case ID: return "IDENTIFICADOR";

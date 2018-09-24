@@ -129,6 +129,8 @@ sent_ejecutable  : sent_seleccion ','
 				 ;
 				 
 invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'
+			{setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());}
+			;
 
 nombre_parametro :	ID
 				 |  CTE
