@@ -330,7 +330,8 @@ public class CompilerUI {
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				clear();
-				//TODO aksa -------------//			
+				//TODO aksa -------------//		
+				
 				String program = textArea.getText();
 				Table table=new Table();
 				Parser parser = new Parser(program,table);
