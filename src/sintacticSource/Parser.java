@@ -390,7 +390,7 @@ final static String yyrule[] = {
 "bloque_de_sentencias : '{' list_sentencias '}'",
 };
 
-//#line 206 "especificacion.y"
+//#line 207 "especificacion.y"
 /**/
 public LexicalAnalizer lexico;
 public Table table;
@@ -628,38 +628,42 @@ boolean doaction;
 case 8:
 //#line 102 "especificacion.y"
 {System.out.println("Declaracion variable");
-												 setRegla(((Token)val_peek(1).obj).getNroLine(), "Declaracion", ((Token)val_peek(1).obj).getLexema());
+												 setRegla(((Token)val_peek(1).obj).getNroLine(), "Declaracion de variables", ((Token)val_peek(1).obj).getLexema());
 												 /*updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 */
 												 }
 break;
+case 9:
+//#line 112 "especificacion.y"
+{setRegla(((Token)val_peek(12).obj).getNroLine(), "Declaracion de funcion", ((Token)val_peek(12).obj).getLexema()+" "+((Token)val_peek(11).obj).getLexema());}
+break;
 case 11:
-//#line 116 "especificacion.y"
+//#line 117 "especificacion.y"
 {System.out.println("WEPA");}
 break;
 case 17:
-//#line 126 "especificacion.y"
+//#line 127 "especificacion.y"
 {System.out.println("signacion realizada");}
 break;
 case 26:
-//#line 143 "especificacion.y"
+//#line 144 "especificacion.y"
 {System.out.println("Case do");
 				  						  setRegla(((Token)val_peek(6).obj).getNroLine(), "Sentencia de control", ((Token)val_peek(6).obj).getLexema());
 										  /*updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 */
 										 }
 break;
 case 30:
-//#line 156 "especificacion.y"
+//#line 157 "especificacion.y"
 {setRegla(((Token)val_peek(4).obj).getNroLine(), "Sentencia de Control", ((Token)val_peek(4).obj).getLexema());}
 break;
 case 31:
-//#line 168 "especificacion.y"
+//#line 169 "especificacion.y"
 { setRegla(((Token)val_peek(2).obj).getNroLine(), "expresion logica", ((Token)val_peek(1).obj).getLexema());}
 break;
 case 45:
-//#line 193 "especificacion.y"
+//#line 194 "especificacion.y"
 {System.out.println("ASIGNACION");setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());}
 break;
-//#line 586 "Parser.java"
+//#line 590 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
