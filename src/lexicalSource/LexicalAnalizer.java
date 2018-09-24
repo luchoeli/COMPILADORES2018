@@ -123,7 +123,7 @@ public class LexicalAnalizer {
 		this.aMatrix=new MatrixActions(17,25);		
 		//int maxInt=32767,minInt=-32768; //RANGO CONSTANTE COMUN
 		
-		BigInteger maxUInt= new BigInteger("65535") ,minUInt= new BigInteger("0");//RANGO CONSTANTE SIN SIGNO --VEEER--
+		BigInteger maxUInt= new BigInteger("65536") ,minUInt= new BigInteger("-1");//RANGO CONSTANTE SIN SIGNO --VEEER--
 		double minDou=2.2250738585072014E-308, maxDou=1.7976931348623157E308;   /// VEEER
 		
 		//SemanticAction SA0 = new SetBufferEmpty(this); // INICIA BUFFER VACIO
@@ -187,7 +187,7 @@ public class LexicalAnalizer {
 		
 		//FIXME ver si donde puse SA10(error) va SA18(ultimoChar al inicio y error)
 		//ESTADO 0
-		this.aMatrix.put(0,0, SA1);this.aMatrix.put(0,1, SA1);this.aMatrix.put(0,2, SA18);this.aMatrix.put(0,3, SA1);
+		this.aMatrix.put(0,0, SA1);this.aMatrix.put(0,1, SA1);this.aMatrix.put(0,2, SA10);this.aMatrix.put(0,3, SA1);
 		this.aMatrix.put(0,4, SA1);this.aMatrix.put(0,5, SA1);this.aMatrix.put(0,6, SA11);this.aMatrix.put(0,7, SA11);
 		this.aMatrix.put(0,8, SA1);this.aMatrix.put(0,9, SA1);this.aMatrix.put(0,10, SA11);this.aMatrix.put(0,11, SA11);
 		this.aMatrix.put(0,12, SA7);this.aMatrix.put(0,13, SA10);this.aMatrix.put(0,14, SA1);this.aMatrix.put(0,15, SA1);
