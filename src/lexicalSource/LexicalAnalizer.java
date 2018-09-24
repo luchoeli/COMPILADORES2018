@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Vector;
 
 import sintacticSource.Error;
 import semanticSource.*;
@@ -71,6 +72,8 @@ public class LexicalAnalizer {
 		
 		//IDENTIFICADOR
 		this.idTokens.put("IDENTIFICADOR",(int)ID);
+		//CADENA
+		this.idTokens.put("CADENA", (int)CADENA);
 		//CONSTANTES
 		this.idTokens.put("CTE",(int)CTE);		
 		//OPERADORES
@@ -110,6 +113,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("pass",(int)PASS);
 		this.idTokens.put("write",(int)WRITE);
 		this.idTokens.put("return",(int)RETURN);
+		this.idTokens.put("print",(int)PRINT);
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -122,7 +126,7 @@ public class LexicalAnalizer {
 		BigInteger maxUInt= new BigInteger("65535") ,minUInt= new BigInteger("0");//RANGO CONSTANTE SIN SIGNO --VEEER--
 		double minDou=2.2250738585072014E-308, maxDou=1.7976931348623157E308;   /// VEEER
 		
-		SemanticAction SA0 = new SetBufferEmpty(this); // INICIA BUFFER VACIO
+		//SemanticAction SA0 = new SetBufferEmpty(this); // INICIA BUFFER VACIO
 		SemanticAction SA1=new SetBufferAction(this);// INICIALIZA BUFFER Y AGREGA CARACTER
 		SemanticAction SA2=new CharacterToInputAction(this); //VUELVE EL ULTIMO CARACTER LEIDO A ESTADO INICIAL
 		SemanticAction SA3=new CheckKeyWord(this);//CONTROLA SI EL BUFFER ES UNA PALABRA RESERVADA
@@ -186,7 +190,7 @@ public class LexicalAnalizer {
 		this.aMatrix.put(0,0, SA1);this.aMatrix.put(0,1, SA1);this.aMatrix.put(0,2, SA18);this.aMatrix.put(0,3, SA1);
 		this.aMatrix.put(0,4, SA1);this.aMatrix.put(0,5, SA1);this.aMatrix.put(0,6, SA11);this.aMatrix.put(0,7, SA11);
 		this.aMatrix.put(0,8, SA1);this.aMatrix.put(0,9, SA1);this.aMatrix.put(0,10, SA11);this.aMatrix.put(0,11, SA11);
-		this.aMatrix.put(0,12, SA7);this.aMatrix.put(0,13, SA10);this.aMatrix.put(0,14, SA0);this.aMatrix.put(0,15, SA1);
+		this.aMatrix.put(0,12, SA7);this.aMatrix.put(0,13, SA10);this.aMatrix.put(0,14, SA1);this.aMatrix.put(0,15, SA1);
 		this.aMatrix.put(0,17, SA18);this.aMatrix.put(0,18, SA11);
 		
 		//ESTADO 1  Los identificadores con longitud mayor deber�n ser informados como error, y el token err�neo deber� ser descartado.
@@ -319,7 +323,7 @@ public class LexicalAnalizer {
 					this.aMatrix.put(15, i, SA21); // 
 				} else
 					if (i==14){ //'
-						this.aMatrix.put(15, i, SA8); //
+						this.aMatrix.put(15, i, SA16); //AGREGO
 					}else
 						this.aMatrix.put(15, i, SA9);
 				
@@ -330,7 +334,7 @@ public class LexicalAnalizer {
 				this.aMatrix.put(16, i, SA19); // 
 			} else
 				if (i==14){ // '
-					this.aMatrix.put(16, i, SA8);
+					this.aMatrix.put(16, i, SA16); // agrego y creo,  //FIXME por que no lo agregaaaa!!!
 				}else  // otro
 					this.aMatrix.put(16, i, SA9);
 		}
@@ -551,10 +555,14 @@ public class LexicalAnalizer {
 		if (this.idTokens.containsKey(buffer)){
 			value = this.idTokens.get(buffer);
 		}else
-			{if (buffer.contains("_ui")|| buffer.contains(".")){
-				value = this.idTokens.get("CTE");
-			}
-			else{value=this.idTokens.get("IDENTIFICADOR");}			
+			{
+				if (buffer.contains("_ui")|| buffer.contains(".")){
+					value = this.idTokens.get("CTE");
+				}
+				else if(buffer.contains("'")){
+						 value = this.idTokens.get("CADENA");
+					 }
+					 	else{value=this.idTokens.get("IDENTIFICADOR");}			
 			}
 		
 		return value;
