@@ -100,8 +100,8 @@ sent_declarativa	:	declaracion_variable ','
 					;
 					
 declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
-												/* setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());*/
-												 //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
+												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
+												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
 						;
 
@@ -113,19 +113,19 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  ;
 
 						  
-list_variables		:	list_variables ';' ID  //{
+list_variables		:	list_variables ';' ID // {
 											//Vector<Token> tokens = (Vector<Token>)$1.obj;
 											//Token token = (Token)$3.obj;
 											//tokens.add(token);
 											//$$.obj = tokens;
-											//
+											
 											//}
 					|	ID // {
-						//	Vector<Token> tokens = (Vector<Token>)$1.obj;
-						//	Token token = (Token)$1.obj;
-						//	tokens.add(token);
+							//Vector<Token> tokens = new Vector<Token>();
+							//Token token = (Token)$1.obj;
+							//tokens.add(token);
 						//	$$.obj = tokens;
-						//	*/}
+							//}
 					;
 
 tipo	:	 USINTEGER
@@ -165,13 +165,18 @@ linea_control	: 	CTE ':' DO bloque_de_sentencias','
 				;
 
 
-sent_seleccion :	IF '('expresion_logica')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
-			   |	IF '('expresion_logica')' bloque_de_sentencias
+sent_seleccion :	IF '('expresion_logica')' bloque_sin_declaracion ELSE bloque_sin_declaracion END_IF 
+			   |	IF '('expresion_logica')' bloque_sin_declaracion
 			    {setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", ((Token)$1.obj).getLexema());}
 			   ;
-/* esto va en las de control.. pero me genera ambiguedad VER
-bloque_sin_declaracion : '{'list_sentencias'}'
-*/				   ;
+// esto va en las de control.. pero me genera ambiguedad VER
+bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
+					   ;
+
+list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
+								| sent_ejecutable
+								;
+								
 
 /*
 condicion : expresion_logica comparador expresion_logica
@@ -279,6 +284,12 @@ public void updateTable(Vector<Token> tokens, String type){
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
 		String newKey = lexema;// + getAlcance(alcance);
+		System.out.println("TIPO: "+type);
+		if ((table.contains(newKey))){
+			System.out.println("TIPO: "+type);
+			table.get(newKey).setType(type);
+		}
+		/*
 		if (!(table.contains(newKey))){
 			tr.decrement();
 			if (tr.getRef()==0){
@@ -295,6 +306,7 @@ public void updateTable(Vector<Token> tokens, String type){
 		}else{
 			this.addError("Error sintactico: Ya existe una variable declarada con el mismo nombre.", token.getNroLine());
 		}
+		*/
 		
 	}
 }
