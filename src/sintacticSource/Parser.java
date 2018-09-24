@@ -390,7 +390,7 @@ final static String yyrule[] = {
 "bloque_de_sentencias : '{' list_sentencias '}'",
 };
 
-//#line 209 "especificacion.y"
+//#line 210 "especificacion.y"
 /**/
 public LexicalAnalizer lexico;
 public Table table;
@@ -663,11 +663,15 @@ case 31:
 //#line 171 "especificacion.y"
 { setRegla(((Token)val_peek(2).obj).getNroLine(), "expresion logica", ((Token)val_peek(1).obj).getLexema());}
 break;
+case 44:
+//#line 194 "especificacion.y"
+{setRegla(((Token)val_peek(3).obj).getNroLine(), "Impresion",((Token)val_peek(3).obj).getLexema()+"("+((Token)val_peek(1).obj).getLexema()+")" ) ;}
+break;
 case 45:
-//#line 196 "especificacion.y"
+//#line 197 "especificacion.y"
 {System.out.println("ASIGNACION");setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());}
 break;
-//#line 594 "Parser.java"
+//#line 598 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

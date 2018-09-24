@@ -191,6 +191,7 @@ termino : termino '*' factor
 		;
 
 imprimir	:	PRINT '('CADENA')'
+				{setRegla(((Token)$1.obj).getNroLine(), "Impresion",((Token)$1.obj).getLexema()+"("+((Token)$3.obj).getLexema()+")" ) ;}
 			;
 			
 asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
