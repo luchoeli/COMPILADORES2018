@@ -204,7 +204,7 @@ public class LexicalAnalizer {
 		
 		//ESTADO 2
 		for(int i=0;i<=18;i++){ 
-			if ((i==1)||(i==2)||(i==3)|(i==8)||(i==9)||(i==14)) {  // l, L, d, u, i, D
+			if ((i==1)||(i==2)||(i==3)|(i==8)||(i==9)||(i==13)) {  // l, L, d, u, i, D
 				this.aMatrix.put(2, i, SA9); // agrgo al buffer
 			}
 			else 
