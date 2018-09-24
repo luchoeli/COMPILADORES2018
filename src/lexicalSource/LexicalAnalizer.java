@@ -95,6 +95,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("{", (int)'{');
 		this.idTokens.put("}", (int)'}');
 		this.idTokens.put("'", (int)'\'');
+		this.idTokens.put(":", (int)':');
 		//PALABRAS RESERVADAS
 		this.idTokens.put("if", (int)IF);
 		this.idTokens.put("then", (int)THEN);
@@ -211,7 +212,7 @@ public class LexicalAnalizer {
 				this.aMatrix.put(3, i, SA16); // agrego y creo 
 			}
 			else
-				this.aMatrix.put(3, i, SA10); // imprimo error
+				this.aMatrix.put(3, i, SA15); // agrego
 		}
 		//ESTADO 4
 		for(int i=0;i<=18;i++){ 
@@ -535,6 +536,8 @@ public class LexicalAnalizer {
 		case '{': return "SIMBOLO";
 		case '}': return "SIMBOLO";
 		case '\'': return "SIMBOLO";
+		case ':': return "SIMBOLO";
+		
 		default: return "EOF";
 				
 		}		

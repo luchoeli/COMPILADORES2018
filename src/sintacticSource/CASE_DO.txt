@@ -1,0 +1,43 @@
+
+
+
+case ( variable ){
+	valor1: do <bloque> ,
+	valor2: do <bloque> ,
+	...
+	valorN: do <bloque> ,
+} ,
+
+//------------------------------------------------------------//
+
+sent_ejecutable  : sent_seleccion ','
+				 | sent_control ','
+				 | imprimir ','
+				 | asignacion ','
+				 | invocacion ','
+				 ;
+
+
+sent_control	: CASE '(' ID ')' 
+				  '{' linea_control '}' 
+				;
+
+linea_control	: 	CTE ':' DO bloque_de_sentencias','
+				|	linea_control CTE ':' DO bloque_de_sentencias','
+				;
+
+bloque_de_sentencias : '{'list_sentencias'}'
+					 ;
+					 
+list_sentencias: sent_declarativa 
+				 | sent_ejecutable 
+				 | list_sentencias sent_declarativa
+				 | list_sentencias sent_ejecutable 
+				 ;
+
+//___________------------------_______________----------------_______________//
+
+case (_a){
+	2_ui : DO {double _a,},
+	1_ui : DO {usinteger _b, _b:=2_ui,},
+},

@@ -393,7 +393,7 @@ final static String yyrule[] = {
 "bloque_de_sentencias : '{' list_sentencias '}'",
 };
 
-//#line 198 "especificacion.y"
+//#line 203 "especificacion.y"
 /**/
 public LexicalAnalizer lexico;
 public Table table;
@@ -628,26 +628,33 @@ boolean doaction;
     switch(yyn)
       {
 //########## USER-SUPPLIED ACTIONS ##########
-case 6:
-//#line 98 "especificacion.y"
-{System.out.println("AAAAAAAAAAAAA");}
-break;
 case 8:
 //#line 102 "especificacion.y"
-{
+{System.out.println("Declaracion variable");
 												 setRegla(((Token)val_peek(1).obj).getNroLine(), "Declaracion", ((Token)val_peek(1).obj).getLexema());
 												 /*updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 */
 												 }
 break;
-case 10:
-//#line 115 "especificacion.y"
+case 11:
+//#line 116 "especificacion.y"
 {System.out.println("WEPA");}
 break;
-case 46:
-//#line 185 "especificacion.y"
-{setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+"="+((Token)val_peek(0).obj).getLexema());}
+case 17:
+//#line 126 "especificacion.y"
+{System.out.println("signacion realizada");}
 break;
-//#line 574 "Parser.java"
+case 26:
+//#line 143 "especificacion.y"
+{System.out.println("Case do");
+				  						  setRegla(((Token)val_peek(6).obj).getNroLine(), "Sentencia de control", ((Token)val_peek(6).obj).getLexema());
+										  /*updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 */
+										 }
+break;
+case 46:
+//#line 190 "especificacion.y"
+{System.out.println("ASIGNACION");setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());}
+break;
+//#line 581 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

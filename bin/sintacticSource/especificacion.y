@@ -95,11 +95,11 @@ list_sentencias: sent_declarativa
 				 | list_sentencias sent_ejecutable 
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ','{System.out.println("AAAAAAAAAAAAA");}
+sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
 					;
 					
-declaracion_variable	:	tipo list_variables {
+declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion", ((Token)$1.obj).getLexema());
 												 //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
@@ -112,8 +112,8 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  ;
 
 						  
-list_variables		:	list_variables ';' ID {System.out.println("WEPA");}
-					|	ID ;
+list_variables		:	list_variables ';' ID
+					|	ID ; {System.out.println("WEPA");}
 
 tipo	:	 USINTEGER
 		|	DOUBLE
@@ -123,7 +123,7 @@ tipo	:	 USINTEGER
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ','
+				 | asignacion ',' {System.out.println("signacion realizada");}
 				 | invocacion ','
 				 ;
 				 
@@ -139,12 +139,17 @@ lista_permisos	: READONLY
 				| WRITE ';' PASS
 				;
 
-sent_control	: CASE '(' ID ')' 
-				  '{' linea_control '}' ;
-
-linea_control	: 	CTE ':' DO bloque_de_sentencias ','
-				|	linea_control CTE ':' DO bloque_de_sentencias  ','
+sent_control	: CASE '(' ID ')''{' linea_control '}'  				
+										 {System.out.println("Case do");
+				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());
+										  //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
+										 }
 				;
+
+linea_control	: 	CTE ':' DO bloque_de_sentencias','
+				|	linea_control CTE ':' DO bloque_de_sentencias','
+				;
+
 
 sent_seleccion :	IF '('condicion')' bloque_de_sentencias ELSE bloque_de_sentencias END_IF 
 			   |	IF '('condicion')' bloque_de_sentencias
@@ -182,7 +187,7 @@ termino : termino '*' factor
 imprimir	:	PRINT '('CADENA')'
 			;
 			
-asignacion 	:	ID ':=' expresion  {setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+"="+((Token)$3.obj).getLexema());}
+asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
 			;
 
 /*chequear factor*/
