@@ -100,7 +100,7 @@ sent_declarativa	:	declaracion_variable ','
 					;
 					
 declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
-												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
+												/* setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());*/
 												 //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
 						;
@@ -113,8 +113,20 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  ;
 
 						  
-list_variables		:	list_variables ';' ID
-					|	ID ; {System.out.println("WEPA");}
+list_variables		:	list_variables ';' ID  //{
+											//Vector<Token> tokens = (Vector<Token>)$1.obj;
+											//Token token = (Token)$3.obj;
+											//tokens.add(token);
+											//$$.obj = tokens;
+											//
+											//}
+					|	ID // {
+						//	Vector<Token> tokens = (Vector<Token>)$1.obj;
+						//	Token token = (Token)$1.obj;
+						//	tokens.add(token);
+						//	$$.obj = tokens;
+						//	*/}
+					;
 
 tipo	:	 USINTEGER
 		|	DOUBLE
@@ -144,8 +156,7 @@ lista_permisos	: READONLY
 
 sent_control	: CASE '(' ID ')''{' linea_control '}'  				
 										 {System.out.println("Case do");
-				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());
-										  //updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
+				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
 										 }
 				;
 
