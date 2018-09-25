@@ -465,28 +465,10 @@ public void updateTable(Vector<Token> tokens, String type){
 			System.out.println("TIPO: "+type);
 			table.get(newKey).setType(type);
 		}
-		/*
-		if (!(table.contains(newKey))){
-			tr.decrement();
-			if (tr.getRef()==0){
-				table.remove(lexema);
-			}
-			TableRecord newTr = new TableRecord(lexema, tr.getIdToken());
-			newTr.setAmbito(newKey);
-			table.put(newKey, newTr);		
-			if (newTr.getType()== null){
-				newTr.setType(type);
-			}
-			token.setRecord(newTr);
-
-		}else{
-			this.addError("Error sintactico: Ya existe una variable declarada con el mismo nombre.", token.getNroLine());
-		}
-		*/
 		
 	}
 }
-//#line 418 "Parser.java"
+//#line 400 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -700,7 +682,7 @@ case 48:
 //#line 213 "especificacion.y"
 {System.out.println("ASIGNACION");setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());}
 break;
-//#line 627 "Parser.java"
+//#line 609 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

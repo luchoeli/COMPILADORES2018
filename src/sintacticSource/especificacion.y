@@ -289,24 +289,6 @@ public void updateTable(Vector<Token> tokens, String type){
 			System.out.println("TIPO: "+type);
 			table.get(newKey).setType(type);
 		}
-		/*
-		if (!(table.contains(newKey))){
-			tr.decrement();
-			if (tr.getRef()==0){
-				table.remove(lexema);
-			}
-			TableRecord newTr = new TableRecord(lexema, tr.getIdToken());
-			newTr.setAmbito(newKey);
-			table.put(newKey, newTr);		
-			if (newTr.getType()== null){
-				newTr.setType(type);
-			}
-			token.setRecord(newTr);
-
-		}else{
-			this.addError("Error sintactico: Ya existe una variable declarada con el mismo nombre.", token.getNroLine());
-		}
-		*/
 		
 	}
 }

@@ -113,19 +113,19 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  ;
 
 						  
-list_variables		:	list_variables ';' ID // {
-											//Vector<Token> tokens = (Vector<Token>)$1.obj;
-											//Token token = (Token)$3.obj;
-											//tokens.add(token);
-											//$$.obj = tokens;
+list_variables		:	list_variables ';' ID  {
+											Vector<Token> tokens = (Vector<Token>)$1.obj;
+											Token token = (Token)$3.obj;
+											tokens.add(token);
+											$$.obj = tokens;
 											
-											//}
-					|	ID // {
-							//Vector<Token> tokens = new Vector<Token>();
-							//Token token = (Token)$1.obj;
-							//tokens.add(token);
-						//	$$.obj = tokens;
-							//}
+											}
+					|	ID  {
+							Vector<Token> tokens = new Vector<Token>();
+							Token token = (Token)$1.obj;
+							tokens.add(token);
+							$$.obj = tokens;
+							}
 					;
 
 tipo	:	 USINTEGER
@@ -289,24 +289,6 @@ public void updateTable(Vector<Token> tokens, String type){
 			System.out.println("TIPO: "+type);
 			table.get(newKey).setType(type);
 		}
-		/*
-		if (!(table.contains(newKey))){
-			tr.decrement();
-			if (tr.getRef()==0){
-				table.remove(lexema);
-			}
-			TableRecord newTr = new TableRecord(lexema, tr.getIdToken());
-			newTr.setAmbito(newKey);
-			table.put(newKey, newTr);		
-			if (newTr.getType()== null){
-				newTr.setType(type);
-			}
-			token.setRecord(newTr);
-
-		}else{
-			this.addError("Error sintactico: Ya existe una variable declarada con el mismo nombre.", token.getNroLine());
-		}
-		*/
 		
 	}
 }
