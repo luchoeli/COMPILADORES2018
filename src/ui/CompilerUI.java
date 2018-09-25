@@ -348,6 +348,7 @@ public class CompilerUI {
 		        ArrayList<SintacticStructure> structures = parser.getReglas();
 		        System.out.println("CANT REGLAS: "+structures.size());
 				ArrayList<Error> errors = analizer.getErrors();
+				System.out.println("CANT ERRORES: "+errors.size());
 				ArrayList<TableRecord> records = table.getElements();
 				System.out.println("CANT RECORD: "+records.size());
 				

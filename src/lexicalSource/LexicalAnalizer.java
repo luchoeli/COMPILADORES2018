@@ -59,8 +59,7 @@ public class LexicalAnalizer {
 	private String in;
 	private Table table;
 	
-	
-	
+
 	public LexicalAnalizer(String in, Table table){//POR PARAMETRO EL ARCHIVO.
 		this.in=in;
 		this.table = table;
@@ -385,14 +384,18 @@ public class LexicalAnalizer {
 			column = getColum(lastChar);	
 			newState = sMatrix.get(state,column);
 			SemanticAction a = aMatrix.get(state,column);
-			if (a!=null){a.execute(buffer,lastChar);}
+			if (a!=null){
+				a.execute(buffer,lastChar);
+			}
 			if (newState==FINAL_STATE){				
 				int pos = tokens.size()-1;
 				if (pos>=0)
 					return (tokens.get(pos));
-				
+				state=0;
 			}
-			state=newState;			
+			else{
+				state=newState;
+			}
 		}
 		return null;
 		
