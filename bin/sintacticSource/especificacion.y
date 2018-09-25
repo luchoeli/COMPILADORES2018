@@ -92,11 +92,13 @@ programa:	list_sentencias;
 list_sentencias: sent_declarativa 
 				 | sent_ejecutable 
 				 | list_sentencias sent_declarativa
-				 | list_sentencias sent_ejecutable 
+				 | list_sentencias sent_ejecutable
+				 | error 
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
+					| error ','
 					;
 					
 declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
