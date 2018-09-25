@@ -348,10 +348,11 @@ public class CompilerUI {
 		        ArrayList<SintacticStructure> structures = parser.getReglas();
 		        System.out.println("CANT REGLAS: "+structures.size());
 				ArrayList<Error> errors = analizer.getErrors();
+				ArrayList<TableRecord> records = table.getElements();
+				System.out.println("CANT RECORD: "+records.size());
 				
 				errors.addAll(parser.getErrors());
 				Collections.sort(errors);
-				ArrayList<TableRecord> records = table.getElements();
 				problems.setText(null);
 				
 				
@@ -387,6 +388,7 @@ public class CompilerUI {
 					data[0]=tr.getType();
 					data[1]=tr.getLexema();
 		            data[2]=tr.getAmbito();
+		            tableDtm.addRow(data);
 				}
 		
 			}

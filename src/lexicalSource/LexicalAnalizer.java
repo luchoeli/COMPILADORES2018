@@ -483,10 +483,25 @@ public class LexicalAnalizer {
 		String type = getType(id);
 		TableRecord record=null;
 		if (type == "IDENTIFICADOR") {
-			 record = this.addIdentificadorToTable(new TableRecord(buffer,id));
-		}else if (type == "CTE") {
-			String value[] = buffer.split("_");
-			record = this.addConstanteToTable(new TableRecord(buffer,id,value[0]));
+			record = new TableRecord(buffer,id);
+			record.setType(type);
+			record = this.addIdentificadorToTable(record);
+		}else if (type == "CONSTANTE") {
+			
+			if (buffer.contains("_ui")){
+				String value[] = buffer.split("_");
+				record = new TableRecord(buffer,id,value[0]);
+				record.setType("usinteger");
+				record = this.addIdentificadorToTable(record);
+			}else if  (buffer.contains(".")){
+				record = new TableRecord(buffer,id);
+				record.setType("double");
+				record = this.addIdentificadorToTable(record);
+			}	
+			
+			;
+			record = this.addConstanteToTable(record);
+			
 		}
 		Token t=new Token(id,buffer,this.line,type,record);	
 		tokens.add(t);		
