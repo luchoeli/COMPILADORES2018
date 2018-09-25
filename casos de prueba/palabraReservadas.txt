@@ -1,0 +1,11 @@
+USINTEGER _a,
+
+IF (_a<5_ui){
+ _a:= 2_ui,
+},
+
+
+CASE (_a){
+2_ui:DO { _a:=3_ui,},
+5_ui:DO { _a:=6_ui,},
+},

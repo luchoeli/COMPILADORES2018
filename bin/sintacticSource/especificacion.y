@@ -103,6 +103,7 @@ declaracion_variable	:	tipo list_variables {System.out.println("Declaracion vari
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
+					//	|	error list_variables {addError("Tipo no reconocido. ",((Token)$1.obj).getNroLine());}
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
@@ -244,9 +245,7 @@ private int yylex() {
 
 	return 0;
 }
-public void yyerror(String errormsg){
 
-}
 
 public int Parse(){
 	return yyparse();
@@ -262,8 +261,13 @@ public void setRegla(int line, String type, String desc){
 
 }
 
+public void yyerror(String errormsg){
+	//addError(errormsg);
+	//this.addError("Error Sintactico: "+ ((Token)yylval.obj).getLexema()+" ", this.lexico.getLine());
+}
+
 public void addError(String e, int line){
-	this.errors.add(new Error(e,line));	
+	//this.errors.add(new Error(e,line));	
 }
 
 public ArrayList<Error> getErrors(){

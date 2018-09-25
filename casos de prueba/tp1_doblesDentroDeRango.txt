@@ -1,6 +1,6 @@
 _sinParteDecimal := 1.,
 _sinParteEntera:= .6 ,
-_negativo=-1.2 ,
+_negativo:=-1.2 ,
 _exponenteNegativo:= 3.D-5  ,
 _exponentePositivo:=2.D+34  ,
 _sinSigno:=2.5D1 ,
