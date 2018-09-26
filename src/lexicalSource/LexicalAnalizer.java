@@ -10,7 +10,8 @@ import sintacticSource.Error;
 import semanticSource.*;
 
 public class LexicalAnalizer {
-		
+
+	
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
@@ -22,22 +23,28 @@ public class LexicalAnalizer {
 	public final static short END=265;
 	public final static short USINTEGER=266;
 	public final static short DOUBLE=267;
-	public final static short WHILE=268;
-	public final static short CASE=269;
-	public final static short DO=270;
-	public final static short READONLY=271;
-	public final static short WRITE=272;
-	public final static short PASS=273;
-	public final static short RETURN=274;
-	public final static short PRINT=275;
-	public final static short MAYORIGUAL=276;
-	public final static short MENORIGUAL=277;
-	public final static short IGUAL=278;
-	public final static short DISTINTO=279;
-	public final static short EOF=280;
+	public final static short LONG=268;
+	public final static short INTEGER=269;
+	public final static short LINTEGER=270;
+	public final static short USLINTEGER=271;
+	public final static short SINGLE=272;
+	public final static short WHILE=273;
+	public final static short CASE=274;
+	public final static short DO=275;
+	public final static short READONLY=276;
+	public final static short WRITE=277;
+	public final static short PASS=278;
+	public final static short RETURN=279;
+	public final static short PRINT=280;
+	public final static short MAYORIGUAL=281;
+	public final static short MENORIGUAL=282;
+	public final static short IGUAL=283;
+	public final static short DISTINTO=284;
+	public final static short EOF=285;
 	public final static short YYERRCODE=256;
 	
-	public final static short ASIGNACION=281;
+	
+	public final static short ASIGNACION=286;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
@@ -104,15 +111,22 @@ public class LexicalAnalizer {
 		this.idTokens.put("else", (int)ELSE);
 		this.idTokens.put("end_if", (int)END_IF); 
 		this.idTokens.put("case", (int)CASE);  
-		this.idTokens.put("usinteger", (int)USINTEGER);
 		this.idTokens.put("do", (int)DO);
+		this.idTokens.put("usinteger", (int)USINTEGER);
 		this.idTokens.put("double", (int)DOUBLE);
+		this.idTokens.put("long", (int)LONG);
+		this.idTokens.put("uslinteger", (int)USLINTEGER);
+		this.idTokens.put("integer", (int)INTEGER);
+		this.idTokens.put("linteger", (int)LINTEGER);
+		this.idTokens.put("single", (int)SINGLE);
+		
 		this.idTokens.put("while", (int)WHILE);   // no va
 		this.idTokens.put("readonly",(int)READONLY);
 		this.idTokens.put("pass",(int)PASS);
 		this.idTokens.put("write",(int)WRITE);
 		this.idTokens.put("return",(int)RETURN);
 		this.idTokens.put("print",(int)PRINT);
+		this.idTokens.put("long",(int)LONG);
 		//END OF FILE
 		this.idTokens.put("\0",290);
 		
@@ -519,13 +533,16 @@ public class LexicalAnalizer {
 		case ELSE: return "PALABRA RESERVADA";
 		case END_IF: return "PALABRA RESERVADA";
 		case PRINT: return "PALABRA RESERVADA";
-		//case INT: return "PALABRA RESERVADA";
 		case BEGIN: return "PALABRA RESERVADA";
 		case END: return "PALABRA RESERVADA";
 		case USINTEGER: return "PALABRA RESERVADA";
 		case DOUBLE: return "PALABRA RESERVADA";
+		case INTEGER: return "PALABRA RESERVADA";
+		case LINTEGER: return "PALABRA RESERVADA";
+		case USLINTEGER: return "PALABRA RESERVADA";
+		case LONG: return "PALABRA RESERVADA";
+		case SINGLE: return "PALABRA RESERVADA";
 		case RETURN: return "PALABRA RESERVADA";
-		//case LONG: return "PALABRA RESERVADA";
 		//case GLOBAL: return "PALABRA RESERVADA";
 		//case WHILE: return "PALABRA RESERVADA";
 		case CASE: return "PALABRA RESERVADA";

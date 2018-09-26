@@ -1,0 +1,4 @@
+_funcion(2.0;write;pass),
+
+_funcion2(_a;readonly),
+
