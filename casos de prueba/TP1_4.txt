@@ -1,0 +1,2 @@
+usinteger _identificadorOk,
+usinteger _identificadorConMasDe25Caracteres,

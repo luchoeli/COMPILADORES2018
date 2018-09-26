@@ -1,0 +1,6 @@
+usinteger _a,
+IF (a<5_ui){
+_a := 2_ui,}
+
+case(_a){
+2_ui:DO{_a:=3_ui},},

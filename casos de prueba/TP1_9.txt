@@ -1,0 +1,7 @@
+'esto es una -
+cadena multilinea -
+bien definida'
+
+'esto es una -
+cadena multilinea
+mal definida'

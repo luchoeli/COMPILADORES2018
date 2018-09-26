@@ -1,0 +1,7 @@
+_sinParteDecimal := 1. ,
+_sinParteEntera := .6,
+_exponenteNegativo := 3.D-5,
+_exponentePositivo := 2.D+34,
+_sinSigno := 2.5D1,
+_cero := 0. ,
+_dosEnteros := 13. ,
