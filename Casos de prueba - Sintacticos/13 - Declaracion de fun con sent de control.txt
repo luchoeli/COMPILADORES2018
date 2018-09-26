@@ -1,0 +1,9 @@
+
+double _fun (double _A){
+	_a:=2.,
+	usinteger _b,
+	if (_a != 2.4) then {
+		double _z,
+	}end_if,
+	return (_a)
+},

@@ -121,11 +121,17 @@ declaracion_variable	:	tipo list_variables {System.out.println("Declaracion vari
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
-					  list_sentencias // conjunto de sentencias declarativas y ejecutables
+					  list_sentencias_no_declarables // conjunto de sentencias declarativas y ejecutables
 					  RETURN '(' expresion ')'
 					  '}'
 					  {setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());}
-					  ;
+					
+					| tipo ID '(' tipo ID')' '{'
+					  error // conjunto de sentencias declarativas y ejecutables
+					  RETURN '(' expresion ')'
+					  '}' 
+					  {this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$8.obj).getNroLine());}
+					;
 
 						  
 list_variables		:	list_variables ';' ID  {
@@ -208,6 +214,11 @@ sent_if :	IF '('expresion_logica')' THEN
 			bloque_sin_declaracion error {System.out.println("TOKE "+((Token)$4.obj).getLexema());
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  										 }
+ 		| 	 IF '('expresion_logica')' THEN 
+			 error
+				 {
+			   	    this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$6.obj).getNroLine());
+			  	 }
 	    ;
 // esto va en las de control.. pero me genera ambiguedad VER
 bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
@@ -223,7 +234,13 @@ expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).get
 				 		
 				 //|expresion error expresion  	{
 				//									addError("Comparador invalido. "+Error.assignment(), ((Token)$1.obj).getNroLine());
-				//								}		
+				//								}
+				| expresion comparador error	{
+													addError("Error sintactico: Expresion derecha invalida ", ((Token)$1.obj).getNroLine());
+												}	
+				| error comparador expresion	{
+													addError("Error sintactico: Expresion izquierda invalida "+Error.assignment(), ((Token)$1.obj).getNroLine());
+												}
 				 ;
 
 comparador : MAYORIGUAL

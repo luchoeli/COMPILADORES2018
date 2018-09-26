@@ -407,7 +407,7 @@ public class CompilerUI {
 			public void actionPerformed(ActionEvent e) {
 				textArea.setEnabled(true);
 				btnRun.setEnabled(true);
-				JFileChooser fc = new JFileChooser(".\\casos de prueba");
+				JFileChooser fc = new JFileChooser(".");
 				
 				fc.setDialogTitle("Open a File");
 				FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos de Texto", "txt");
