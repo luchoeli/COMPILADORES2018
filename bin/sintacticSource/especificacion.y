@@ -20,6 +20,11 @@
 		END
 		USINTEGER
 		DOUBLE
+		LONG 
+		INTEGER
+		LINTEGER
+		USLINTEGER
+		SINGLE
 		WHILE
 		CASE 
 		DO
@@ -91,7 +96,7 @@ programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
 		;
 
 list_sentencias:   sent_declarativa 
-				 | sent_ejecutable {System.out.println("TAAA");}
+				 | sent_ejecutable 
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
 				 ;
@@ -105,7 +110,14 @@ declaracion_variable	:	tipo list_variables {System.out.println("Declaracion vari
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
-						//|	error list_variables {addError("Tipo no reconocido. ",((Token)$1.obj).getNroLine());}
+						| tipo list_variables error {
+														Vector<Token> tokens = (Vector<Token>)$2.obj;
+														if (tokens.size()>1){
+															this.addError("Error sintactico en declaración múltiple.", ((Token)$1.obj).getNroLine());
+														}else{
+															this.addError("Error sintactico en declaración.", ((Token)$1.obj).getNroLine());
+														}
+													}
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
@@ -131,9 +143,14 @@ list_variables		:	list_variables ';' ID  {
 							}
 					;
 
-tipo	:	 USINTEGER
+tipo	:	USINTEGER
 		|	DOUBLE
-			;
+		|	LONG {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		|	USLINTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		|	LINTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		|	SINGLE {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		|	INTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		;
 			
 
 sent_ejecutable  : sent_seleccion ','
@@ -143,8 +160,16 @@ sent_ejecutable  : sent_seleccion ','
 				 | invocacion ','
 				 ;
 				 
-invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'
-			{setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());}
+invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
+																setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+															 }
+			|	ID nombre_parametro ';' lista_permisos')' error {
+																	addError("Error sintactico: falta '(' al inicio de la invocacion ", ((Token)$1.obj).getNroLine());
+															 	}
+															 	
+			|	ID '('nombre_parametro ';' lista_permisos error {
+																	addError("Error sintactico: falta ')' al final de la invocacion ", ((Token)$1.obj).getNroLine());
+															 	}
 			;
 
 nombre_parametro :	ID
@@ -166,12 +191,24 @@ sent_control	: CASE '(' ID ')''{' linea_control '}'
 linea_control	: 	CTE ':' DO bloque_de_sentencias','
 				|	linea_control CTE ':' DO bloque_de_sentencias','
 				;
-
-
-sent_seleccion :	IF '('expresion_logica')' bloque_sin_declaracion ELSE bloque_sin_declaracion END_IF 
-			   |	IF '('expresion_logica')' bloque_sin_declaracion
-			    {setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", ((Token)$1.obj).getLexema());}
-			   ;
+				
+sent_seleccion : sent_if END_IF
+			   | sent_if ELSE bloque_sin_declaracion END_IF{
+						      								  setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
+			   			  									}
+sent_if :	IF '('expresion_logica')' THEN 
+			bloque_sin_declaracion {
+			   				  			setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
+			   			   			}
+		|	IF '(' expresion_logica THEN
+			bloque_sin_declaracion error {System.out.println("TOKE "+((Token)$4.obj).getLexema());
+											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
+ 										 }
+ 		|	IF expresion_logica ')' THEN
+			bloque_sin_declaracion error {System.out.println("TOKE "+((Token)$4.obj).getLexema());
+											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
+ 										 }
+	    ;
 // esto va en las de control.. pero me genera ambiguedad VER
 bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
 					   ;
@@ -181,13 +218,12 @@ list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
 								;
 								
 
-/*
-condicion : expresion_logica comparador expresion_logica
-		  ;
-*/
-
 
 expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Token)$2.obj).getLexema());}
+				 		
+				 //|expresion error expresion  	{
+				//									addError("Comparador invalido. "+Error.assignment(), ((Token)$1.obj).getNroLine());
+				//								}		
 				 ;
 
 comparador : MAYORIGUAL
@@ -216,7 +252,6 @@ imprimir	:	PRINT '('CADENA')'
 asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
 			|	ID error {
 							addError("Operador invalido. ", ((Token)$1.obj).getNroLine());
-							System.out.println("errorreasad "+((Token)$1.obj).getNroLine());
 						 }
 			;
 

@@ -52,6 +52,8 @@ import lexicalSource.Token;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.RowSorter;
+
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
 import lexicalSource.Table;
@@ -152,7 +154,7 @@ public class CompilerUI {
 		Problems.setLayout(gl_Problems);
 		
 		// -------------------------------- PANEL CONSOLE ------------------------------------------
-		
+		/*
 		JPanel Console = new JPanel();
 		tabbedPane.addTab("Console", new ImageIcon(CompilerUI.class.getResource("/icons/console_view.gif")), Console, null);
 		
@@ -174,7 +176,7 @@ public class CompilerUI {
 					.addGap(0))
 		);
 		Console.setLayout(gl_Console);
-		
+		*/
 		// -------------------------------- PANEL TOKENS ------------------------------------------
 		
 		JPanel Tokens = new JPanel();
@@ -205,6 +207,7 @@ public class CompilerUI {
 		String[] strucColumns={"Linea","Tipo","Descripcion"};
 		structDtm=new DefaultTableModel(null,strucColumns);
 		JTable table_Estruc= new JTable(structDtm);
+		table_Estruc.setAutoCreateRowSorter(true);
 		scrollPane_Estructuras.setViewportView(table_Estruc);
 		GroupLayout gl_Estructuras = new GroupLayout(Estructuras);
 		gl_Estructuras.setHorizontalGroup(

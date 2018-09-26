@@ -1,6 +1,9 @@
-if (_a<5_ui){
- _a:= 2_ui,
-},
+if (_a<5_ui) then {
+	_a:= 2_ui,
+} else{
+	  	_b:=2.3D+2,   
+	  }
+end_if,
 
 
 case (_a){
