@@ -87,23 +87,25 @@ Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fue
 	Nota: Los valores valor1, valor2, etc., sÃ³lo podrÃ¡n ser constantes del mismo tipo que la variable.
 	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
 ------------------------------------------------------------------------------------------------------------*/
-programa:	list_sentencias;
+programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
+		;
 
-list_sentencias: sent_declarativa 
-				 | sent_ejecutable 
+list_sentencias:   sent_declarativa 
+				 | sent_ejecutable {System.out.println("TAAA");}
 				 | list_sentencias sent_declarativa
-				 | list_sentencias sent_ejecutable 
+				 | list_sentencias sent_ejecutable
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
+					
 					;
 					
 declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
-					//	|	error list_variables {addError("Tipo no reconocido. ",((Token)$1.obj).getNroLine());}
+						//|	error list_variables {addError("Tipo no reconocido. ",((Token)$1.obj).getNroLine());}
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
@@ -137,7 +139,7 @@ tipo	:	 USINTEGER
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {System.out.println("signacion realizada");}
+				 | asignacion ',' {System.out.println("Asignacion realizada");}
 				 | invocacion ','
 				 ;
 				 
@@ -212,6 +214,10 @@ imprimir	:	PRINT '('CADENA')'
 			;
 			
 asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
+			|	ID error {
+							addError("Operador invalido. ", ((Token)$1.obj).getNroLine());
+							System.out.println("errorreasad "+((Token)$1.obj).getNroLine());
+						 }
 			;
 
 /*chequear factor*/
@@ -267,7 +273,7 @@ public void yyerror(String errormsg){
 }
 
 public void addError(String e, int line){
-	//this.errors.add(new Error(e,line));	
+	this.errors.add(new Error(e,line));	
 }
 
 public ArrayList<Error> getErrors(){
