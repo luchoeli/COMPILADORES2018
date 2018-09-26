@@ -593,7 +593,7 @@ public class LexicalAnalizer {
 	public void addError(String des, int line, int severity) {
 		// Agrega un error y en que linea sucedio .
 		Error e = new Error(des,line);
-		e.severity = severity;		
+		//e.severity = severity;		
 		this.errors.add(e);		
 	}
 	public ArrayList<Error> getErrors() {
