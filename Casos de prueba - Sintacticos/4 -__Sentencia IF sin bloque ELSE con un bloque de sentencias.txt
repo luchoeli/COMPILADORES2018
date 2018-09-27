@@ -1,0 +1,8 @@
+ __Sentencia IF sin bloque ELSE con un bloque de sentencias.
+
+if (){
+	_a:=2.23D+2
+	_b:=_c,
+	
+}
+__Sentencia IF con bloque ELSE.

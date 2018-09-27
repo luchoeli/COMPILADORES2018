@@ -1,0 +1,8 @@
+double _b;_c;_d,
+usinteger _f;_g,
+
+__errores,
+integer _h;_i,
+double _i;_j:_k,
+usinteger _l;_m;,
+long _d;_v,
