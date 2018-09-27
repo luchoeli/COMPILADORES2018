@@ -99,6 +99,7 @@ list_sentencias:   sent_declarativa
 				 | sent_ejecutable 
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
+				 | error {this.addError()}
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
@@ -156,6 +157,7 @@ tipo	:	USINTEGER
 		|	LINTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	SINGLE {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	INTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
+		| error {}
 		;
 			
 
@@ -202,22 +204,22 @@ sent_seleccion : sent_if END_IF
 			   | sent_if ELSE bloque_sin_declaracion END_IF{
 						      								  setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   			  									}
-sent_if :	IF '('expresion_logica')' THEN 
+sent_if :	IF '('expresion_logica')'  
 			bloque_sin_declaracion {
 			   				  			setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   			   			}
-		|	IF '(' expresion_logica THEN
-			bloque_sin_declaracion error {System.out.println("TOKE "+((Token)$4.obj).getLexema());
+		|	IF '(' expresion_logica 
+			bloque_sin_declaracion error {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  										 }
- 		|	IF expresion_logica ')' THEN
-			bloque_sin_declaracion error {System.out.println("TOKE "+((Token)$4.obj).getLexema());
+ 		|	IF expresion_logica ')' 
+			bloque_sin_declaracion error {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  										 }
- 		| 	 IF '('expresion_logica')' THEN 
+ 		| 	 IF '('expresion_logica')'  
 			 error
 				 {
-			   	    this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$6.obj).getNroLine());
+			   	    this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$5.obj).getNroLine());
 			  	 }
 	    ;
 // esto va en las de control.. pero me genera ambiguedad VER
@@ -264,10 +266,11 @@ termino : termino '*' factor
 
 imprimir	:	PRINT '('CADENA')'
 				{setRegla(((Token)$1.obj).getNroLine(), "Impresion",((Token)$1.obj).getLexema()+"("+((Token)$3.obj).getLexema()+")" ) ;}
+			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
 asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
-			|	ID error {
+			|	ID error { 
 							addError("Operador invalido. ", ((Token)$1.obj).getNroLine());
 						 }
 			;
