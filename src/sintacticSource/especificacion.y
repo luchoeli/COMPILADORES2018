@@ -11,6 +11,7 @@
 		ID
 		CTE
 		CADENA
+		ASIGNACION
 		/* Palabras reservadas */
 		IF
 		THEN
@@ -99,7 +100,7 @@ list_sentencias:   sent_declarativa
 				 | sent_ejecutable 
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
-				 | error {this.addError()}
+				 //| error {this.addError()}
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
@@ -157,7 +158,7 @@ tipo	:	USINTEGER
 		|	LINTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	SINGLE {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	INTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
-		| error {}
+		//| error {}
 		;
 			
 
@@ -269,9 +270,9 @@ imprimir	:	PRINT '('CADENA')'
 			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
-asignacion 	:	ID ':=' expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
+asignacion 	:	ID ASIGNACION expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
 			|	ID error { 
-							addError("Operador invalido. ", ((Token)$1.obj).getNroLine());
+							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
 						 }
 			;
 

@@ -10,41 +10,37 @@ import sintacticSource.Error;
 import semanticSource.*;
 
 public class LexicalAnalizer {
-
-	
 	public final static short ID=257;
 	public final static short CTE=258;
 	public final static short CADENA=259;
-	public final static short IF=260;
-	public final static short THEN=261;
-	public final static short ELSE=262;
-	public final static short END_IF=263;
-	public final static short BEGIN=264;
-	public final static short END=265;
-	public final static short USINTEGER=266;
-	public final static short DOUBLE=267;
-	public final static short LONG=268;
-	public final static short INTEGER=269;
-	public final static short LINTEGER=270;
-	public final static short USLINTEGER=271;
-	public final static short SINGLE=272;
-	public final static short WHILE=273;
-	public final static short CASE=274;
-	public final static short DO=275;
-	public final static short READONLY=276;
-	public final static short WRITE=277;
-	public final static short PASS=278;
-	public final static short RETURN=279;
-	public final static short PRINT=280;
-	public final static short MAYORIGUAL=281;
-	public final static short MENORIGUAL=282;
-	public final static short IGUAL=283;
-	public final static short DISTINTO=284;
-	public final static short EOF=285;
+	public final static short ASIGNACION=260;
+	public final static short IF=261;
+	public final static short THEN=262;
+	public final static short ELSE=263;
+	public final static short END_IF=264;
+	public final static short BEGIN=265;
+	public final static short END=266;
+	public final static short USINTEGER=267;
+	public final static short DOUBLE=268;
+	public final static short LONG=269;
+	public final static short INTEGER=270;
+	public final static short LINTEGER=271;
+	public final static short USLINTEGER=272;
+	public final static short SINGLE=273;
+	public final static short WHILE=274;
+	public final static short CASE=275;
+	public final static short DO=276;
+	public final static short READONLY=277;
+	public final static short WRITE=278;
+	public final static short PASS=279;
+	public final static short RETURN=280;
+	public final static short PRINT=281;
+	public final static short MAYORIGUAL=282;
+	public final static short MENORIGUAL=283;
+	public final static short IGUAL=284;
+	public final static short DISTINTO=285;
+	public final static short EOF=286;
 	public final static short YYERRCODE=256;
-	
-	
-	public final static short ASIGNACION=286;
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
