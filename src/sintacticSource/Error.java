@@ -1,5 +1,4 @@
 package sintacticSource;
-
 public class Error implements Comparable<Error>{
 	public String description;
 	public int nroLine;

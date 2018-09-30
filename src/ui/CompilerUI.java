@@ -2,8 +2,6 @@ package ui;
 import sintacticSource.*;
 import sintacticSource.Error;
 
-
-
 import java.awt.EventQueue;
 
 import javax.swing.JFileChooser;
@@ -59,8 +57,6 @@ import org.eclipse.wb.swing.FocusTraversalOnArray;
 import lexicalSource.Table;
 
 import java.awt.Component;
-
-
 
 public class CompilerUI {
 
@@ -226,7 +222,7 @@ public class CompilerUI {
 		JScrollPane scrollPane_TS= new JScrollPane();
 		scrollPane_TS.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
-		String[] tableColumns={"Tipo","Nombre","Name Mangling"};
+		String[] tableColumns={"Tipo","Nombre","Cant referencias"};
 		tableDtm=new DefaultTableModel(null,tableColumns);
 		JTable table_TS = new JTable(tableDtm);
 		scrollPane_TS.setViewportView(table_TS);
@@ -334,10 +330,14 @@ public class CompilerUI {
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				clear();
+//				dtm.setRowCount(0);
+//				structDtm.setRowCount(0);
+				tableDtm.setRowCount(0);
 				//TODO aksa -------------//		
 				
 				String program = textArea.getText();
 				Table table=new Table();
+		
 				Parser parser = new Parser(program,table);
 				parser.Parse();
 				//-----------//
@@ -391,7 +391,7 @@ public class CompilerUI {
 					String[] data=new String[3];
 					data[0]=tr.getType();
 					data[1]=tr.getLexema();
-		            data[2]=tr.getAmbito();
+		            data[2]=String.valueOf((tr.getRef()));
 		            tableDtm.addRow(data);
 				}
 		
