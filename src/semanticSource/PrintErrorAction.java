@@ -1,6 +1,6 @@
 package semanticSource;
-import sintacticSource.Error;
 import lexicalSource.*;
+import sintacticSource.Error;
 
 public class PrintErrorAction extends SimpleSemanticAction{
 		

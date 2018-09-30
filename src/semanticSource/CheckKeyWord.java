@@ -13,8 +13,8 @@ public class CheckKeyWord extends SimpleSemanticAction {
 			return true;
 		}else{
 			System.out.println("no es pala reserv");
-			this.analizer.addError("LEX- Error lexico: "+Error.keyWord(), this.analizer.getLine());
-			buffer = ""; //FIXME esta mal que se sete null.?
+			this.analizer.addError("Error lexico: "+Error.keyWord(), this.analizer.getLine());
+			buffer = ""; 
 			return false;
 		}
 	}

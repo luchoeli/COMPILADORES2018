@@ -3,8 +3,9 @@ package semanticSource;
 import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sintacticSource.Error;
+
 import lexicalSource.*;
+import sintacticSource.Error;
 
 
 public class CheckRangeActionUnsigned extends SimpleSemanticAction {

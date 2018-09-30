@@ -1,5 +1,6 @@
 package sintacticSource;
 
+
 public class SintacticStructure {
 	private int line;
 	private String type;

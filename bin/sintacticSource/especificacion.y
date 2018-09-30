@@ -3,6 +3,9 @@
 	import lexicalSource.*;
 	import java.util.ArrayList;
 	import sintacticSource.Error;
+	import semanticSource.SemanticAction;
+	import semanticSource.CheckRangeAction;
+	import semanticSource.CheckRangeActionUnsigned;
 	import java.util.Enumeration;
 	import java.util.Vector;
 %}
@@ -94,21 +97,24 @@ Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fue
 	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
 ------------------------------------------------------------------------------------------------------------*/
 programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
+		//se cuelga|  error {this.addError("error",1);}
 		;
 
 list_sentencias:   sent_declarativa 
 				 | sent_ejecutable 
+				 //| sent_declarativa error {this.addError("error",1);} 
+				 //| sent_ejecutable error {this.addError("error",1);}
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
-				 //| error {this.addError()}
+				 // se cuelga | error {this.addError("error",1);}
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
-					
+					//| error {this.addError("error",1);}
 					;
 					
-declaracion_variable	:	tipo list_variables {System.out.println("Declaracion variable");
+declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
 												 }
@@ -165,8 +171,9 @@ tipo	:	USINTEGER
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {System.out.println("Asignacion realizada");}
+				 | asignacion ',' //{System.out.println("Asignacion realizada");}
 				 | invocacion ','
+				 //| error {this.addError("error",1);}
 				 ;
 				 
 invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
@@ -210,18 +217,14 @@ sent_if :	IF '('expresion_logica')'
 			   				  			setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   			   			}
 		|	IF '(' expresion_logica 
-			bloque_sin_declaracion error {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
+			bloque_sin_declaracion  {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  										 }
  		|	IF expresion_logica ')' 
-			bloque_sin_declaracion error {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
-											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
+			bloque_sin_declaracion  {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
+											addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
  										 }
- 		| 	 IF '('expresion_logica')'  
-			 error
-				 {
-			   	    this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$5.obj).getNroLine());
-			  	 }
+ 		
 	    ;
 // esto va en las de control.. pero me genera ambiguedad VER
 bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
@@ -235,14 +238,14 @@ list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
 
 expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Token)$2.obj).getLexema());}
 				 		
-				 //|expresion error expresion  	{
-				//									addError("Comparador invalido. "+Error.assignment(), ((Token)$1.obj).getNroLine());
-				//								}
+				|expresion error expresion  	{
+													addError("Errorsintactico: Comparador invalido. ", ((Token)$1.obj).getNroLine());
+												}
 				| expresion comparador error	{
 													addError("Error sintactico: Expresion derecha invalida ", ((Token)$1.obj).getNroLine());
 												}	
 				| error comparador expresion	{
-													addError("Error sintactico: Expresion izquierda invalida "+Error.assignment(), ((Token)$1.obj).getNroLine());
+													addError("Error sintactico: Expresion izquierda invalida ", ((Token)$1.obj).getNroLine());
 												}
 				 ;
 
@@ -255,13 +258,21 @@ comparador : MAYORIGUAL
 		   ;
 
 
-expresion : expresion '+' termino 
-		  | expresion '-' termino
+expresion : expresion '+' termino{
+									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+								 } 
+		  | expresion '-' termino{
+									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+								 }
 		  | termino
 		  ;
 
-termino : termino '*' factor
-		| termino '/' factor
+termino : termino '*' factor{
+								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+							}
+		| termino '/' factor{
+								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+							}
 		| factor
 		;
 
@@ -270,7 +281,11 @@ imprimir	:	PRINT '('CADENA')'
 			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
-asignacion 	:	ID ASIGNACION expresion  {System.out.println("ASIGNACION");setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());}
+asignacion 	:	ID ASIGNACION expresion {
+											if (isDeclarated((Token)$1.obj)){	
+												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
+											}
+										}
 			|	ID error { 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
 						 }
@@ -278,7 +293,20 @@ asignacion 	:	ID ASIGNACION expresion  {System.out.println("ASIGNACION");setRegl
 
 /*chequear factor*/
 factor : CTE
-	   | ID
+	   | '-' CTE {
+	   				System.out.println("Un negative "+((Token)$2.obj).getRecord().getType());
+	   				if (((Token)$2.obj).getRecord().getType() =="usinteger"){
+	   					this.addError("Error sintactico: usinteger no puede ser negativio ",((Token)val_peek(0).obj).getNroLine());
+	   					//$$.obj = error;
+	   				}else{
+	   					updateTableNegative(   ((Token)$2.obj).getLexema()   );
+	   					$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+	   				}
+	   				
+	   			 }
+	   
+	   | ID  { isDeclarated((Token)$1.obj);
+	   		 }
 	   ;
 
 bloque_de_sentencias : '{'list_sentencias'}'
@@ -287,8 +315,8 @@ bloque_de_sentencias : '{'list_sentencias'}'
 			
 %%
 /**/
-public LexicalAnalizer lexico;
-public Table table;
+LexicalAnalizer lexico;
+Table table;
 public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
 public ArrayList<Error> errors = new ArrayList<Error>();
 
@@ -343,18 +371,116 @@ public LexicalAnalizer getLexical(){
 	return lexico;
 }
 
-public void updateTable(Vector<Token> tokens, String type){
+public void updateTable(Vector<Token> tokens, String type){  //type double o usinteger, tokens son identificadores
+	/*setea el tipo del _id en la tabla de simbolos*/
 	Enumeration e = tokens.elements();
 	while (e.hasMoreElements()){
 		Token token = (Token)e.nextElement();
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
-		String newKey = lexema;// + getAlcance(alcance);
-		System.out.println("TIPO: "+type);
-		if ((table.contains(newKey))){
-			System.out.println("TIPO: "+type);
-			table.get(newKey).setType(type);
-		}
 		
+		//for (TableRecord A : table.getElements()){
+		//	System.out.println("TS :: "+A.getLexema()+" "+A.getIdToken()+" "+A.getType()+" ");
+		//}
+		//System.out.println("TIPO de "+lexema+": "+(tr.getType()));
+		if (table.containsLexema(lexema)){
+			//System.out.println("esta en la tabla");
+			
+			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
+				
+				//System.out.println("ya fue asignado el tipo");
+				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+				/*
+				if ((table.get(lexema)).getType()!="IDENTIFICADOR"){
+					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+				}else{
+					System.out.println("estaba en "+(table.get(lexema)).getType()+", la seteo en "+type);
+					(table.get(lexema)).setType(type);
+					tr.setType(type);
+					token.setRecord(tr);				
+				}
+				 */
+			}
+			else{
+				//System.out.println("aa"+table.get(lexema).getType()+ " lo cambio a "+type);
+				(table.get(lexema)).setType(type);
+			}
+		}
+		else{
+			//System.out.println("No esta asignado en la tabla");
+							
+			}
 	}
+}		
+public void updateTablePositive(String key) {
+	TableRecord tr = (TableRecord)table.get(key); 
+	if (tr.getType() == "UNSIGNED"){ //si es un unsigned ya se chequeo
+		return;
+	}
+	SemanticAction as = new CheckRangeActionUnsigned(lexico, LexicalAnalizer.minUInt, LexicalAnalizer.maxUInt);
+	if (!as.execute(key, ' ')) {
+		table.remove(key);
+	}
+
+}
+
+public TableRecord updateTableNegative(String key ){//key: 2.0
+	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
+		String newLexema = "-"+ key;
+		System.out.println("NEWKEY: "+newLexema);
+		//FIXME supongo que e ya se que es double 
+		SemanticAction as = new CheckRangeAction(lexico,LexicalAnalizer.minNega, LexicalAnalizer.maxDou);
+		if (!as.execute(newLexema, ' ')) { //Si no cumple rango retorno null
+			return null;
+		}
+		//si cumplo rango de doble
+		
+		if (tr.getRef() == 1){ //Si tengo una unica referencia en la TS del 2.0
+			if (table.contains(newLexema)){// existe el -2.0
+				table.remove(key); // saco el que pense que era positivo 2.0
+				TableRecord newr = (TableRecord)table.get(newLexema); 
+				newr.increment(); // lo incremento al -2.0
+				return newr;
+			}
+			else{//si !existe el -2.0
+				TableRecord newRecord = new TableRecord(newLexema , CTE);
+				String value = tr.getValue();
+				newRecord.setValue("-"+value);
+				table.put(newRecord.getLexema(), newRecord);// agrego el -2.0
+				newRecord.setType(tr.getType());
+				table.remove(key); //saco el 2.0
+				return newRecord;
+				}
+
+		}
+		else { //(existe mas de una ref al 2.0)
+			tr.decrement(); //le resto una ref al positivo
+			if (table.contains(newLexema)){
+				TableRecord newr = (TableRecord)table.get(newLexema);
+				newr.increment();
+				return newr;
+			}
+			else{
+				TableRecord newRecord = new TableRecord(newLexema,CTE);
+				String value = tr.getValue();
+				newRecord.setValue("-"+value);
+				table.put(newRecord.getLexema(), newRecord);
+				newRecord.setType(tr.getType());
+				return newRecord;
+			}
+		}
+	}	
+}
+
+public boolean isDeclarated(Token id){
+	if (table.get(id.getLexema()).getType() == "IDENTIFICADOR" )
+        {
+            this.addError("Error sintactico: Variable "+id.getLexema()+" no declarada.", id.getNroLine());
+            this.table.remove(id.getRecord().getLexema());
+            return false;
+        }
+        else{
+        	table.get(id.getLexema()).increment();
+        	return true;
+        }
 }

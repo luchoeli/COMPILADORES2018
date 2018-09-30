@@ -17,8 +17,10 @@ public class Table {
 
 	public void put(String key, TableRecord tr){
 		if (this.table.contains(key)) {
+			//System.out.println("ya esta, incremento");
 			this.table.get(key).increment();
 		}else{
+			//System.out.println("no esta, inserto");
 			table.put(key, tr);
 		}
 
@@ -40,8 +42,7 @@ public class Table {
 	public boolean containsLexema(String lexema){
 		ArrayList<String> keys = new ArrayList<String>(table.keySet());
 		for (String k : keys){
-			String[] values = k.split("_");
-			if (values[0].equals(lexema)){
+			if (k.equals(lexema)){
 				return true;
 			}
 

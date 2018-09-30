@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import sintacticSource.Error;
 import semanticSource.*;
@@ -44,9 +43,10 @@ public class LexicalAnalizer {
 	
 	public final static int maxInt=32767;
 	public final static int minInt=-32768;
-	//----------------//
-	public final static long maxUInt=4294967295L;
-	public final static long minUInt=0;
+	
+	public final static BigInteger maxUInt= new BigInteger("65536") ,minUInt= new BigInteger("-1");//RANGO CONSTANTE SIN SIGNO --VEEER--
+	//public final static Double minDou=(Double)2.2250738585072014E-308, maxDou=(Double)1.7976931348623157E308;   /// VEEER
+	public final static Double minNega = -Double.MAX_VALUE,minDou=Double.MIN_NORMAL,maxDou=Double.MAX_VALUE;   /// 
 	private static final int FINAL_STATE = -1; //Estado final.
 	private Hashtable<String,Integer> idTokens= new Hashtable<String,Integer>();
 	private List<Error> errors = new ArrayList<Error>();
@@ -63,11 +63,10 @@ public class LexicalAnalizer {
 	private Table table;
 	
 
-	public LexicalAnalizer(String in, Table table){//POR PARAMETRO EL ARCHIVO.
+	public LexicalAnalizer(String in, Table t){//POR PARAMETRO EL ARCHIVO.
 		this.in=in;
-		this.table = table;
+		table = t;
 		initilize();
-		
 	}
 	public void initilize(){
 		this.sMatrix=new MatrixState();
@@ -130,12 +129,7 @@ public class LexicalAnalizer {
 		
 		//MATRIZ DE ACCIONES SEMANTICAS
 		this.aMatrix=new MatrixActions(17,25);		
-		//int maxInt=32767,minInt=-32768; //RANGO CONSTANTE COMUN
 		
-		BigInteger maxUInt= new BigInteger("65536") ,minUInt= new BigInteger("-1");//RANGO CONSTANTE SIN SIGNO --VEEER--
-		double minDou=2.2250738585072014E-308, maxDou=1.7976931348623157E308;   /// VEEER
-		
-		//SemanticAction SA0 = new SetBufferEmpty(this); // INICIA BUFFER VACIO
 		SemanticAction SA1=new SetBufferAction(this);// INICIALIZA BUFFER Y AGREGA CARACTER
 		SemanticAction SA2=new CharacterToInputAction(this); //VUELVE EL ULTIMO CARACTER LEIDO A ESTADO INICIAL
 		SemanticAction SA3=new CheckKeyWord(this);//CONTROLA SI EL BUFFER ES UNA PALABRA RESERVADA
@@ -466,17 +460,20 @@ public class LexicalAnalizer {
 	
 	private TableRecord addIdentificadorToTable(TableRecord a){
 		String key =a.getLexema();
-		//Si no existe lo agrego, y lo retorno.
+		//System.out.println(key);
 		if (!table.containsLexema(key)){
+			//System.out.println("no esta! - lo meto");
 			table.put(key,a);
+			//a.print();
 			return a;
 		}
+	//	System.out.println("no isrerto, retorno");
 		return a;
 	}
 	
 	private TableRecord addConstanteToTable(TableRecord a){
 		String key = a.getLexema();
-		if (table.contains(key)){
+		if (table.containsLexema(key)){
 			//Si existe incremento el número de referencias.
 			TableRecord out= table.get(key);
 			out.increment();
@@ -496,24 +493,31 @@ public class LexicalAnalizer {
 		String type = getType(id);
 		TableRecord record=null;
 		if (type == "IDENTIFICADOR") {
+			//System.out.println("//////////makeToken//////////");
 			record = new TableRecord(buffer,id);
 			record.setType(type);
 			record = this.addIdentificadorToTable(record);
+			//System.out.println("////////////////");
+			
+			//record = this.addIdentificadorToTable(new TableRecord(buffer, id));
 		}else if (type == "CONSTANTE") {
 			
 			if (buffer.contains("_ui")){
 				String value[] = buffer.split("_");
+				
 				record = new TableRecord(buffer,id,value[0]);
 				record.setType("usinteger");
-				record = this.addIdentificadorToTable(record);
+				record = this.addConstanteToTable(record);
+				
+				//record = this.addConstanteToTable(new TableRecord(buffer, id, value[0]));
 			}else if  (buffer.contains(".")){
+				
 				record = new TableRecord(buffer,id);
 				record.setType("double");
-				record = this.addIdentificadorToTable(record);
+				record = this.addConstanteToTable(record);
+				
+				//record = this.addConstanteToTable(new TableRecord(buffer, id));
 			}	
-			
-			;
-			record = this.addConstanteToTable(record);
 			
 		}
 		Token t=new Token(id,buffer,this.line,type,record);	
@@ -539,8 +543,6 @@ public class LexicalAnalizer {
 		case LONG: return "PALABRA RESERVADA";
 		case SINGLE: return "PALABRA RESERVADA";
 		case RETURN: return "PALABRA RESERVADA";
-		//case GLOBAL: return "PALABRA RESERVADA";
-		//case WHILE: return "PALABRA RESERVADA";
 		case CASE: return "PALABRA RESERVADA";
 		case DO: return "PALABRA RESERVADA";
 		case READONLY: return "PALABRA RESERVADA";
