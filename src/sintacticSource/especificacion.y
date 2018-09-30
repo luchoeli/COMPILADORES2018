@@ -101,8 +101,7 @@ programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
 
 list_sentencias:   sent_declarativa 
 				 | sent_ejecutable 
-				 //| sent_declarativa error {this.addError("error",1);} 
-				 //| sent_ejecutable error {this.addError("error",1);}
+			
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
 				 // se cuelga | error {this.addError("error",1);}
@@ -110,7 +109,7 @@ list_sentencias:   sent_declarativa
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
-					//| error {this.addError("error",1);}
+					//|   error ',' {this.addError("error",1);}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");

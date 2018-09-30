@@ -5,7 +5,6 @@
 	import sintacticSource.Error;
 	import semanticSource.SemanticAction;
 	import semanticSource.CheckRangeAction;
-	import semanticSource.CheckRangeActionUnsigned;
 	import java.util.Enumeration;
 	import java.util.Vector;
 %}
@@ -102,8 +101,7 @@ programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
 
 list_sentencias:   sent_declarativa 
 				 | sent_ejecutable 
-				 //| sent_declarativa error {this.addError("error",1);} 
-				 //| sent_ejecutable error {this.addError("error",1);}
+			
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
 				 // se cuelga | error {this.addError("error",1);}
@@ -111,7 +109,7 @@ list_sentencias:   sent_declarativa
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
-					//| error {this.addError("error",1);}
+					//|   error ',' {this.addError("error",1);}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
@@ -379,50 +377,21 @@ public void updateTable(Vector<Token> tokens, String type){  //type double o usi
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
 		
-		//for (TableRecord A : table.getElements()){
-		//	System.out.println("TS :: "+A.getLexema()+" "+A.getIdToken()+" "+A.getType()+" ");
-		//}
-		//System.out.println("TIPO de "+lexema+": "+(tr.getType()));
 		if (table.containsLexema(lexema)){
 			//System.out.println("esta en la tabla");
 			
 			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
-				
-				//System.out.println("ya fue asignado el tipo");
 				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
-				/*
-				if ((table.get(lexema)).getType()!="IDENTIFICADOR"){
-					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
-				}else{
-					System.out.println("estaba en "+(table.get(lexema)).getType()+", la seteo en "+type);
-					(table.get(lexema)).setType(type);
-					tr.setType(type);
-					token.setRecord(tr);				
-				}
-				 */
 			}
 			else{
-				//System.out.println("aa"+table.get(lexema).getType()+ " lo cambio a "+type);
 				(table.get(lexema)).setType(type);
 			}
 		}
 		else{
-			//System.out.println("No esta asignado en la tabla");
-							
+			System.out.println("No esta asignado en la tabla");				
 			}
 	}
-}		
-public void updateTablePositive(String key) {
-	TableRecord tr = (TableRecord)table.get(key); 
-	if (tr.getType() == "UNSIGNED"){ //si es un unsigned ya se chequeo
-		return;
-	}
-	SemanticAction as = new CheckRangeActionUnsigned(lexico, LexicalAnalizer.minUInt, LexicalAnalizer.maxUInt);
-	if (!as.execute(key, ' ')) {
-		table.remove(key);
-	}
-
-}
+}	
 
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
