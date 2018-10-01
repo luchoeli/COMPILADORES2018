@@ -1,8 +1,29 @@
- __Sentencia IF sin bloque ELSE con un bloque de sentencias.
+ __Sentencia IF sin bloque ELSE con una sola sentencia.
 
+double _a,
 if (_a>2.){
 	_a:=2.23D+2,
-	_b:=_c,
-	
+}end_if,
+
+__errores
+
+if ( _a > 2.){
+	double _b,  __no se permite declaracion de variables	
+}end_if,
+
+if (_a>2. {     __falta perentesis
+	_a:=2_ui,	
+}end_if,
+
+if (_a=2_ui) {     __Comparador invalido
+	_a:=2_ui,		
+}end_if,
+
+if (_a!=2_ui) {     __falta end_if
+	_a:=2_ui,		
 },
-__Sentencia IF con bloque ELSE.
+
+
+if (_a!=2_ui)      __faltan corchetes
+	_a:=2_ui,		
+end_if,

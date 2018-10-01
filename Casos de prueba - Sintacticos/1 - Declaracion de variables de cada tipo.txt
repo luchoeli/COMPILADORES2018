@@ -1,12 +1,10 @@
 double _a,
-double _b;_c;_d,
-
-usinteger _e,
-usinteger _f;_g,
+usinteger _b,
 
 __errores,
-integer _h,
-double _i;_j:_k,
-usinteger s;,
+usinteger _a,
+integer _c,
+long _d,
 
-
+usinteger _s;,
+double e,
