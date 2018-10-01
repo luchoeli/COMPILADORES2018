@@ -96,7 +96,6 @@ Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fue
 	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
 ------------------------------------------------------------------------------------------------------------*/
 programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
-		//se cuelga|  error {this.addError("error",1);}
 		;
 
 list_sentencias:   sent_declarativa 
@@ -104,12 +103,10 @@ list_sentencias:   sent_declarativa
 			
 				 | list_sentencias sent_declarativa
 				 | list_sentencias sent_ejecutable
-				 // se cuelga | error {this.addError("error",1);}
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ','
 					|	declaracion_funcion ','
-					//|   error ',' {this.addError("error",1);}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
@@ -127,16 +124,18 @@ declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion va
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
-					  list_sentencias_no_declarables // conjunto de sentencias declarativas y ejecutables
+					  list_sentencias // conjunto de sentencias declarativas y ejecutables
 					  RETURN '(' expresion ')'
-					  '}'
-					  {setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());}
+					  '}' {
+					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
+					  		Vector<Token> vec = new Vector<Token>(); 
+					  		vec.add((Token)$2.obj);
+					  		updateTable(vec, ((Token)$1.obj).getLexema());
+					  	  } 
 					
 					| tipo ID '(' tipo ID')' '{'
-					  error // conjunto de sentencias declarativas y ejecutables
-					  RETURN '(' expresion ')'
-					  '}' 
-					  {this.addError("Error Sintactico: No se puede realizar declaraciones en las funciones ",((Token)$8.obj).getNroLine());}
+					  list_sentencias // conjunto de sentencias declarativas y ejecutables
+					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$1.obj).getNroLine());}
 					;
 
 						  
@@ -162,7 +161,6 @@ tipo	:	USINTEGER
 		|	LINTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	SINGLE {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
 		|	INTEGER {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)$1.obj).getNroLine());}
-		//| error {}
 		;
 			
 
@@ -171,19 +169,18 @@ sent_ejecutable  : sent_seleccion ','
 				 | imprimir ','
 				 | asignacion ',' //{System.out.println("Asignacion realizada");}
 				 | invocacion ','
-				 //| error {this.addError("error",1);}
 				 ;
 				 
 invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
 																setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
 															 }
-			|	ID nombre_parametro ';' lista_permisos')' error {
+			|	ID nombre_parametro ';' lista_permisos')'  {
 																	addError("Error sintactico: falta '(' al inicio de la invocacion ", ((Token)$1.obj).getNroLine());
 															 	}
 															 	
-			|	ID '('nombre_parametro ';' lista_permisos error {
-																	addError("Error sintactico: falta ')' al final de la invocacion ", ((Token)$1.obj).getNroLine());
-															 	}
+			|	ID '('nombre_parametro ';' lista_permisos  {
+																addError("Error sintactico: falta ')' al final de la invocacion ", ((Token)$1.obj).getNroLine());
+															}
 			;
 
 nombre_parametro :	ID
@@ -196,40 +193,63 @@ lista_permisos	: READONLY
 				| WRITE ';' PASS
 				;
 
-sent_control	: CASE '(' ID ')''{' linea_control '}'  				
+sent_control	: CASE '(' ID ')' bloque_control  				
 										 {System.out.println("Case do");
 				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
 										 }
+				| CASE '(' error ')' bloque_control  				
+										 {
+				  						  addError("Error sintactico: condicion erronea ", ((Token)$2.obj).getNroLine());												 
+										 }
 				;
 
-linea_control	: 	CTE ':' DO bloque_de_sentencias','
-				|	linea_control CTE ':' DO bloque_de_sentencias','
+bloque_control 	: '{' linea_control '}'
+				|  linea_control '}' error {addError("Error sintactico: falta '{' para iniciar el bloque de sentencias de control ", ((Token)$1.obj).getNroLine());}
+				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
+				;
+				
+linea_control	: 	CTE ':' DO bloque_sin_declaracion','
+				|	linea_control CTE ':' DO bloque_sin_declaracion','
+				//| 	CTE ':' DO bloque_sin_declaracion error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
+				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
+				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
 sent_seleccion : sent_if END_IF
-			   | sent_if ELSE bloque_sin_declaracion END_IF{
-						      								  setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
+	
+			   | sent_if ELSE bloque_sin_declaracion END_IF{setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   			  									}
+			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
+			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
+			   ;			  									
 sent_if :	IF '('expresion_logica')'  
 			bloque_sin_declaracion {
-			   				  			setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
-			   			   			}
+			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
+			   			   		   }
 		|	IF '(' expresion_logica 
-			bloque_sin_declaracion  {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
+			bloque_sin_declaracion error {
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
- 										 }
+ 									     }
  		|	IF expresion_logica ')' 
-			bloque_sin_declaracion  {//System.out.println("TOKE "+((Token)$4.obj).getLexema());
-											addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
- 										 }
- 		
+			bloque_sin_declaracion error {
+										  	addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
+ 									     }
+		|	IF '('expresion_logica ')' 
+			error {
+				   		addError("Error sintactico en el bloque ",((Token)$2.obj).getNroLine());
+ 			      }
+ 		 		
 	    ;
-// esto va en las de control.. pero me genera ambiguedad VER
+
 bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
 					   ;
 
 list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
 								| sent_ejecutable
+								//| sent_ejecutable error {addError("Error sintactico: falta la coma",((Token)$2.obj).getNroLine());}
+								| sent_declarativa error{ 
+															addError("Error sint�ctico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
+														}
 								;
 								
 
@@ -284,14 +304,13 @@ asignacion 	:	ID ASIGNACION expresion {
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 											}
 										}
-			|	ID error { 
+			|	ID ASIGNACION error { 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
 						 }
 			;
 
-/*chequear factor*/
 factor : CTE
-	   | '-' CTE {
+	   | '-' factor {
 	   				System.out.println("Un negative "+((Token)$2.obj).getRecord().getType());
 	   				if (((Token)$2.obj).getRecord().getType() =="usinteger"){
 	   					this.addError("Error sintactico: usinteger no puede ser negativio ",((Token)val_peek(0).obj).getNroLine());
@@ -303,14 +322,15 @@ factor : CTE
 	   				
 	   			 }
 	   
-	   | ID  { isDeclarated((Token)$1.obj);
+	   | ID  { 
+	   			isDeclarated((Token)$1.obj);
 	   		 }
+	   | invocacion','
+	   		 
 	   ;
 
-bloque_de_sentencias : '{'list_sentencias'}'
-					 ;
-
-			
+//bloque_de_sentencias : '{'list_sentencias'}'
+//					   ;
 %%
 /**/
 LexicalAnalizer lexico;

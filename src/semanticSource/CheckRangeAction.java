@@ -31,7 +31,7 @@ public class CheckRangeAction extends SimpleSemanticAction{
 		if (error){
 			
 			System.out.println("Error Lexico en linea: "+this.analizer.getLine()+". Constante double "+buffer+" fuera de rango.");
-			this.analizer.addError("Error Lexico: "+ Error.intRange(), this.analizer.getLine());
+			this.analizer.addError("Error Lexico: Constante double fuera de rango ", this.analizer.getLine());
 			return false;   
 		}
 		return true;

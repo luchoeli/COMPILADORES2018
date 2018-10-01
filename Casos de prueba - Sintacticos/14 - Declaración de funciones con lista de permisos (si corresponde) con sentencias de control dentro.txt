@@ -1,19 +1,19 @@
 __12 - Declaración de funciones con lista de permisos (si corresponde) con sentencias de control dentro.
+double _parametro,
 
 double _funcion1(usinteger _parametro){
 	_parametro:=3.2,
 	print('cadena'),
 	return (_parametro) 
 },
-
-__funcion mal declarada
-long _funcion1(usinteger _parametro){
-	_parametro:=3.2,
-	print('cadena'),
-	return (_parametro) 
-},
-
+ 
 _funcion1(_parametro;write;pass),
+_funcion1(_parametro;readonly),
+_funcion1(_parametro;pass),
+_funcion1(_parametro;write),
 
+__errores
+_funcion1(_parametro;pass;write),
+_funcion1(_parametro;writeonly),
 
 

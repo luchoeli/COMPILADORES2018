@@ -1,0 +1,9 @@
+__7-Sentencia IF con comparación entre expresiones aritméticas como condición, con bloque ELSE:
+
+double _a;_b;_c,
+
+if (_a*2.5>=_b+_c/4.25){
+	print('bloque if'),
+}else{
+	print('bloque else'),
+}end_if,

@@ -1,0 +1,12 @@
+
+usinteger _a;_b,
+case (_a){
+	2_ui : do { if (2_ui > 2_ui){
+					_a:=3_ui,
+					_b:=3_ui,
+		    	}end_if, 
+		  	  },
+	5_ui : do { _a:=6_ui,
+		    	_b:=6_ui,
+	 	      },
+},

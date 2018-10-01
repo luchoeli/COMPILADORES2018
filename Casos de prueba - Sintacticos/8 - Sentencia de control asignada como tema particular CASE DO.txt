@@ -1,0 +1,34 @@
+usinteger _a;_b,
+
+case (_a){
+	2_ui : do { _a:=3_ui,
+				_b:=3_ui,
+			  },
+			  
+	5_ui : do { _a:=6_ui,
+				_b:=6_ui,
+			  },
+},
+
+__errores
+
+case (-2.,){       __comparador erroneo
+	2_ui : do { _a:=3_ui,},
+	5_ui : do { _a:=6_ui,},
+},
+
+case (_a){
+	2_ui : do {	_a:=3_ui,};   __las sentencias de control se separan con ','
+	3_ui : do {	_a:=6_ui,
+		    	_b:=6_ui,
+		  },
+},
+
+case (_a){
+	4_ui do {	_a:=6_ui,   __falta el ':' antes del 'do'
+		    	_b:=6_ui,
+		  	},
+	5_ui : {	_a:=6_ui,  __falta el 'do' despues del ':'
+		    	_b:=6_ui,
+		  	},
+},
