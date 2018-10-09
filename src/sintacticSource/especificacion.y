@@ -302,6 +302,10 @@ imprimir	:	PRINT '('CADENA')'
 asignacion 	:	ID ASIGNACION expresion {
 											if (isDeclarated((Token)$1.obj)){	
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
+												Nodo nuevo = new Nodo(':=', new Nodo(table.get(((Token)$1.obj).getLexema())), arbolSint.getE());
+												//arbolSint.setA(nuevo);
+												arbolSint.add(nuevo);
+																								
 											}
 										}
 			|	ID ASIGNACION error { 
