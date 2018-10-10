@@ -1,2 +1,3 @@
-boublue _Ahbb;_b;_c,
-double _b,
+double _a;_b;_c,
+
+_a:= _b + 2.32,

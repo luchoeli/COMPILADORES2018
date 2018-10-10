@@ -278,20 +278,32 @@ comparador : MAYORIGUAL
 
 expresion : expresion '+' termino{
 									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+									Nodo nuevo = new Nodo("+",arbol.getE(),arbol.getT());
+	   								arbol.setE(nuevo);
 								 } 
 		  | expresion '-' termino{
 									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+									Nodo nuevo = new Nodo("-",arbol.getE(),arbol.getT());
+	   								arbol.setE(nuevo);
 								 }
-		  | termino
+		  | termino	{
+		  				arbol.setE(arbol.getT());
+		  			}
 		  ;
 
 termino : termino '*' factor{
 								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+								Nodo nuevo = new Nodo("*",arbol.getT(),arbol.getF());
+	   							arbol.setT(nuevo);
 							}
 		| termino '/' factor{
 								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+								Nodo nuevo = new Nodo("/",arbol.getT(),arbol.getF());
+	   							arbol.setT(nuevo);
 							}
-		| factor
+		| factor	{
+						arbol.setT(arbol.getF());
+					}
 		;
 
 imprimir	:	PRINT '('CADENA')'
@@ -302,9 +314,9 @@ imprimir	:	PRINT '('CADENA')'
 asignacion 	:	ID ASIGNACION expresion {
 											if (isDeclarated((Token)$1.obj)){	
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
-												Nodo nuevo = new Nodo(':=', new Nodo(table.get(((Token)$1.obj).getLexema())), arbolSint.getE());
-												//arbolSint.setA(nuevo);
-												arbolSint.add(nuevo);
+												Nodo nuevo = new Nodo(":=", new Nodo(table.get(((Token)$1.obj).getLexema())), arbol.getE());
+												//arbol.setA(nuevo);
+												arbol.add(nuevo);
 																								
 											}
 										}
@@ -313,23 +325,32 @@ asignacion 	:	ID ASIGNACION expresion {
 						 }
 			;
 
-factor : CTE
+factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
+	   				arbol.setF(nuevo);
+	   			}
 	   | '-' factor {
 	   				System.out.println("Un negative "+((Token)$2.obj).getRecord().getType());
-	   				if (((Token)$2.obj).getRecord().getType() =="usinteger"){
+	   				if (((Token)$2.obj).getRecord().getType() == "usinteger"){
 	   					this.addError("Error sintactico: usinteger no puede ser negativio ",((Token)val_peek(0).obj).getNroLine());
 	   					//$$.obj = error;
 	   				}else{
 	   					updateTableNegative(   ((Token)$2.obj).getLexema()   );
 	   					$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
+	   					Nodo nuevo = new Nodo(table.get("-"+((Token)$2.obj).getLexema()));
+	   					arbol.setF(nuevo);
 	   				}
-	   				
+
 	   			 }
 	   
 	   | ID  { 
 	   			isDeclarated((Token)$1.obj);
+	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
+	   			arbol.setF(nuevo);
 	   		 }
 	   | invocacion','
+	   	{
+	   		//TODO 	poner la invocacion en una variable auxuliar y agregarla a la tabla de simbolos 
+	   	}
 	   		 
 	   ;
 
@@ -341,10 +362,15 @@ LexicalAnalizer lexico;
 Table table;
 public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
 public ArrayList<Error> errors = new ArrayList<Error>();
+public ArbolSintactico arbol = new ArbolSintactico();
 
 public Parser(String programa, Table table) {
     lexico = new LexicalAnalizer(programa, table);
 	this.table = table;
+}
+
+public ArbolSintactico getArbol(){
+	return arbol;
 }
 
 private int yylex() {

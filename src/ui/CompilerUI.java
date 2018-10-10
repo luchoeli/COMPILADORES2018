@@ -354,6 +354,8 @@ public class CompilerUI {
 				System.out.println("CANT ERRORES: "+errors.size());
 				ArrayList<TableRecord> records = table.getElements();
 				System.out.println("CANT RECORD: "+records.size());
+				ArbolSintactico arbol = parser.getArbol();
+				arbol.imprimirArbol();
 				
 				errors.addAll(parser.getErrors());
 				Collections.sort(errors);
