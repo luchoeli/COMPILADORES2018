@@ -5,7 +5,21 @@ public class TableRecord {
 	private int idToken;
 	private String type; // Tipo de identificador o constante ( INT o UNSIGNED LONG)
 	private int ref; // Cantidad de referencias.
+	private String uso; 
+	private String ambito;
 
+
+	public String getUso() {
+		return uso;
+	}
+
+	public void setUso(String uso) {
+		this.uso = uso;
+	}
+
+	public void setRef(int ref) {
+		this.ref = ref;
+	}
 
 	private String value = "0";
 	
@@ -71,6 +85,14 @@ public class TableRecord {
 		System.out.println("value: "+value);
 		System.out.println("---------------------------");
 
+	}
+
+	public String getAmbito() {
+		return ambito;
+	}
+
+	public void setAmbito(String ambito) {
+		this.ambito = ambito;
 	}
 
 }

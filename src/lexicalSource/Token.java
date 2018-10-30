@@ -1,5 +1,7 @@
 package lexicalSource;
 
+import sintacticSource.Nodo;
+
 public class Token {
 
 	private int id;
@@ -7,13 +9,15 @@ public class Token {
 	private int nroLine;
 	private String type;
 	private TableRecord record;
+	private Nodo nodo;
 	
-	public Token(int id, String lexema, int nroLine, String type,TableRecord record){
+	public Token(int id, String lexema, int nroLine, String type,TableRecord record, Nodo nodo){
 		this.id=id;
 		this.lexema=lexema;
 		this.nroLine=nroLine;
 		this.type=type;
 		this.record=record;
+		this.nodo = nodo;
 	}
 	
 	public TableRecord getRecord() {
@@ -45,6 +49,14 @@ public class Token {
 	}
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Nodo getNodo() {
+		return nodo;
+	}
+
+	public void setNodo(Nodo nodo) {
+		this.nodo = nodo;
 	}
 	
 }

@@ -23,15 +23,28 @@ public class Nodo {
 	}
 	
 	public Nodo getIzq () {
-		return this.izq;
+		return this.izq; 
 	}
 	
 	public Nodo getDer () {
 		return this.der;
 	}
 	
+	public void setIzq(Nodo izq) {
+		this.izq = izq;
+	}
+
+	public void setDer(Nodo der) {
+		this.der = der;
+	}
+	
 	public void imprimirNodo () {
+		if(izq != null)
+			izq.imprimirNodo();
 		System.out.println(this.lexema);
+		if(der != null)
+			der.imprimirNodo();
+		
 	}
 	
 }

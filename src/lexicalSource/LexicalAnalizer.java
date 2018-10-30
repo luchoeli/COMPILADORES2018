@@ -520,7 +520,7 @@ public class LexicalAnalizer {
 			}	
 			
 		}
-		Token t=new Token(id,buffer,this.line,type,record);	
+		Token t=new Token(id,buffer,this.line,type,record,null);	
 		tokens.add(t);		
 	}
 
