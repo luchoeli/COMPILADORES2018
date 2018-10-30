@@ -30,6 +30,10 @@ public class Table {
 		return table.get(key);
 	}
 	
+	public TableRecord get(String key, String uso){
+		return table.get(key);
+	}
+	
 	public void remove(String key) {
 		table.remove(key);		
 	}

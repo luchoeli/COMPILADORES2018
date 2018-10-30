@@ -222,8 +222,8 @@ public class CompilerUI {
 		JScrollPane scrollPane_TS= new JScrollPane();
 		scrollPane_TS.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
-		String[] tableColumns={"Tipo","Nombre","Cant referencias"};
-		tableDtm=new DefaultTableModel(null,tableColumns);
+		String[] tableColumns={"Tipo","Nombre","Cant referencias","Uso"};
+		tableDtm = new DefaultTableModel(null,tableColumns);
 		JTable table_TS = new JTable(tableDtm);
 		scrollPane_TS.setViewportView(table_TS);
 		GroupLayout gl_TS = new GroupLayout(tablaSimbolos);
@@ -236,9 +236,7 @@ public class CompilerUI {
 				.addComponent(scrollPane_TS, GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
 		);
 		tablaSimbolos.setLayout(gl_TS);
-		
-		
-		
+	
 		//-------------------------------------- TEXT AREA -----------------------------------------
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -333,8 +331,8 @@ public class CompilerUI {
 //				dtm.setRowCount(0);
 //				structDtm.setRowCount(0);
 				tableDtm.setRowCount(0);
+			
 				//TODO aksa -------------//		
-				
 				String program = textArea.getText();
 				Table table=new Table();
 		
@@ -387,16 +385,16 @@ public class CompilerUI {
 					structDtm.addRow(data);
 				}
 				
-				
-				
 				for (TableRecord tr : records){
-					String[] data=new String[3];
+					String[] data=new String[4];
 					data[0]=tr.getType();
 					data[1]=tr.getLexema();
 		            data[2]=String.valueOf((tr.getRef()));
+		            data[3]=tr.getUso();
 		            tableDtm.addRow(data);
 				}
-		
+				
+			parser.getRaiz().imprimirNodo();
 			}
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));

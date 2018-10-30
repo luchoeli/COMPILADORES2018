@@ -6,6 +6,7 @@
 	import semanticSource.SemanticAction;
 	import semanticSource.CheckRangeAction;
 	import java.util.Enumeration;
+	import java.util.HashSet;
 	import java.util.Vector;
 %}
 
@@ -44,74 +45,46 @@
 		DISTINTO
 		EOF
 %%
-/*reglas gramaticales*/	
+/*-------------------------------------- reglas gramaticales ------------------------------------*/	
 
-/*-----------------------------------------------------------------------------------------------------------------
-Programa:
-
-*Programa constituido por un conjunto de sentencias, que pueden ser declarativas o ejecutables.
-Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fuente, exceptuando los bloques de las sentencias de control.
-
-*El programa no tendrÃ¡ ningÃºn delimitador.
-
-*Cada sentencia debe terminar con " , ".
-
-*Sentencias declarativas:
-	<tipo> <lista_de_variables>, //o la estructura que corresponda al tema asignado (11 a 13)
-
-	<tipo> ID ( <tipo> ID) {
-		<cuerpo_de_la_funcion> // conjunto de sentencias declarativas y ejecutables
-		return ( <retorno> )
-	}
-	Donde <retorno> es expresion
-
-*Sentencias ejecutables:
-	*ClÃ¡usula de selecciÃ³n (if). Cada rama de la selecciÃ³n serÃ¡ un bloque de sentencias. La condiciÃ³n serÃ¡ una comparaciÃ³n entre expresiones aritmÃ©ticas, variables o constantes, y debe escribirse entre ( ). La estructura de la selecciÃ³n serÃ¡, entonces:
-	if (<condicion>) <bloque_de_sentencias> else <bloque_de_sentencias> end_if
-	El bloque para el else puede estar ausente.
-
-	* Un bloque de sentencias puede estar constituido por una sola sentencia, o un conjunto de sentencias delimitadas por â€˜{â€˜ y â€˜}â€™.
-
-	* Sentencia de control segÃºn tipo especial asignado al grupo. (Temas 7 al 10 del Trabajo prÃ¡ctico 1)
-	Debe permitirse anidamiento de sentencias de control. Por ejemplo, puede haber una iteraciÃ³n dentro de una rama de una selecciÃ³n.
-	* Sentencia de salida de mensajes por pantalla. El formato serÃ¡ print(cadena). Las cadenas de caracteres sÃ³lo podrÃ¡n ser usadas en esta sentencia, y tendrÃ¡n el formato asignado al grupo en el Trabajo PrÃ¡ctico 1.
-	* Los operandos de las expresiones aritmÃ©ticas pueden ser variables, constantes, u otras expresiones aritmÃ©ticas.
-	No se permiten anidamientos de expresiones con parÃ©ntesis.
-	
-	*Incorporar la invocaciÃ³n de funciones, con la siguiente sintaxis:
-		ID(<nombre_parametro>;<lista_permisos>),
-
-	Donde <lista_permisos> puede ser: readonly / write / pass / write ; pass
-	La invocaciÃ³n puede aparecer en cualquier lugar donde pueda aparecer una expresiÃ³n aritmÃ©tica.
-
-*Sentencias de control
-	case do (tema 10 en TP1)
-		case ( variable ){
-			valor1: do <bloque> .
-			valor2: do <bloque> .
-			...
-			valorN: do <bloque> .
-		} .
-	Nota: Los valores valor1, valor2, etc., sÃ³lo podrÃ¡n ser constantes del mismo tipo que la variable.
-	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
-------------------------------------------------------------------------------------------------------------*/
-programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
+programa:	list_sentencias {
+								System.out.println("TERMINO GRAMATICA");
+								this.raiz = (Nodo)$1.obj;
+								raiz.imprimirNodo();
+								
+							}
 		;
 
-list_sentencias:   sent_declarativa 
-				 | sent_ejecutable 
+list_sentencias:   sent_declarativa {
+										$$.obj = null;
+									}
+				 | sent_ejecutable {
+				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+				 						$$.obj = nuevo;
+				 				   }
 			
-				 | list_sentencias sent_declarativa
-				 | list_sentencias sent_ejecutable
+				 | list_sentencias sent_declarativa 
+				 | list_sentencias sent_ejecutable{	
+				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+				 									if (($1.obj)!= null){
+					 									((Nodo)$1.obj).setDer(nuevo);
+					 								}
+					 								if (raiz == null){
+					 									raiz = nuevo;
+					 								}else{
+					 									raiz.setDer(nuevo);
+					 								}
+				 								  }
+				// | list_sentencias EOF {System.out.println("terminamo");}
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ','
+sent_declarativa	:	declaracion_variable ',' {System.out.println("variable");}
 					|	declaracion_funcion ','
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
-												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
+												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable");												 
 												 }
 						| tipo list_variables error {
 														Vector<Token> tokens = (Vector<Token>)$2.obj;
@@ -130,7 +103,7 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
 					  		Vector<Token> vec = new Vector<Token>(); 
 					  		vec.add((Token)$2.obj);
-					  		updateTable(vec, ((Token)$1.obj).getLexema());
+					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  	  } 
 					
 					| tipo ID '(' tipo ID')' '{'
@@ -167,7 +140,9 @@ tipo	:	USINTEGER
 sent_ejecutable  : sent_seleccion ','
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' //{System.out.println("Asignacion realizada");}
+				 | asignacion ',' {$$.obj = (Nodo)$1.obj;
+				 					System.out.println("asigna");
+				 				  } 
 				 | invocacion ','
 				 ;
 				 
@@ -277,32 +252,28 @@ comparador : MAYORIGUAL
 
 
 expresion : expresion '+' termino{
-									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-									Nodo nuevo = new Nodo("+",arbol.getE(),arbol.getT());
-	   								arbol.setE(nuevo);
+	   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 								 } 
 		  | expresion '-' termino{
-									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-									Nodo nuevo = new Nodo("-",arbol.getE(),arbol.getT());
-	   								arbol.setE(nuevo);
+									Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
+	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 								 }
 		  | termino	{
-		  				arbol.setE(arbol.getT());
+		  				$$.obj = (Token)$1.obj;
 		  			}
 		  ;
 
 termino : termino '*' factor{
-								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-								Nodo nuevo = new Nodo("*",arbol.getT(),arbol.getF());
-	   							arbol.setT(nuevo);
+								Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 							}
 		| termino '/' factor{
-								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-								Nodo nuevo = new Nodo("/",arbol.getT(),arbol.getF());
-	   							arbol.setT(nuevo);
+								Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 							}
 		| factor	{
-						arbol.setT(arbol.getF());
+						$$.obj = (Token)$1.obj;
 					}
 		;
 
@@ -314,9 +285,9 @@ imprimir	:	PRINT '('CADENA')'
 asignacion 	:	ID ASIGNACION expresion {
 											if (isDeclarated((Token)$1.obj)){	
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
-												Nodo nuevo = new Nodo(":=", new Nodo(table.get(((Token)$1.obj).getLexema())), arbol.getE());
-												//arbol.setA(nuevo);
-												arbol.add(nuevo);
+												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
+												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
+												$$.obj = nuevo;
 																								
 											}
 										}
@@ -325,8 +296,9 @@ asignacion 	:	ID ASIGNACION expresion {
 						 }
 			;
 
-factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
-	   				arbol.setF(nuevo);
+factor : CTE 	{	
+					Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
+					((Token)$1.obj).setNodo(nuevo);
 	   			}
 	   | '-' factor {
 	   				System.out.println("Un negative "+((Token)$2.obj).getRecord().getType());
@@ -335,9 +307,8 @@ factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   					//$$.obj = error;
 	   				}else{
 	   					updateTableNegative(   ((Token)$2.obj).getLexema()   );
-	   					$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
 	   					Nodo nuevo = new Nodo(table.get("-"+((Token)$2.obj).getLexema()));
-	   					arbol.setF(nuevo);
+						$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 	   				}
 
 	   			 }
@@ -345,7 +316,8 @@ factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   | ID  { 
 	   			isDeclarated((Token)$1.obj);
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
-	   			arbol.setF(nuevo);
+	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
+	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
 	   | invocacion','
 	   	{
@@ -360,6 +332,9 @@ factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 /**/
 LexicalAnalizer lexico;
 Table table;
+Nodo raiz = null;
+Nodo actual = null;
+HashSet<String> alcanceActual = new HashSet<String>();
 public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
 public ArrayList<Error> errors = new ArrayList<Error>();
 public ArbolSintactico arbol = new ArbolSintactico();
@@ -373,6 +348,9 @@ public ArbolSintactico getArbol(){
 	return arbol;
 }
 
+public Nodo getRaiz(){
+	return raiz;
+}
 private int yylex() {
 	Token token=lexico.getToken();
 
@@ -419,29 +397,35 @@ public LexicalAnalizer getLexical(){
 	return lexico;
 }
 
-public void updateTable(Vector<Token> tokens, String type){  //type double o usinteger, tokens son identificadores
+public void updateTable(Vector<Token> tokens, String type, String uso){  //type double o usinteger, tokens son identificadores
 	/*setea el tipo del _id en la tabla de simbolos*/
 	Enumeration e = tokens.elements();
 	while (e.hasMoreElements()){
 		Token token = (Token)e.nextElement();
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
-		
+		//System.out.println("-- "+(table.get(lexema).getUso()));
 		if (table.containsLexema(lexema)){
 			//System.out.println("esta en la tabla");
-			
-			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
+
+			if  ((table.get(lexema).getType()!="IDENTIFICADOR") && (table.get(lexema).getUso() == uso)){
 				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
 			}
 			else{
-				(table.get(lexema)).setType(type);
+				if (table.get(lexema).getUso() == uso){
+					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+				}else{
+					TableRecord ntr = token.getRecord();
+					(table.get(lexema,uso)).setType(type);
+					(table.get(lexema)).setUso(uso);
+				}
 			}
 		}
 		else{
 			System.out.println("No esta asignado en la tabla");				
-			}
+		}
 	}
-}	
+}
 
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
