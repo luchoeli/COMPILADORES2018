@@ -22,6 +22,29 @@ public class Nodo {
 		this.der=nodoDer;
 	}
 	
+	public Nodo(String lexema) {
+		tableRec = null;
+		this.lexema = lexema;
+		this.izq = null;
+		this.der = null;
+	}
+
+	public String getLexema() {
+		return lexema;
+	}
+
+	public void setLexema(String lexema) {
+		this.lexema = lexema;
+	}
+
+	public TableRecord getTableRec() {
+		return tableRec;
+	}
+
+	public void setTableRec(TableRecord tableRec) {
+		this.tableRec = tableRec;
+	}
+
 	public Nodo getIzq () {
 		return this.izq; 
 	}

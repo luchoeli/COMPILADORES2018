@@ -61,24 +61,25 @@ list_sentencias:   sent_declarativa {
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 				 						$$.obj = nuevo;
+				 						if (raiz == null){
+					 						raiz = nuevo;
+		 								}
 				 				   }
 			
 				 | list_sentencias sent_declarativa 
 				 | list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
-				 									if (($1.obj)!= null){
-					 									((Nodo)$1.obj).setDer(nuevo);
-					 								}
+				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
 					 								}else{
-					 									raiz.setDer(nuevo);
+				 											((Nodo)$1.obj).setDer(nuevo);
+					 									 }
+					 								$$.obj = nuevo;
 					 								}
-				 								  }
-				// | list_sentencias EOF {System.out.println("terminamo");}
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ',' {System.out.println("variable");}
+sent_declarativa	:	declaracion_variable ',' 
 					|	declaracion_funcion ','
 					;
 					
@@ -137,12 +138,11 @@ tipo	:	USINTEGER
 		;
 			
 
-sent_ejecutable  : sent_seleccion ','
+sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {$$.obj = (Nodo)$1.obj;
-				 					System.out.println("asigna");
-				 				  } 
+				 | asignacion ',' { 
+				 					$$.obj = (Nodo)$1.obj;} 
 				 | invocacion ','
 				 ;
 				 
@@ -190,16 +190,30 @@ linea_control	: 	CTE ':' DO bloque_sin_declaracion','
 				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
-sent_seleccion : sent_if END_IF
+sent_seleccion : sent_if END_IF {
+									//Nodo nuevo = new Nodo("IF",);
+									$$.obj = (Nodo)$1.obj;
+								}
 	
-			   | sent_if ELSE bloque_sin_declaracion END_IF{setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
-			   			  									}
+			   | sent_if ELSE bloque_sin_declaracion END_IF{
+			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
+			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
+			   													Nodo ifNodo = (Nodo)$1.obj;
+			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)$3.obj,null); 
+			   													
+			   													ifNodo.getDer().setDer(elseNodo);
+			   													
+			   			  								   }
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
 			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
 sent_if :	IF '('expresion_logica')'  
 			bloque_sin_declaracion {
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
+			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
+			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
+			   				  	    	Nodo nuevo = new Nodo("IF",(Nodo)$3.obj,cuerpoNodo);
+			   				  	    	$$.obj = nuevo;
 			   			   		   }
 		|	IF '(' expresion_logica 
 			bloque_sin_declaracion error {
@@ -216,11 +230,16 @@ sent_if :	IF '('expresion_logica')'
  		 		
 	    ;
 
-bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
+bloque_sin_declaracion : '{'list_sentencias_no_declarables'}' {$$.obj = (Nodo)$2.obj;}
 					   ;
 
-list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
-								| sent_ejecutable
+list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable {
+																					((Nodo)$1.obj).setDer((Nodo)$2.obj);	
+																				}
+								| sent_ejecutable	{
+								 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+								 						$$.obj = nuevo;
+								 				 	}
 								//| sent_ejecutable error {addError("Error sintactico: falta la coma",((Token)$2.obj).getNroLine());}
 								| sent_declarativa error{ 
 															addError("Error sintáctico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
@@ -229,7 +248,12 @@ list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
 								
 
 
-expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Token)$2.obj).getLexema());}
+expresion_logica : expresion comparador expresion { 
+														setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Nodo)$2.obj).getLexema());
+														Nodo comparador = new Nodo(((Nodo)$2.obj).getLexema(),((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());	
+														Nodo nuevo = new Nodo("Condicion",comparador,null);
+														$$.obj = nuevo;
+												  }
 				 		
 				|expresion error expresion  	{
 													addError("Errorsintactico: Comparador invalido. ", ((Token)$1.obj).getNroLine());
@@ -242,12 +266,30 @@ expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).get
 												}
 				 ;
 
-comparador : MAYORIGUAL
-		   | MENORIGUAL
-		   | IGUAL
-		   | DISTINTO
-		   | '>'
-		   | '<'
+comparador : MAYORIGUAL {
+						 Nodo nuevo = new Nodo(">=");
+						 $$.obj = nuevo;
+						}
+		   | MENORIGUAL {	
+						Nodo nuevo = new Nodo("<=");
+						$$.obj = nuevo;
+		   				}
+		   | IGUAL {	
+		   				Nodo nuevo = new Nodo("==");
+		   				$$.obj = nuevo;	
+		   		   }
+		   | DISTINTO {	
+		   				Nodo nuevo = new Nodo("!=");
+		   				$$.obj = nuevo;
+		   			  }
+		   | '>' {	
+		   			Nodo nuevo = new Nodo(">");
+		   			$$.obj = nuevo;
+		   		}
+		   | '<' {	
+		   			Nodo nuevo = new Nodo("<");
+		   			$$.obj = nuevo;
+		   		}
 		   ;
 
 
@@ -293,6 +335,7 @@ asignacion 	:	ID ASIGNACION expresion {
 										}
 			|	ID ASIGNACION error { 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
+							//FIXME arreglar esto, tendria que devolver un nodo para que no me tire error.
 						 }
 			;
 
