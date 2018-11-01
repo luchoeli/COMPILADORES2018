@@ -61,6 +61,7 @@ list_sentencias:   sent_declarativa {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
 					 						raiz = nuevo;
+					 						nuevo.setPadre(null);
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
@@ -70,8 +71,10 @@ list_sentencias:   sent_declarativa {
 				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
+					 									nuevo.setPadre(null);
 					 								}else{
 				 											((Nodo)$1.obj).setDer(nuevo);
+				 											nuevo.setPadre((Nodo)$1.obj);
 					 									 }
 					 								$$.obj = nuevo;
 					 								}
@@ -105,9 +108,11 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
-					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),((Nodo)$8.obj),null);					  		
+					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
+					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
 					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
-					  		if (raiz == ((Nodo)$8.obj)){
+					  		if (raiz == padre){
 					  			System.out.println("ENTRO");
 					  			raiz = null;
 					  		}
