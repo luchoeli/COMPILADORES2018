@@ -1,11 +1,15 @@
-double _a;_b,
-
-if (_a>2.){
-	_a:=2.23D+2,
-	_b:=2_ui,
-}else{
-	_b:=_a+_b,
-	_a:= 2.3 * 3.5,
-}end_if,
-
+__13
+double _a;_c,
+_a:=1.,
+double _fun (double _e) {
+	_c:=3.,
+	usinteger _b,
+	if (_a != 4.) {
+		_a:=5.,
+		_c:=6.,		
+	}end_if,
+	_c:=7.,
+	return (_a)
+},
+_c:=2.,
 
