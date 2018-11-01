@@ -62,6 +62,8 @@ public class LexicalAnalizer {
 	private String in;
 	private Table table;
 	
+	private boolean enFuncion = false;
+	
 
 	public LexicalAnalizer(String in, Table t){//POR PARAMETRO EL ARCHIVO.
 		this.in=in;
@@ -613,6 +615,12 @@ public class LexicalAnalizer {
 	}
 	public ArrayList<Error> getErrors() {
 		return (ArrayList<Error>) this.errors;
+	}
+	public boolean isEnFuncion() {
+		return enFuncion;
+	}
+	public void setEnFuncion(boolean enFuncion) {
+		this.enFuncion = enFuncion;
 	}
 	
 	

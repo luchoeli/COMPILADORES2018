@@ -31,6 +31,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
+import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -393,9 +394,15 @@ public class CompilerUI {
 		            data[3]=tr.getUso();
 		            tableDtm.addRow(data);
 				}
-				
-			parser.getRaiz().imprimirNodo();
+			Nodo raiz = parser.getRaiz();
+			if (raiz != null)
+				parser.getRaiz().imprimirNodo();
+			
+			for (Nodo n : parser.getFunciones()){
+				System.out.println("******* funcion : "+n.getLexema()+" *******");
+				n.imprimirNodo();
 			}
+			}	
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
 		

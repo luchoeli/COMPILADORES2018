@@ -50,22 +50,20 @@
 programa:	list_sentencias {
 								System.out.println("TERMINO GRAMATICA");
 								this.raiz = (Nodo)$1.obj;
-								raiz.imprimirNodo();
-								
+								raiz.imprimirNodo();							
 							}
 		;
 
 list_sentencias:   sent_declarativa {
-										$$.obj = null;
+										//$$.obj = null;
 									}
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
-				 						$$.obj = nuevo;
-				 						if (raiz == null){
+		 								if (raiz == null){
 					 						raiz = nuevo;
 		 								}
-				 				   }
-			
+		 								$$.obj = nuevo;
+				 				   }			
 				 | list_sentencias sent_declarativa 
 				 | list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
@@ -80,7 +78,7 @@ list_sentencias:   sent_declarativa {
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ',' 
-					|	declaracion_funcion ','
+					|	declaracion_funcion ',' {funciones.add((Nodo)$1.obj);}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
@@ -98,13 +96,23 @@ declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion va
 						;
 
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
-					  list_sentencias // conjunto de sentencias declarativas y ejecutables
+					  list_sentencias 
 					  RETURN '(' expresion ')'
 					  '}' {
 					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
 					  		Vector<Token> vec = new Vector<Token>(); 
 					  		vec.add((Token)$2.obj);
+					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
+					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
+					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),((Nodo)$8.obj),null);					  		
+					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+					  		if (raiz == ((Nodo)$8.obj)){
+					  			System.out.println("ENTRO");
+					  			raiz = null;
+					  		}
+					  		
+					  		$$.obj = nuevo;
 					  	  } 
 					
 					| tipo ID '(' tipo ID')' '{'
@@ -141,9 +149,8 @@ tipo	:	USINTEGER
 sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' { 
-				 					$$.obj = (Nodo)$1.obj;} 
-				 | invocacion ','
+				 | asignacion ',' {$$.obj = (Nodo)$1.obj;} 
+				// | invocacion ','
 				 ;
 				 
 invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
@@ -333,8 +340,10 @@ asignacion 	:	ID ASIGNACION expresion {
 																								
 											}
 										}
-			|	ID ASIGNACION error { 
+			|	ID ASIGNACION error {
+							System.out.println("ERROR"); 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
+							
 							//FIXME arreglar esto, tendria que devolver un nodo para que no me tire error.
 						 }
 			;
@@ -362,21 +371,22 @@ factor : CTE 	{
 	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
 	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
-	   | invocacion','
-	   	{
-	   		//TODO 	poner la invocacion en una variable auxuliar y agregarla a la tabla de simbolos 
-	   	}
-	   		 
+	   
+		| invocacion ','{
+						$$.obj = (Token)$1.obj;
+					 }
+	 	
 	   ;
 
 //bloque_de_sentencias : '{'list_sentencias'}'
 //					   ;
 %%
-/**/
+/*******************************************************************************************************/
 LexicalAnalizer lexico;
 Table table;
 Nodo raiz = null;
 Nodo actual = null;
+ArrayList<Nodo> funciones = new ArrayList<Nodo>();
 HashSet<String> alcanceActual = new HashSet<String>();
 public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
 public ArrayList<Error> errors = new ArrayList<Error>();
@@ -389,6 +399,9 @@ public Parser(String programa, Table table) {
 
 public ArbolSintactico getArbol(){
 	return arbol;
+}
+public ArrayList<Nodo> getFunciones(){
+	return funciones;
 }
 
 public Nodo getRaiz(){
@@ -448,27 +461,41 @@ public void updateTable(Vector<Token> tokens, String type, String uso){  //type 
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
 		//System.out.println("-- "+(table.get(lexema).getUso()));
+		/*
 		if (table.containsLexema(lexema)){
-			//System.out.println("esta en la tabla");
-
-			if  ((table.get(lexema).getType()!="IDENTIFICADOR") && (table.get(lexema).getUso() == uso)){
-				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
-			}
-			else{
-				if (table.get(lexema).getUso() == uso){
+ 			//System.out.println("esta en la tabla");
+ 			
+ 			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
+ 				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+ 			}
+ 			else{
+ 				(table.get(lexema)).setType(type);
+ 			}
+ 		}
+ 		else{
+ 			System.out.println("No esta asignado en la tabla");				
+ 			}
+ 		*/
+		
+			 if (table.containsLexema(lexema)){
+			 
+				//System.out.println("esta en la tabla");
+	
+				if  ((table.get(lexema).getType()!="IDENTIFICADOR")){
 					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
-				}else{
-					TableRecord ntr = token.getRecord();
-					(table.get(lexema,uso)).setType(type);
-					(table.get(lexema)).setUso(uso);
+				}
+				else{
+						//TableRecord ntr = token.getRecord();
+						(table.get(lexema,uso)).setType(type);
+						(table.get(lexema)).setUso(uso);
 				}
 			}
-		}
-		else{
-			System.out.println("No esta asignado en la tabla");				
-		}
+			else{
+				System.out.println("No esta asignado en la tabla");				
+			}
 	}
 }
+
 
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
@@ -530,3 +557,4 @@ public boolean isDeclarated(Token id){
         	return true;
         }
 }
+
