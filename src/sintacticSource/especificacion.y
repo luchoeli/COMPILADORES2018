@@ -54,29 +54,24 @@ programa:	list_sentencias {
 							}
 		;
 
-list_sentencias:   sent_declarativa {
-										//$$.obj = null;
-									}
+list_sentencias:   sent_declarativa 
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
 					 						raiz = nuevo;
-					 						nuevo.setPadre(null);
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
-				 | list_sentencias sent_declarativa 
-				 | list_sentencias sent_ejecutable{	
-				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+				 | sent_declarativa list_sentencias
+				 | sent_ejecutable list_sentencias {	
+				 									Nodo nuevo = new Nodo("S", (Nodo)$1.obj, null);
 				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
-					 									nuevo.setPadre(null);
-					 								}else{
-				 											((Nodo)$1.obj).setDer(nuevo);
-				 											nuevo.setPadre((Nodo)$1.obj);
+					 								}else{						 										
+				 											((Nodo)$2.obj).setProximaSentencia(nuevo);
 					 									 }
-					 								$$.obj = nuevo;
+					 								$$.obj = (Nodo)$2.obj;
 					 								}
 				 ;
 			  
@@ -108,11 +103,11 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
-					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
-					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
-					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
+					  		//Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
+					  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),(Nodo)$8.obj,null);					  		
 					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
-					  		if (raiz == padre){
+					  		if (raiz == (Nodo)$8.obj){
 					  			System.out.println("ENTRO");
 					  			raiz = null;
 					  		}

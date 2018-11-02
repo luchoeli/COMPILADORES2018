@@ -71,6 +71,14 @@ public class Nodo {
 		
 	}
 	
+	public void setProximaSentencia(Nodo nodo){
+		Nodo pos = this;
+		while (pos.getDer() != null){
+			pos = pos.getDer();
+		}
+		pos.setDer(nodo);
+	}
+	
 	public Nodo getFuncionPadre(){
 		Nodo retorno = this;
 		while (retorno.getPadre() != null){
