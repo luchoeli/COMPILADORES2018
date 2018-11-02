@@ -8,6 +8,7 @@ public class Nodo {
 	private TableRecord tableRec;
 	private Nodo izq;
 	private Nodo der;
+	private Nodo padre;
 		
 	public Nodo(TableRecord tr){
 		tableRec = tr;
@@ -68,6 +69,31 @@ public class Nodo {
 		if(der != null)
 			der.imprimirNodo();
 		
+	}
+	
+	public void setProximaSentencia(Nodo nodo){
+		Nodo pos = this;
+		while (pos.getDer() != null){
+			pos = pos.getDer();
+		}
+		pos.setDer(nodo);
+	}
+	
+	public Nodo getFuncionPadre(){
+		Nodo retorno = this;
+		while (retorno.getPadre() != null){
+			System.out.println("nodo "+retorno.getLexema());
+			retorno = retorno.getPadre();
+			System.out.println("padre "+retorno.getLexema());
+		}
+		return retorno;
+	}
+	public Nodo getPadre() {
+		return padre;
+	}
+
+	public void setPadre(Nodo padre) {
+		this.padre = padre;
 	}
 	
 }
