@@ -54,9 +54,7 @@ programa:	list_sentencias {
 							}
 		;
 
-list_sentencias:   sent_declarativa {
-										//$$.obj = null;
-									}
+list_sentencias:   sent_declarativa 
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
@@ -65,18 +63,18 @@ list_sentencias:   sent_declarativa {
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
-				 | list_sentencias sent_declarativa 
-				 | list_sentencias sent_ejecutable{	
+				 |  list_sentencias sent_declarativa
+				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
 				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
-					 								}else{
-				 											((Nodo)$1.obj).setDer(nuevo);
+					 								}else{						 										
+				 											((Nodo)$1.obj).setProximaSentencia(nuevo);
 				 											nuevo.setPadre((Nodo)$1.obj);
 					 									 }
-					 								$$.obj = nuevo;
+					 								$$.obj =nuevo;
 					 								}
 				 ;
 			  
@@ -306,25 +304,42 @@ comparador : MAYORIGUAL {
 
 
 expresion : expresion '+' termino{
-	   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+		   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error semántico: Los tipos de datos de la operacion + no coinciden. ", ((Token)$1.obj).getNroLine());
+	   								}
 								 } 
 		  | expresion '-' termino{
-									Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
-	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		  							if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+										Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error semántico: Los tipos de datos de la operacion - no coinciden. ", ((Token)$1.obj).getNroLine());
+	   								}
 								 }
 		  | termino	{
 		  				$$.obj = (Token)$1.obj;
 		  			}
 		  ;
 
-termino : termino '*' factor{
-								Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+termino : termino '*' factor{	
+							
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+	   							}else{
+	   								addError("Error semántico: Los tipos de datos de la operacion * no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| termino '/' factor{
-								Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   						}else{
+	   								addError("Error semántico: Los tipo de datos de la operacion / no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| factor	{
 						$$.obj = (Token)$1.obj;
@@ -561,5 +576,13 @@ public boolean isDeclarated(Token id){
         	table.get(id.getLexema()).increment();
         	return true;
         }
+}
+
+private boolean datosCompatibles(String type, String type2) {
+	System.out.println(">>>"+type+">>>"+type2);
+	if (type == type2){
+	return true;
+	}
+	return false;
 }
 

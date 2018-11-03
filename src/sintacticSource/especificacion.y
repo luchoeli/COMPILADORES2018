@@ -59,19 +59,22 @@ list_sentencias:   sent_declarativa
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
 					 						raiz = nuevo;
+					 						nuevo.setPadre(null);
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
-				 | sent_declarativa list_sentencias
-				 | sent_ejecutable list_sentencias {	
-				 									Nodo nuevo = new Nodo("S", (Nodo)$1.obj, null);
+				 |  list_sentencias sent_declarativa
+				 |  list_sentencias sent_ejecutable{	
+				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
 				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
+					 									nuevo.setPadre(null);
 					 								}else{						 										
-				 											((Nodo)$2.obj).setProximaSentencia(nuevo);
+				 											((Nodo)$1.obj).setProximaSentencia(nuevo);
+				 											nuevo.setPadre((Nodo)$1.obj);
 					 									 }
-					 								$$.obj = (Nodo)$2.obj;
+					 								$$.obj =nuevo;
 					 								}
 				 ;
 			  
@@ -103,11 +106,11 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
-					  		//Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
-					  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
-					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),(Nodo)$8.obj,null);					  		
+					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
+					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
 					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
-					  		if (raiz == (Nodo)$8.obj){
+					  		if (raiz == padre){
 					  			System.out.println("ENTRO");
 					  			raiz = null;
 					  		}
@@ -301,25 +304,42 @@ comparador : MAYORIGUAL {
 
 
 expresion : expresion '+' termino{
-	   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+		   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error semántico: Los tipos de datos de la operacion + no coinciden. ", ((Token)$1.obj).getNroLine());
+	   								}
 								 } 
 		  | expresion '-' termino{
-									Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
-	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		  							if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+										Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error semántico: Los tipos de datos de la operacion - no coinciden. ", ((Token)$1.obj).getNroLine());
+	   								}
 								 }
 		  | termino	{
 		  				$$.obj = (Token)$1.obj;
 		  			}
 		  ;
 
-termino : termino '*' factor{
-								Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+termino : termino '*' factor{	
+							
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+	   							}else{
+	   								addError("Error semántico: Los tipos de datos de la operacion * no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| termino '/' factor{
-								Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-	   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   						}else{
+	   								addError("Error semántico: Los tipo de datos de la operacion / no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| factor	{
 						$$.obj = (Token)$1.obj;
@@ -556,5 +576,13 @@ public boolean isDeclarated(Token id){
         	table.get(id.getLexema()).increment();
         	return true;
         }
+}
+
+private boolean datosCompatibles(String type, String type2) {
+	System.out.println(">>>"+type+">>>"+type2);
+	if (type == type2){
+	return true;
+	}
+	return false;
 }
 

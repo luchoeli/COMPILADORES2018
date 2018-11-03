@@ -5,8 +5,8 @@ double _fun (double _e) {
 	_c:=3.,
 	usinteger _b,
 	if (_a != 4.) {
-		_a:=5.,
-		_c:=6.,		
+		_a:=5. + 4.0,
+		_c:=6. + 1_ui,		
 	}end_if,
 	_c:=7.,
 	return (_a)
