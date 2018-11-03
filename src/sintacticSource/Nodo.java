@@ -74,6 +74,7 @@ public class Nodo {
 	public void setProximaSentencia(Nodo nodo){
 		Nodo pos = this;
 		while (pos.getDer() != null){
+			System.out.println("---"+pos.getLexema());
 			pos = pos.getDer();
 		}
 		pos.setDer(nodo);

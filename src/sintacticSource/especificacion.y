@@ -54,29 +54,36 @@ programa:	list_sentencias {
 							}
 		;
 
-list_sentencias:   sent_declarativa 
-				 | sent_ejecutable {
+list_sentencias:   sent_declarativa {System.out.println("---decla");}
+				 | sent_ejecutable {	
+				 						System.out.println("---ejec");
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
 					 						raiz = nuevo;
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
-				 | sent_declarativa list_sentencias
+				 | sent_declarativa list_sentencias {System.out.println("---decla2");}
 				 | sent_ejecutable list_sentencias {	
-				 									Nodo nuevo = new Nodo("S", (Nodo)$1.obj, null);
-				 									
-					 								if (raiz == null){
-					 									raiz = nuevo;
-					 								}else{						 										
-				 											((Nodo)$2.obj).setProximaSentencia(nuevo);
-					 									 }
-					 								$$.obj = (Nodo)$2.obj;
+				 										System.out.println("---ejec2");
+					 									Nodo nuevo = new Nodo("S", (Nodo)$1.obj, null);
+					 									if ((Nodo)$2.obj != null){
+						 									((Nodo)$2.obj).setProximaSentencia(nuevo);
+							 								$$.obj = (Nodo)$2.obj;
+							 								System.out.println("then");
+						 								}
+						 								else{
+						 									raiz = nuevo;
+						 									$$.obj = nuevo;
+						 									System.out.println("else");
+						 								}
 					 								}
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ',' 
-					|	declaracion_funcion ',' {funciones.add((Nodo)$1.obj);}
+sent_declarativa	:	declaracion_variable ',' //{$$.obj = new Nodo(null,null,null);}
+					|	declaracion_funcion ',' {	
+													funciones.add((Nodo)$1.obj);
+												}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
@@ -149,7 +156,10 @@ tipo	:	USINTEGER
 sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {$$.obj = (Nodo)$1.obj;} 
+				 | asignacion ',' {
+				 					$$.obj = (Nodo)$1.obj;
+				 					System.out.println("Asigna");
+				 				  } 
 				// | invocacion ','
 				 ;
 				 

@@ -54,34 +54,36 @@ programa:	list_sentencias {
 							}
 		;
 
-list_sentencias:   sent_declarativa {
-										//$$.obj = null;
-									}
-				 | sent_ejecutable {
+list_sentencias:   sent_declarativa {System.out.println("---decla");}
+				 | sent_ejecutable {	
+				 						System.out.println("---ejec");
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
 					 						raiz = nuevo;
-					 						nuevo.setPadre(null);
 		 								}
 		 								$$.obj = nuevo;
 				 				   }			
-				 | list_sentencias sent_declarativa 
-				 | list_sentencias sent_ejecutable{	
-				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
-				 									
-					 								if (raiz == null){
-					 									raiz = nuevo;
-					 									nuevo.setPadre(null);
-					 								}else{
-				 											((Nodo)$1.obj).setDer(nuevo);
-				 											nuevo.setPadre((Nodo)$1.obj);
-					 									 }
-					 								$$.obj = nuevo;
+				 | sent_declarativa list_sentencias {System.out.println("---decla2");}
+				 | sent_ejecutable list_sentencias {	
+				 										System.out.println("---ejec2");
+					 									Nodo nuevo = new Nodo("S", (Nodo)$1.obj, null);
+					 									if ((Nodo)$2.obj != null){
+						 									((Nodo)$2.obj).setProximaSentencia(nuevo);
+							 								$$.obj = (Nodo)$2.obj;
+							 								System.out.println("then");
+						 								}
+						 								else{
+						 									raiz = nuevo;
+						 									$$.obj = nuevo;
+						 									System.out.println("else");
+						 								}
 					 								}
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ',' 
-					|	declaracion_funcion ',' {funciones.add((Nodo)$1.obj);}
+sent_declarativa	:	declaracion_variable ',' //{$$.obj = new Nodo(null,null,null);}
+					|	declaracion_funcion ',' {	
+													funciones.add((Nodo)$1.obj);
+												}
 					;
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
@@ -108,11 +110,11 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
-					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
-					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
-					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
+					  		//Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
+					  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),(Nodo)$8.obj,null);					  		
 					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
-					  		if (raiz == padre){
+					  		if (raiz == (Nodo)$8.obj){
 					  			System.out.println("ENTRO");
 					  			raiz = null;
 					  		}
@@ -154,7 +156,10 @@ tipo	:	USINTEGER
 sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {$$.obj = (Nodo)$1.obj;} 
+				 | asignacion ',' {
+				 					$$.obj = (Nodo)$1.obj;
+				 					System.out.println("Asigna");
+				 				  } 
 				// | invocacion ','
 				 ;
 				 
