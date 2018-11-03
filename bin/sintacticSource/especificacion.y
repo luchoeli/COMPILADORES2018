@@ -47,6 +47,7 @@
 %%
 /*-------------------------------------- reglas gramaticales ------------------------------------*/	
 
+//shdgsyd
 programa:	list_sentencias {
 								System.out.println("TERMINO GRAMATICA");
 								this.raiz = (Nodo)$1.obj;
