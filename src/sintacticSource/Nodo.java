@@ -1,6 +1,9 @@
 package sintacticSource;
 
+import javax.swing.JPanel;
+
 import lexicalSource.TableRecord;
+import ui.ArbolExpresionGrafico;
 
 public class Nodo {
 	
@@ -96,4 +99,7 @@ public class Nodo {
 		this.padre = padre;
 	}
 	
+	public ArbolExpresionGrafico getdibujo() {
+        return new ui.ArbolExpresionGrafico(this);
+    }
 }

@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.GridLayout;
@@ -70,6 +71,8 @@ public class CompilerUI {
 	private DefaultTableModel dtm;
 	private DefaultTableModel tableDtm;
 	private JTable table_Tok;
+	private Nodo raiz = null;
+	private ArrayList<Nodo> funciones = null;
 	
 	
 	private String namefile="untitled";
@@ -118,7 +121,7 @@ public class CompilerUI {
 		frmCompiler = new JFrame();
 		frmCompiler.setIconImage(Toolkit.getDefaultToolkit().getImage(CompilerUI.class.getResource("/icons/genericregister_obj.gif")));
 		frmCompiler.setTitle("Compiler1.0");
-		frmCompiler.setBounds(100, 100, 723, 533);
+		frmCompiler.setBounds(100, 100, 980, 628);
 		frmCompiler.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmCompiler.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 		
@@ -322,11 +325,32 @@ public class CompilerUI {
 			
 		//------------------------------------------ BOTONES ---------------------------------------
 		/**
+		 * ----------- BOTON ARBOL ---------------
+		 */
+		
+		final JButton btnArbol = new JButton("Arbol");
+		btnArbol.setEnabled(false);
+		btnArbol.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ArbolFrame panel = new ArbolFrame();
+				panel.setRaiz(raiz);
+				panel.setFunciones(funciones);
+				panel.setVisible(true);
+				
+				//panel.setContentPane(raiz.getdibujo());
+				
+				
+				
+			}
+		});
+		/**
 		 * ----------- BOTON RUN ---------------
 		 */
 		final JButton btnRun = new JButton("");
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent arg0) {
 				clear();
 //				dtm.setRowCount(0);
@@ -394,10 +418,13 @@ public class CompilerUI {
 		            data[3]=tr.getUso();
 		            tableDtm.addRow(data);
 				}
-			Nodo raiz = parser.getRaiz();
-			if (raiz != null)
+			raiz = parser.getRaiz();
+			funciones = parser.getFunciones();
+			if (raiz != null){
 				parser.getRaiz().imprimirNodo();
-			
+				btnArbol.setEnabled(true);
+				
+			}
 			for (Nodo n : parser.getFunciones()){
 				System.out.println("******* funcion : "+n.getLexema()+" *******");
 				n.imprimirNodo();
@@ -457,23 +484,23 @@ public class CompilerUI {
 				btnRun.setEnabled(true);
 			}
 		});
+	
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel.createSequentialGroup()
-					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-						.addGroup(Alignment.LEADING, gl_panel.createSequentialGroup()
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel.createSequentialGroup()
 							.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-							.addContainerGap())
-						.addGroup(gl_panel.createSequentialGroup()
-							.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-								.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 697, Short.MAX_VALUE)
-								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 697, Short.MAX_VALUE))
-							.addGap(8))))
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnArbol))
+						.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
+						.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE))
+					.addGap(8))
 		);
 		gl_panel.setVerticalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -482,11 +509,12 @@ public class CompilerUI {
 						.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 							.addComponent(btnNewButton)
 							.addComponent(btnOpen))
-						.addComponent(btnRun))
+						.addComponent(btnRun)
+						.addComponent(btnArbol))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE))
 		);
 		panel.setLayout(gl_panel);
 		//panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{textArea, btnNewButton, btnOpen, btnRun, tabbedPane, Problems, scrollPane_Problems, problems, Console, scrollPane_Console, console, Tokens, scrollPane_Tokens, table, scrollPane, lines}));
@@ -524,5 +552,4 @@ public class CompilerUI {
 
 
 	}
-
 }
