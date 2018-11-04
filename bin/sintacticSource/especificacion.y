@@ -47,7 +47,6 @@
 %%
 /*-------------------------------------- reglas gramaticales ------------------------------------*/	
 
-//shdgsyd
 programa:	list_sentencias {
 								System.out.println("TERMINO GRAMATICA");
 								this.raiz = (Nodo)$1.obj;
@@ -104,8 +103,12 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
 					  		Vector<Token> vec = new Vector<Token>(); 
 					  		vec.add((Token)$2.obj);
-					  		vec.add((Token)$5.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
+					  		vec.add((Token)$5.obj);
+					  		vec.removeAllElements();
+					  		vec.add((Token)$5.obj);
+					  		updateTable(vec, ((Token)$4.obj).getLexema(), "Identificador del parametro de la funcion");
+					  		//updateTable(new Vector<Token>((Token)$5.obj)), ((Token)$4.obj).getLexema(), "Identificador del parametro de la funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
 					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
 					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
