@@ -1,27 +1,21 @@
 package ui;
-
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Panel;
+import java.awt.Dimension;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
+
 import javax.swing.border.EmptyBorder;
 
-import com.sun.xml.internal.ws.api.server.Container;
-
+import javafx.scene.input.MouseDragEvent;
 import sintacticSource.Nodo;
 import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JSeparator;
+
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import java.awt.Window.Type;
 
 public class ArbolFrame extends JFrame {
 
@@ -34,8 +28,10 @@ public class ArbolFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public ArbolFrame() {
-		setBounds(100, 100, 734, 521);
+		setTitle("Arbol Sintactico");
+		setBounds(100, 100, 1123, 654);
 		contentPane = new JPanel();
+		contentPane.setPreferredSize(new Dimension(50, 50));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
@@ -54,8 +50,9 @@ public class ArbolFrame extends JFrame {
 		);
 		contentPane.setLayout(gl_contentPane);
 		
-		JPanel panel = new JPanel();
-		//tabbedPane.addTab("New tab", null, panel, null);
+		
+		
+		
 	}
 
 
@@ -77,6 +74,7 @@ public class ArbolFrame extends JFrame {
 
 	public ArrayList<Nodo> getFunciones() {
 		return funciones;
+		
 	}
 
 
@@ -89,13 +87,10 @@ public class ArbolFrame extends JFrame {
 		
 		for (Nodo nodo : funciones) {
 			
-			ArbolExpresionGrafico jpanel = nodo.getdibujo();
-			JScrollPane sp = new JScrollPane(jpanel);
-			sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-			sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-			tabbedPane.addTab(nodo.getLexema(),null,sp,null);
+			ArbolExpresionGrafico jpanel = new ArbolExpresionGrafico(nodo);
 			
-			
+			//jpanel.setPreferredSize(new Dimension(2000, 1000));
+			tabbedPane.addTab(nodo.getLexema(),null,jpanel,null);
 		}
 	}
 }

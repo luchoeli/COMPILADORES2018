@@ -85,9 +85,7 @@ public class Nodo {
 	public Nodo getFuncionPadre(){
 		Nodo retorno = this;
 		while (retorno.getPadre() != null){
-			System.out.println("nodo "+retorno.getLexema());
 			retorno = retorno.getPadre();
-			System.out.println("padre "+retorno.getLexema());
 		}
 		return retorno;
 	}

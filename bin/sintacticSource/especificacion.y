@@ -62,7 +62,8 @@ list_sentencias:   sent_declarativa
 					 						nuevo.setPadre(null);
 		 								}
 		 								$$.obj = nuevo;
-				 				   }			
+				 				   }	
+				 ;		
 				 |  list_sentencias sent_declarativa
 				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
@@ -84,7 +85,9 @@ sent_declarativa	:	declaracion_variable ','
 					
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
-												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable");												 
+												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable",ambito.get(ambito.size()-1));
+												 System.out.println("lal");
+												//setAmbito(((Vector<Token>)$2.obj), ambito.getLast());												 
 												 }
 						| tipo list_variables error {
 														Vector<Token> tokens = (Vector<Token>)$2.obj;
@@ -96,24 +99,65 @@ declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion va
 													}
 						;
 
+encabezado : tipo ID '(' tipo ID ')'	{	
+									  		//System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
+									  		
+									  		String ambit = ambito.get(ambito.size()-1);
+											Vector<Token> vec = new Vector<Token>(); 
+									  		vec.add((Token)$2.obj);
+									  		updateTable(vec, ((Token)$1.obj).getLexema(), FUNCION,ambit);	
+									  		ambit = ((Token)$2.obj).getLexema();
+											apilarAmbito(ambit);
+									  		vec.removeAllElements();
+									  		vec.add((Token)$5.obj);
+									  		updateTable(vec, ((Token)$4.obj).getLexema(), PARAMETRO,ambit);
+									  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),null,null);
+									  		$$.obj = nuevo;
+									  		
+										}
+
+		   ;
+
+declaracion_funcion	: encabezado '{' list_sentencias
+									 RETURN '(' expresion ')'
+								 '}' {	
+								 		System.out.println("wepa "+((Nodo)$3.obj).getLexema());
+								  		Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
+								  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+								  		System.out.println();
+								  		Nodo nuevo = ((Nodo)$1.obj);
+								  		nuevo.setIzq(padre);					  		
+								  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+								  		if (raiz == padre){
+								  			System.out.println("ENTRO");
+								  			raiz = null;
+								  		}
+					  		
+					  					$$.obj = nuevo;
+					  					
+					  					desapilarAmbito();
+								 	 }
+								 
+/*								   
 declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  list_sentencias 
 					  RETURN '(' expresion ')'
 					  '}' {
-					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
+					  		//setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
 					  		Vector<Token> vec = new Vector<Token>(); 
 					  		vec.add((Token)$2.obj);
 					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
 					  		vec.add((Token)$5.obj);
 					  		vec.removeAllElements();
 					  		vec.add((Token)$5.obj);
-					  		updateTable(vec, ((Token)$4.obj).getLexema(), "Identificador del parametro de la funcion");
+					  		updateTable(vec, ((Token)$4.obj).getLexema(), "ID funcion");
+					  		//
 					  		//updateTable(new Vector<Token>((Token)$5.obj)), ((Token)$4.obj).getLexema(), "Identificador del parametro de la funcion");
 					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
 					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
 					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
 					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
-					  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+					  		///lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion
 					  		if (raiz == padre){
 					  			System.out.println("ENTRO");
 					  			raiz = null;
@@ -127,7 +171,7 @@ declaracion_funcion	: tipo ID '(' tipo ID')' '{'
 					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$1.obj).getNroLine());}
 					;
 
-						  
+*/					  
 list_variables		:	list_variables ';' ID  {
 											Vector<Token> tokens = (Vector<Token>)$1.obj;
 											Token token = (Token)$3.obj;
@@ -355,13 +399,18 @@ imprimir	:	PRINT '('CADENA')'
 			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
-asignacion 	:	ID ASIGNACION expresion {
-											if (isDeclarated((Token)$1.obj)){	
+asignacion 	:	ID ASIGNACION expresion {	
+											System.out.println("ASIGNA");
+											if (isDeclarated((Token)$1.obj)){
+											System.out.println("THEN");	
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
 												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
 												$$.obj = nuevo;
-																								
+												registrarEscritura(((Token)$1.obj).getLexema());																							
+											}
+											else{
+												System.out.println(((Token)$1.obj).getLexema()+ "  no esta declarada");
 											}
 										}
 			|	ID ASIGNACION error {
@@ -406,6 +455,10 @@ factor : CTE 	{
 //					   ;
 %%
 /*******************************************************************************************************/
+private static final String FUNCION = "ID funcion";
+private static final String PARAMETRO = "ID parametro";
+private static final String IDENTIFICADOR = "IDENTIFICADOR";
+ArrayList<String> ambito = new ArrayList<String>();
 LexicalAnalizer lexico;
 Table table;
 Nodo raiz = null;
@@ -416,9 +469,21 @@ public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructu
 public ArrayList<Error> errors = new ArrayList<Error>();
 public ArbolSintactico arbol = new ArbolSintactico();
 
+private void apilarAmbito(String ambito){
+	this.ambito.add(ambito);
+}
+
+private void desapilarAmbito(){
+	int pos = this.ambito.size()-1;
+	if (pos >= 0){
+		this.ambito.remove(pos);
+	}
+}
+
 public Parser(String programa, Table table) {
     lexico = new LexicalAnalizer(programa, table);
 	this.table = table;
+	this.ambito.add("main");
 }
 
 public ArbolSintactico getArbol(){
@@ -477,7 +542,7 @@ public LexicalAnalizer getLexical(){
 	return lexico;
 }
 
-public void updateTable(Vector<Token> tokens, String type, String uso){  //type double o usinteger, tokens son identificadores
+public void updateTable(Vector<Token> tokens, String type, String uso, String ambito){  //type double o usinteger, tokens son identificadores
 	/*setea el tipo del _id en la tabla de simbolos*/
 	Enumeration e = tokens.elements();
 	while (e.hasMoreElements()){
@@ -485,33 +550,19 @@ public void updateTable(Vector<Token> tokens, String type, String uso){  //type 
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
 		//System.out.println("-- "+(table.get(lexema).getUso()));
-		/*
-		if (table.containsLexema(lexema)){
- 			//System.out.println("esta en la tabla");
- 			
- 			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
- 				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
- 			}
- 			else{
- 				(table.get(lexema)).setType(type);
- 			}
- 		}
- 		else{
- 			System.out.println("No esta asignado en la tabla");				
- 			}
- 		*/
 		
 			 if (table.containsLexema(lexema)){
 			 
 				//System.out.println("esta en la tabla");
 	
-				if  ((table.get(lexema).getType()!="IDENTIFICADOR")){
+				if  ((table.get(lexema).getType()!=IDENTIFICADOR)){
 					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
 				}
 				else{
 						//TableRecord ntr = token.getRecord();
 						(table.get(lexema,uso)).setType(type);
 						(table.get(lexema)).setUso(uso);
+						(table.get(lexema)).setAmbito(ambito);
 				}
 			}
 			else{
@@ -520,6 +571,10 @@ public void updateTable(Vector<Token> tokens, String type, String uso){  //type 
 	}
 }
 
+public void setAmbito(Vector<Token> tokens, String ambito){
+	
+
+}
 
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
@@ -570,7 +625,7 @@ public TableRecord updateTableNegative(String key ){//key: 2.0
 }
 
 public boolean isDeclarated(Token id){
-	if (table.get(id.getLexema()).getType() == "IDENTIFICADOR" )
+	if (table.get(id.getLexema()).getType() == IDENTIFICADOR )
         {
             this.addError("Error sintactico: Variable "+id.getLexema()+" no declarada.", id.getNroLine());
             this.table.remove(id.getRecord().getLexema());
@@ -583,10 +638,44 @@ public boolean isDeclarated(Token id){
 }
 
 private boolean datosCompatibles(String type, String type2) {
-	System.out.println(">>>"+type+">>>"+type2);
 	if (type == type2){
 	return true;
 	}
 	return false;
 }
+
+/*
+public void registrarUso(String id, String accion){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito(); 
+		switch(accion){
+			case PASS: {table.get(ambito)};
+			case WRITE:{}; 
+			
+		}
+	}
+}
+*/
+public void registrarEscritura(String id){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito();
+		TableRecord funcionTR = table.get(ambito);
+		System.out.println("escritado en "+ambito);
+		funcionTR.setWritten(true);
+	}
+}
+
+
+public void registrarPasaje(String id){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito();
+		TableRecord funcionTR = table.get(ambito);
+		System.out.println("pasado en "+ambito);
+		funcionTR.setPassed(true);
+	}
+}
+
 

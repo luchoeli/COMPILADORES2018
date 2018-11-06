@@ -226,7 +226,7 @@ public class CompilerUI {
 		JScrollPane scrollPane_TS= new JScrollPane();
 		scrollPane_TS.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
-		String[] tableColumns={"Tipo","Nombre","Cant referencias","Uso"};
+		String[] tableColumns={"Tipo","Nombre","Cant referencias","Uso","Ámbito"};
 		tableDtm = new DefaultTableModel(null,tableColumns);
 		JTable table_TS = new JTable(tableDtm);
 		scrollPane_TS.setViewportView(table_TS);
@@ -411,11 +411,12 @@ public class CompilerUI {
 				}
 				
 				for (TableRecord tr : records){
-					String[] data=new String[4];
+					String[] data=new String[5];
 					data[0]=tr.getType();
 					data[1]=tr.getLexema();
 		            data[2]=String.valueOf((tr.getRef()));
 		            data[3]=tr.getUso();
+		            data[4]=tr.getAmbito();
 		            tableDtm.addRow(data);
 				}
 			raiz = parser.getRaiz();
