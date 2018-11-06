@@ -10,8 +10,8 @@ public class TableRecord {
 	private String uso; 
 	private String ambito;
 	
-	private boolean written = false;
-	private boolean passed = false;
+	private boolean written ;
+	private boolean passed ;
 	
 	
 	public String getUso() {
@@ -32,6 +32,8 @@ public class TableRecord {
 		this.lexema = lexema;
 		this.setIdToken(idToken);
 		this.ref = 1;
+		setWritten(false);
+		setPassed(false);
 	}
 
 	public TableRecord(String lexema, int idToken, String value){
@@ -39,6 +41,8 @@ public class TableRecord {
 		this.setIdToken(idToken);
 		this.ref = 1;
 		this.value = value;
+		setWritten(false);
+		setPassed(false);
 	}
 
 	public void setValue(String value){

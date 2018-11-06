@@ -388,7 +388,7 @@ public class CompilerUI {
 				
 				for(Error error : errors){
 					drawLine(error.nroLine-1, error.severity);
-					problems.setText(problems.getText() + error.description + "En linea: "+error.nroLine+"\n");
+					problems.setText(problems.getText() + error.description + " En linea: "+error.nroLine+"\n");
 				}
 				
 

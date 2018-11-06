@@ -86,7 +86,6 @@ sent_declarativa	:	declaracion_variable ','
 declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable",ambito.get(ambito.size()-1));
-												 System.out.println("lal");
 												//setAmbito(((Vector<Token>)$2.obj), ambito.getLast());												 
 												 }
 						| tipo list_variables error {
@@ -201,29 +200,43 @@ sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
 				 | sent_control ','
 				 | imprimir ','
 				 | asignacion ',' {$$.obj = (Nodo)$1.obj;} 
-				// | invocacion ','
+				 
 				 ;
 				 
-invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
-																setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+invocacion	:	ID '(' ID ';' lista_permisos')' {
+																if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
+																	setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+																	Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
+																	TableRecord tr = table.get(((Token)$1.obj).getLexema());
+																	nodoFun.setTableRec(tr);
+																	Nodo nodoCall = new Nodo("Call",nodoFun,null);
+																	
+																	$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
+																}else{
+																	addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
+																	System.out.println("No cumple chqueo de permisos");
+																}
+																
 															 }
+/*															 
 			|	ID nombre_parametro ';' lista_permisos')'  {
 																	addError("Error sintactico: falta '(' al inicio de la invocacion ", ((Token)$1.obj).getNroLine());
 															 	}
 															 	
 			|	ID '('nombre_parametro ';' lista_permisos  {
 																addError("Error sintactico: falta ')' al final de la invocacion ", ((Token)$1.obj).getNroLine());
-															}
+														}
+													
 			;
 
 nombre_parametro :	ID
 				 |  CTE
 				 ;
-
-lista_permisos	: READONLY
-				| WRITE
-				| PASS
-				| WRITE ';' PASS
+*/
+lista_permisos	: READONLY  {$$.obj = "READONLY";}
+				| WRITE	{$$.obj = "WRITE";}
+				| PASS	{$$.obj = "PASS";}
+				| WRITE ';' PASS	{$$.obj = "WRITE;PASS";}
 				;
 
 sent_control	: CASE '(' ID ')' bloque_control  				
@@ -392,6 +405,10 @@ termino : termino '*' factor{
 		| factor	{
 						$$.obj = (Token)$1.obj;
 					}
+		| invocacion  '+'{
+							$$.obj = (Token)$1.obj;
+						}
+		
 		;
 
 imprimir	:	PRINT '('CADENA')'
@@ -400,9 +417,8 @@ imprimir	:	PRINT '('CADENA')'
 			;
 			
 asignacion 	:	ID ASIGNACION expresion {	
-											System.out.println("ASIGNA");
 											if (isDeclarated((Token)$1.obj)){
-											System.out.println("THEN");	
+												
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
 												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
@@ -444,11 +460,6 @@ factor : CTE 	{
 	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
 	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
-	   
-		| invocacion ','{
-						$$.obj = (Token)$1.obj;
-					 }
-	 	
 	   ;
 
 //bloque_de_sentencias : '{'list_sentencias'}'
@@ -662,8 +673,8 @@ public void registrarEscritura(String id){
 	if (tr.getUso() == PARAMETRO){
 		String ambito = tr.getAmbito();
 		TableRecord funcionTR = table.get(ambito);
-		System.out.println("escritado en "+ambito);
-		funcionTR.setWritten(true);
+		System.out.println("escritado en "+funcionTR.getLexema());
+		funcionTR.setWritten(true);		
 	}
 }
 
@@ -676,6 +687,40 @@ public void registrarPasaje(String id){
 		System.out.println("pasado en "+ambito);
 		funcionTR.setPassed(true);
 	}
+}
+
+public boolean checkPermisos(String func, String permiso){
+	TableRecord tr = table.get(func);
+	boolean written = tr.isWritten();
+	boolean passed = tr.isPassed();
+	System.out.println(tr.getLexema()+" writen="+written+" passed="+passed);
+	System.out.println("Lexema de LLLa func "+tr.getLexema()+" --- permiso "+permiso+"-");
+	switch (permiso){
+		case ("READONLY") :
+			if (written || passed){
+				
+			 	return false ;
+			}
+			break;
+		case ("WRITE") : 
+			System.out.println("wwwwww");
+			if (written){
+				System.out.println("><><>");
+				return false;
+			}
+			break;
+		case ("PASS") : 
+			if (passed){
+				return false;
+			}
+			break;
+		case ("WRITE;PASS") : 
+			return true;
+		default : System.out.println("Mandaron cualquira");
+				  return false;
+	}	
+	System.out.println("permisos aceptados");
+	return true;
 }
 
 
