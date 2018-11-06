@@ -1,5 +1,7 @@
 package lexicalSource;
 
+import java.util.ArrayList;
+
 public class TableRecord {
 	private String lexema; 
 	private int idToken;
@@ -7,8 +9,11 @@ public class TableRecord {
 	private int ref; // Cantidad de referencias.
 	private String uso; 
 	private String ambito;
-
-
+	
+	private boolean written = false;
+	private boolean passed = false;
+	
+	
 	public String getUso() {
 		return uso;
 	}
@@ -93,6 +98,22 @@ public class TableRecord {
 
 	public void setAmbito(String ambito) {
 		this.ambito = ambito;
+	}
+
+	public boolean isWritten() {
+		return written;
+	}
+
+	public void setWritten(boolean written) {
+		this.written = written;
+	}
+
+	public boolean isPassed() {
+		return passed;
+	}
+
+	public void setPassed(boolean passed) {
+		this.passed = passed;
 	}
 
 }

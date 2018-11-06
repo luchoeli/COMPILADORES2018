@@ -15,9 +15,11 @@ public class ArbolExpresionGrafico extends JPanel
     private HashMap subtreeSizes = null;
     private boolean dirty = true;
     private int parent2child = 20, child2child = 30;
-    private Dimension empty = new Dimension(0,0);
-    private FontMetrics fm = null;
-    
+    private Dimension empty = new Dimension(0,0); 
+    private Dimension dime;
+	private FontMetrics fm = null;
+    public int he;
+    public int wh;
     
     /**
      * Constructor de la clase ArbolExpresionGrafico.
@@ -30,10 +32,11 @@ public class ArbolExpresionGrafico extends JPanel
     {
           this.raiz = raiz;
           this.setBackground(Color.WHITE);
+          
           posicionNodos = new HashMap();
           subtreeSizes = new HashMap();
           dirty = true;
-          repaint();      
+          repaint();
     }
 
 
@@ -166,6 +169,16 @@ public class ArbolExpresionGrafico extends JPanel
                   fm.getLeading() + fm.getAscent());
          fm = null;
    }
+
+
+public Dimension getDime() {
+	return dime;
+}
+
+
+public void setDime(Dimension dime) {
+	this.dime = dime;
+}
    
  }
 
