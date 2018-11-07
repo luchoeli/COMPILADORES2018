@@ -185,7 +185,7 @@ public class CompilerUI {
 		scrollPane_Tokens.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
 		String[] colums={"ID","Tipo","Lexema","Linea"};		
-		final DefaultTableModel dtm=new DefaultTableModel(null,colums);
+		dtm = new DefaultTableModel(null,colums);
 		table_Tok = new JTable(dtm);
 		scrollPane_Tokens.setViewportView(table_Tok);
 		GroupLayout gl_Tokens = new GroupLayout(Tokens);
@@ -355,8 +355,9 @@ public class CompilerUI {
 				clear();
 //				dtm.setRowCount(0);
 //				structDtm.setRowCount(0);
-				tableDtm.setRowCount(0);
-			
+//				tableDtm.setRowCount(0);
+//				problems.setText("");
+//			
 				//TODO aksa -------------//		
 				String program = textArea.getText();
 				Table table=new Table();
@@ -485,7 +486,19 @@ public class CompilerUI {
 				btnRun.setEnabled(true);
 			}
 		});
-	
+		/**
+		 * ----------- BOTON CLEAR ---------------
+		 */
+		JButton btnClear = new JButton("Clear");
+		btnClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				textArea.setEnabled(false);
+				btnRun.setEnabled(false);
+				btnArbol.setEnabled(false);
+				clear();
+			}
+		});
+		
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -498,7 +511,9 @@ public class CompilerUI {
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnArbol))
+							.addComponent(btnArbol)
+							.addPreferredGap(ComponentPlacement.RELATED, 582, Short.MAX_VALUE)
+							.addComponent(btnClear))
 						.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
 						.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE))
 					.addGap(8))
@@ -511,7 +526,9 @@ public class CompilerUI {
 							.addComponent(btnNewButton)
 							.addComponent(btnOpen))
 						.addComponent(btnRun)
-						.addComponent(btnArbol))
+						.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+							.addComponent(btnArbol)
+							.addComponent(btnClear)))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
@@ -522,9 +539,11 @@ public class CompilerUI {
 		
 	}
 	private void clear(){
-		String text=this.textArea.getText();
-		this.textArea.setText(null);
-		this.textArea.setText(text);
+		//this.textArea.setText(null);
+		structDtm.setRowCount(0);
+		tableDtm.setRowCount(0);
+		dtm.setRowCount(0);
+		problems.setText("");
 	}
 
 

@@ -136,41 +136,11 @@ declaracion_funcion	: encabezado '{' list_sentencias
 					  					
 					  					desapilarAmbito();
 								 	 }
-								 
-/*								   
-declaracion_funcion	: tipo ID '(' tipo ID')' '{'
-					  list_sentencias 
-					  RETURN '(' expresion ')'
-					  '}' {
-					  		//setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
-					  		Vector<Token> vec = new Vector<Token>(); 
-					  		vec.add((Token)$2.obj);
-					  		updateTable(vec, ((Token)$1.obj).getLexema(), "Identificador de funcion");
-					  		vec.add((Token)$5.obj);
-					  		vec.removeAllElements();
-					  		vec.add((Token)$5.obj);
-					  		updateTable(vec, ((Token)$4.obj).getLexema(), "ID funcion");
-					  		//
-					  		//updateTable(new Vector<Token>((Token)$5.obj)), ((Token)$4.obj).getLexema(), "Identificador del parametro de la funcion");
-					  		System.out.println("La primera de la func es "+((Nodo)$8.obj).getLexema()+" -> "+((Nodo)$8.obj).getIzq().getLexema()+(((Nodo)$8.obj).getIzq()).getDer().getLexema());
-					  		Nodo padre = ((Nodo)$8.obj).getFuncionPadre();
-					  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
-					  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),padre,null);					  		
-					  		///lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion
-					  		if (raiz == padre){
-					  			System.out.println("ENTRO");
-					  			raiz = null;
-					  		}
-					  		
-					  		$$.obj = nuevo;
-					  	  } 
-					
-					| tipo ID '(' tipo ID')' '{'
+					| encabezado '{'
 					  list_sentencias // conjunto de sentencias declarativas y ejecutables
-					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$1.obj).getNroLine());}
+					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$4.obj).getNroLine());}
 					;
-
-*/					  
+								 
 list_variables		:	list_variables ';' ID  {
 											Vector<Token> tokens = (Vector<Token>)$1.obj;
 											Token token = (Token)$3.obj;
@@ -196,10 +166,10 @@ tipo	:	USINTEGER
 		;
 			
 
-sent_ejecutable  : sent_seleccion ',' {$$.obj = (Nodo)$1.obj;}
+sent_ejecutable  : sent_seleccion ',' {$$.obj = ((Token)$1.obj).getNodo();}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' {$$.obj = (Nodo)$1.obj;} 
+				 | asignacion ',' {$$.obj = ((Token)$1.obj).getNodo();} 
 				 
 				 ;
 				 
@@ -254,44 +224,45 @@ bloque_control 	: '{' linea_control '}'
 				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
 				;
 				
-linea_control	: 	CTE ':' DO bloque_sin_declaracion','
-				|	linea_control CTE ':' DO bloque_sin_declaracion','
-				//| 	CTE ':' DO bloque_sin_declaracion error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
-				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
-				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
+linea_control	: 	CTE ':' DO bloque_de_sentencias','
+				|	linea_control CTE ':' DO bloque_de_sentencias','
+				//| 	CTE ':' DO bloque_de_sentencias error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
+				| 	CTE DO bloque_de_sentencias ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
+				| 	CTE ':' bloque_de_sentencias ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
 sent_seleccion : sent_if END_IF {
-									//Nodo nuevo = new Nodo("IF",);
-									$$.obj = (Nodo)$1.obj;
+							
+									//$$.obj = (Nodo)$1.obj;
 								}
 	
-			   | sent_if ELSE bloque_sin_declaracion END_IF{
+			   | sent_if ELSE bloque_de_sentencias END_IF{
 			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
-			   													Nodo ifNodo = (Nodo)$1.obj;
+			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
 			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)$3.obj,null); 
 			   													
 			   													ifNodo.getDer().setDer(elseNodo);
 			   													
 			   			  								   }
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
-			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
+			   | sent_if END_IF ELSE bloque_de_sentencias END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
 sent_if :	IF '('expresion_logica')'  
-			bloque_sin_declaracion {
+			bloque_de_sentencias {
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
 			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
 			   				  	    	Nodo nuevo = new Nodo("IF",(Nodo)$3.obj,cuerpoNodo);
-			   				  	    	$$.obj = nuevo;
+										((Token)$1.obj).setNodo(nuevo);
+			   				  	    	//$$.obj = nuevo;
 			   			   		   }
 		|	IF '(' expresion_logica 
-			bloque_sin_declaracion error {
+			bloque_de_sentencias error {
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  									     }
  		|	IF expresion_logica ')' 
-			bloque_sin_declaracion error {
+			bloque_de_sentencias error {
 										  	addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
  									     }
 		|	IF '('expresion_logica ')' 
@@ -300,7 +271,7 @@ sent_if :	IF '('expresion_logica')'
  			      }
  		 		
 	    ;
-
+/*
 bloque_sin_declaracion : '{'list_sentencias_no_declarables'}' {$$.obj = (Nodo)$2.obj;}
 					   ;
 
@@ -316,7 +287,7 @@ list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable 
 															addError("Error sintáctico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
 														}
 								;
-								
+*/								
 
 
 expresion_logica : expresion comparador expresion { 
@@ -422,7 +393,8 @@ asignacion 	:	ID ASIGNACION expresion {
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
 												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
-												$$.obj = nuevo;
+												//$$.obj = nuevo;
+												((Token)$1.obj).setNodo(nuevo);
 												registrarEscritura(((Token)$1.obj).getLexema());																							
 											}
 											else{
@@ -432,7 +404,8 @@ asignacion 	:	ID ASIGNACION expresion {
 			|	ID ASIGNACION error {
 							System.out.println("ERROR"); 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
-							
+							//((Token)$1.obj).se
+							//$$.obj = new 
 							//FIXME arreglar esto, tendria que devolver un nodo para que no me tire error.
 						 }
 			;
@@ -462,8 +435,8 @@ factor : CTE 	{
 	   		 }
 	   ;
 
-//bloque_de_sentencias : '{'list_sentencias'}'
-//					   ;
+bloque_de_sentencias : '{'list_sentencias'}' {$$.obj = (Nodo)$2.obj;}
+					   ;
 %%
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";

@@ -89,7 +89,8 @@ public class ArbolFrame extends JFrame {
 			
 			ArbolExpresionGrafico jpanel = new ArbolExpresionGrafico(nodo);
 			
-			//jpanel.setPreferredSize(new Dimension(2000, 1000));
+			//jpanel.setPreferredSize(jpanel.get);
+			jpanel.setPreferredSize(new Dimension(2000,1000));
 			tabbedPane.addTab(nodo.getLexema(),null,jpanel,null);
 		}
 	}
