@@ -353,12 +353,7 @@ public class CompilerUI {
 
 			public void actionPerformed(ActionEvent arg0) {
 				clear();
-//				dtm.setRowCount(0);
-//				structDtm.setRowCount(0);
-//				tableDtm.setRowCount(0);
-//				problems.setText("");
-//			
-				//TODO aksa -------------//		
+						
 				String program = textArea.getText();
 				Table table=new Table();
 		
@@ -492,10 +487,12 @@ public class CompilerUI {
 		JButton btnClear = new JButton("Clear");
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				textArea.setText("");
 				textArea.setEnabled(false);
 				btnRun.setEnabled(false);
 				btnArbol.setEnabled(false);
 				clear();
+				
 			}
 		});
 		

@@ -3,6 +3,10 @@ double _a;_c,
 _a:=1.,
 double _fun (double _e) {
 	_c:=3.,
+	double _fun2 (double _e) {
+		usinteger _x,
+	return (_a)
+	},
 	usinteger _b,
 	if (_a != 4.) {
 		_a:=5. + 4.0,
@@ -11,6 +15,5 @@ double _fun (double _e) {
 	_e:=7.,
 	return (_a)
 },
-_c:=2.,
-_c:=_fun(_a;write)+,
-
+_b:=2.,
+_c:=_fun(_a;pass)+,
