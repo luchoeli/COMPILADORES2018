@@ -9,6 +9,7 @@ double _fun (double _e) {
 	},
 	usinteger _b,
 	if (_a != 4.) {
+		double _xxx,
 		_a:=5. + 4.0,
 		_c:=6. + 1_ui,		
 	}end_if,
