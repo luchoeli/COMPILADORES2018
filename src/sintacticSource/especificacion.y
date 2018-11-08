@@ -54,7 +54,7 @@ programa:	list_sentencias {
 							}
 		;
 
-list_sentencias:   sent_declarativa 
+list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
 		 								if (raiz == null){
@@ -63,31 +63,42 @@ list_sentencias:   sent_declarativa
 		 								}
 		 								$$.obj = nuevo;
 				 				   }	
-				 ;		
-				 |  list_sentencias sent_declarativa
+				 		
+				 |  list_sentencias sent_declarativa{$$.obj =  (Nodo)$1.obj;}
 				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
 				 									
 					 								if (raiz == null){
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
-					 								}else{						 										
+					 									
+					 								}else{	
+					 									if (((Nodo)$1.obj).getLexema().equals("null")){					 										
+					 										((Nodo)$1.obj).setLexema("S");
+				 											((Nodo)$1.obj).setIzq((Nodo)$2.obj);
+				 											((Nodo)$1.obj).setDer(null); 
+				 											
+				 										}else{
 				 											((Nodo)$1.obj).setProximaSentencia(nuevo);
-				 											nuevo.setPadre((Nodo)$1.obj);
-					 									 }
+					 										nuevo.setPadre((Nodo)$1.obj);	
+				 										}
+					 								}
 					 								$$.obj =nuevo;
 					 								}
 				 ;
 			  
 sent_declarativa	:	declaracion_variable ',' 
-					|	declaracion_funcion ',' {funciones.add((Nodo)$1.obj);}
+					|	declaracion_funcion ',' {
+													if (!((Nodo)$1.obj).equals(null)){
+														funciones.add((Nodo)$1.obj);
+													}
+												}
 					;
 					
-declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
+declaracion_variable	:	tipo list_variables {
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
 												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable",ambito.get(ambito.size()-1));
-												//setAmbito(((Vector<Token>)$2.obj), ambito.getLast());												 
-												 }
+												}
 						| tipo list_variables error {
 														Vector<Token> tokens = (Vector<Token>)$2.obj;
 														if (tokens.size()>1){
@@ -99,19 +110,27 @@ declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion va
 						;
 
 encabezado : tipo ID '(' tipo ID ')'	{	
-									  		//System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
-									  		
-									  		String ambit = ambito.get(ambito.size()-1);
-											Vector<Token> vec = new Vector<Token>(); 
-									  		vec.add((Token)$2.obj);
-									  		updateTable(vec, ((Token)$1.obj).getLexema(), FUNCION,ambit);	
-									  		ambit = ((Token)$2.obj).getLexema();
-											apilarAmbito(ambit);
-									  		vec.removeAllElements();
-									  		vec.add((Token)$5.obj);
-									  		updateTable(vec, ((Token)$4.obj).getLexema(), PARAMETRO,ambit);
-									  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),null,null);
-									  		$$.obj = nuevo;
+										  	String ambit = ambito.get(ambito.size()-1);
+									  		System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
+									  		if (ambit.equals("main")){
+									  			//System.out.println("declarar ");
+												Vector<Token> vec = new Vector<Token>(); 
+										  		vec.add((Token)$2.obj);
+										  		updateTable(vec, ((Token)$1.obj).getLexema(), FUNCION,ambit);	
+										  		ambit = ((Token)$2.obj).getLexema();
+												apilarAmbito(ambit);
+										  		vec.removeAllElements();
+										  		vec.add((Token)$5.obj);
+										  		updateTable(vec, ((Token)$4.obj).getLexema(), PARAMETRO,ambit);
+										  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),null,null);
+										  		$$.obj = nuevo;
+										  	}else{
+										  		System.out.println("en "+ambit+"Error semantico: no se puede declarar "+((Token)$2.obj).getLexema());
+										  		this.addError("Error semantico: no se puede declarar funcion dentro de otra ", ((Token)$2.obj).getNroLine());
+										  		//FIXME
+										  		//Error error = new Error("Error semantico: no se puede declarar funcion dentro de otra ",((Token)$5.obj).getNroLine());
+										  		$$.obj = new Nodo(null,null,null);
+										  	}
 									  		
 										}
 
@@ -122,8 +141,7 @@ declaracion_funcion	: encabezado '{' list_sentencias
 								 '}' {	
 								 		System.out.println("wepa "+((Nodo)$3.obj).getLexema());
 								  		Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
-								  		System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
-								  		System.out.println();
+								  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
 								  		Nodo nuevo = ((Nodo)$1.obj);
 								  		nuevo.setIzq(padre);					  		
 								  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
@@ -138,7 +156,11 @@ declaracion_funcion	: encabezado '{' list_sentencias
 								 	 }
 					| encabezado '{'
 					  list_sentencias // conjunto de sentencias declarativas y ejecutables
-					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$4.obj).getNroLine());}
+					  '}' 	{
+					  			System.out.println("rmpo");
+					  			this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$4.obj).getNroLine());
+					  		}
+					  		
 					;
 								 
 list_variables		:	list_variables ';' ID  {
@@ -232,11 +254,10 @@ linea_control	: 	CTE ':' DO bloque_de_sentencias','
 				;
 				
 sent_seleccion : sent_if END_IF {
-							
-									//$$.obj = (Nodo)$1.obj;
+									//$$.obj = ((Token)$1.obj).getNodo();
 								}
 	
-			   | sent_if ELSE bloque_de_sentencias END_IF{
+			   | sent_if ELSE bloque_sin_declaracion END_IF{
 			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
 			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
@@ -246,10 +267,10 @@ sent_seleccion : sent_if END_IF {
 			   													
 			   			  								   }
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
-			   | sent_if END_IF ELSE bloque_de_sentencias END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
+			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
 sent_if :	IF '('expresion_logica')'  
-			bloque_de_sentencias {
+			bloque_sin_declaracion {
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
 			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
@@ -258,11 +279,11 @@ sent_if :	IF '('expresion_logica')'
 			   				  	    	//$$.obj = nuevo;
 			   			   		   }
 		|	IF '(' expresion_logica 
-			bloque_de_sentencias error {
+			bloque_sin_declaracion error {
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
  									     }
  		|	IF expresion_logica ')' 
-			bloque_de_sentencias error {
+			bloque_sin_declaracion error {
 										  	addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
  									     }
 		|	IF '('expresion_logica ')' 
@@ -271,23 +292,49 @@ sent_if :	IF '('expresion_logica')'
  			      }
  		 		
 	    ;
-/*
-bloque_sin_declaracion : '{'list_sentencias_no_declarables'}' {$$.obj = (Nodo)$2.obj;}
-					   ;
 
-list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable {
-																					((Nodo)$1.obj).setDer((Nodo)$2.obj);	
-																				}
-								| sent_ejecutable	{
+bloque_sin_declaracion : '{'list_sentencias_no_declarables'}' {$$.obj = ((Nodo)$2.obj).getFuncionPadre();}
+					   ;			  
+list_sentencias_no_declarables :    sent_declarativa {
+														$$.obj = new Nodo("null",null,null);
+														addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
+													 }
+								| sent_ejecutable{
 								 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
-								 						$$.obj = nuevo;
-								 				 	}
-								//| sent_ejecutable error {addError("Error sintactico: falta la coma",((Token)$2.obj).getNroLine());}
-								| sent_declarativa error{ 
-															addError("Error sintáctico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
-														}
+						 								if (raiz == null){
+									 						raiz = nuevo;
+									 						nuevo.setPadre(null);
+						 								}
+						 								$$.obj = nuevo;
+								 				   }
+								|	list_sentencias_no_declarables sent_ejecutable {	
+												 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+												 									
+													 								if (raiz == null){
+													 									raiz = nuevo;
+													 									nuevo.setPadre(null);
+													 									
+													 								}else{	
+													 									if (((Nodo)$1.obj).getLexema().equals("null")){					 										
+													 										((Nodo)$1.obj).setLexema("S");
+												 											((Nodo)$1.obj).setIzq((Nodo)$2.obj);
+												 											((Nodo)$1.obj).setDer(null); 
+												 											
+												 										}else{
+												 											((Nodo)$1.obj).setProximaSentencia(nuevo);
+													 										nuevo.setPadre((Nodo)$1.obj);	
+												 										}
+													 								}
+													 								$$.obj =nuevo;
+													 								}
+				 				| list_sentencias_no_declarables sent_declarativa	{
+				 																			$$.obj =  (Nodo)$1.obj;
+																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
+				 																	}
+				 				
+							
 								;
-*/								
+								
 
 
 expresion_logica : expresion comparador expresion { 
@@ -335,12 +382,14 @@ comparador : MAYORIGUAL {
 		   ;
 
 
-expresion : expresion '+' termino{
+expresion : expresion '+' termino{	
+									Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
 									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
-		   								Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   								
 		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 		   							}else{
 	   									addError("Error semántico: Los tipos de datos de la operacion + no coinciden. ", ((Token)$1.obj).getNroLine());
+	   									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 	   								}
 								 } 
 		  | expresion '-' termino{
@@ -435,7 +484,10 @@ factor : CTE 	{
 	   		 }
 	   ;
 
-bloque_de_sentencias : '{'list_sentencias'}' {$$.obj = (Nodo)$2.obj;}
+bloque_de_sentencias : '{'list_sentencias'}' {
+												
+												$$.obj = ((Nodo)$2.obj).getFuncionPadre();
+											 }
 					   ;
 %%
 /*******************************************************************************************************/
@@ -538,15 +590,20 @@ public void updateTable(Vector<Token> tokens, String type, String uso, String am
 			 if (table.containsLexema(lexema)){
 			 
 				//System.out.println("esta en la tabla");
-	
-				if  ((table.get(lexema).getType()!=IDENTIFICADOR)){
-					addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
-				}
-				else{
-						//TableRecord ntr = token.getRecord();
-						(table.get(lexema,uso)).setType(type);
-						(table.get(lexema)).setUso(uso);
-						(table.get(lexema)).setAmbito(ambito);
+				
+				if ((table.get(lexema).getType()==FUNCION) && (ambito != "main") ){
+					System.out.println("declaracion en declaracion");
+					addError("Error semantico: no se puede declarar funcion dentro de una funcion.",token.getNroLine());
+				}else{
+					if  ((table.get(lexema).getType()!=IDENTIFICADOR)){
+						addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+					}
+					else{
+							//TableRecord ntr = token.getRecord();
+							(table.get(lexema,uso)).setType(type);
+							(table.get(lexema)).setUso(uso);
+							(table.get(lexema)).setAmbito(ambito);
+					}
 				}
 			}
 			else{
