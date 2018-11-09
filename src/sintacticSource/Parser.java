@@ -1214,7 +1214,7 @@ case 52:
 //#line 330 "especificacion.y"
 {
 				 																			yyval.obj =  (Nodo)val_peek(1).obj;
-																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)val_peek(1).obj).getNroLine());
+																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)val_peek(0).obj).getNroLine());
 				 																	}
 break;
 case 53:

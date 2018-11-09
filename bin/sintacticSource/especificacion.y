@@ -329,7 +329,7 @@ list_sentencias_no_declarables :    sent_declarativa {
 													 								}
 				 				| list_sentencias_no_declarables sent_declarativa	{
 				 																			$$.obj =  (Nodo)$1.obj;
-																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
+																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$2.obj).getNroLine());
 				 																	}
 				 				
 							
