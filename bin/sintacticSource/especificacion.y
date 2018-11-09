@@ -196,6 +196,7 @@ sent_ejecutable  : sent_seleccion ',' {$$.obj = ((Token)$1.obj).getNodo();}
 				 ;
 				 
 invocacion	:	ID '(' ID ';' lista_permisos')' { 	if (isFunDeclarated(((Token)$1.obj).getLexema())){
+														//TODO chequear ambito de $2.obj !
 														System.out.println("Declatada la funcion");
 														if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
 															setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
@@ -237,6 +238,8 @@ lista_permisos	: READONLY  {$$.obj = "READONLY";}
 
 sent_control	: CASE '(' ID ')' bloque_control  				
 										 {System.out.println("Case do");
+										 //TODO chequear ambito de $3.obj, 
+										 //FIXME sentencias solo ejecutables
 				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
 										 }
 				| CASE '(' error ')' bloque_control  				
@@ -436,19 +439,23 @@ termino : termino '*' factor{
 		;
 
 imprimir	:	PRINT '('CADENA')'
+				//TODO chequear ambito de la cadena
 				{setRegla(((Token)$1.obj).getNroLine(), "Impresion",((Token)$1.obj).getLexema()+"("+((Token)$3.obj).getLexema()+")" ) ;}
 			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
 asignacion 	:	ID ASIGNACION expresion {	
 											if (isDeclarated((Token)$1.obj)){
-												
-												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
-												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
-												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
-												//$$.obj = nuevo;
-												((Token)$1.obj).setNodo(nuevo);
-												registrarEscritura(((Token)$1.obj).getLexema());																							
+												if (checkAmbito(((Token)$1.obj).getLexema())){
+													setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
+													Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
+													Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
+													//$$.obj = nuevo;
+													((Token)$1.obj).setNodo(nuevo);
+													registrarEscritura(((Token)$1.obj).getLexema());
+												}else{
+													addError("Error Semantico: la variable '"+((Token)$1.obj).getLexema()+"' no pertenece al ambito '"+ambito.get(ambito.size()-1)+"'.",((Token)$1.obj).getNroLine());
+												}
 											}
 											else{
 												System.out.println(((Token)$1.obj).getLexema()+ "  no esta declarada");
@@ -482,6 +489,7 @@ factor : CTE 	{
 	   
 	   | ID  { 
 	   			isDeclarated((Token)$1.obj);
+	   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
 	   			((Token)$1.obj).setNodo(nuevo);
@@ -737,11 +745,11 @@ public boolean checkPermisos(String func, String permiso){
 			break;
 		case ("WRITE") : 
 			
-			if (written){
+			if (passed){
 				return false;
 			}
 			break;
-		case ("PASS") : 
+		case ("written") : 
 			if (passed){
 				return false;
 			}
@@ -768,6 +776,30 @@ private boolean isFunDeclarated(String funcion){
 		return false;
 	}
 	System.out.println("la tabla no contiene a: "+funcion);
+	return false;
+	
+}
+
+private boolean checkAmbito(String lexema){
+	if (table.contains(lexema)){
+		System.out.println("contiene el lex: "+lexema);
+		TableRecord tr = table.get(lexema);
+		int pos = ambito.size()-1;
+		if (tr.getAmbito()!=null){
+			while (pos>=0 && !tr.getAmbito().equals(ambito.get(pos))){
+				pos-=1; 
+			}
+			if (pos<0){
+				System.out.println("no esta en ambito!");
+				return false;			
+			}
+			System.out.println("esta en ambito!");
+			return true;
+		}
+		System.out.println("no esta en ambito, ambito de "+lexema+" es '"+tr.getAmbito()+"' != de "+ambito.get(ambito.size()-1));
+		return false;
+	}
+	System.out.println("la tabla no contiene a: "+lexema);
 	return false;
 	
 }
