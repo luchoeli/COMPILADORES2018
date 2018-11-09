@@ -195,21 +195,25 @@ sent_ejecutable  : sent_seleccion ',' {$$.obj = ((Token)$1.obj).getNodo();}
 				 
 				 ;
 				 
-invocacion	:	ID '(' ID ';' lista_permisos')' {
-																if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
-																	setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
-																	Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
-																	TableRecord tr = table.get(((Token)$1.obj).getLexema());
-																	nodoFun.setTableRec(tr);
-																	Nodo nodoCall = new Nodo("Call",nodoFun,null);
-																	
-																	$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
-																}else{
-																	addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
-																	System.out.println("No cumple chqueo de permisos");
-																}
-																
-															 }
+invocacion	:	ID '(' ID ';' lista_permisos')' { 	if (isFunDeclarated(((Token)$1.obj).getLexema())){
+														System.out.println("Declatada la funcion");
+														if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
+															setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+															Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
+															TableRecord tr = table.get(((Token)$1.obj).getLexema());
+															nodoFun.setTableRec(tr);
+															Nodo nodoCall = new Nodo("Call",nodoFun,null);
+															
+															$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
+														}else{
+															addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
+															System.out.println("No cumple chqueo de permisos");
+														}
+													}else{
+														System.out.println("FUNC NO DECLARADA");
+														addError("Error semantico: la funcion '"+((Token)$1.obj).getLexema()+"' no esta declarada", ((Token)$1.obj).getNroLine());
+													}
+												 }
 /*															 
 			|	ID nombre_parametro ';' lista_permisos')'  {
 																	addError("Error sintactico: falta '(' al inicio de la invocacion ", ((Token)$1.obj).getNroLine());
@@ -728,14 +732,12 @@ public boolean checkPermisos(String func, String permiso){
 	switch (permiso){
 		case ("READONLY") :
 			if (written || passed){
-				
 			 	return false ;
 			}
 			break;
 		case ("WRITE") : 
-			System.out.println("wwwwww");
+			
 			if (written){
-				System.out.println("><><>");
 				return false;
 			}
 			break;
@@ -753,4 +755,20 @@ public boolean checkPermisos(String func, String permiso){
 	return true;
 }
 
+private boolean isFunDeclarated(String funcion){
+	System.out.println("=="+funcion);
+	if (table.contains(funcion)){
+		System.out.println("contiene la fun: "+funcion);
+		TableRecord funTR = table.get(funcion);
+		if (funTR.getUso()!=null && funTR.getUso().equals(FUNCION)){
+			System.out.println("es tipo funcion");
+			return true;
+		}
+		System.out.println("no es tipo funcion: "+funTR.getUso()+" != "+FUNCION);
+		return false;
+	}
+	System.out.println("la tabla no contiene a: "+funcion);
+	return false;
+	
+}
 
