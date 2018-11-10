@@ -245,8 +245,10 @@ lista_permisos	: READONLY  {$$.obj = "READONLY";}
 sent_control	: CASE '(' ID ')' bloque_control  				
 										 {System.out.println("Case do");
 										 //TODO chequear ambito de $3.obj, 
-										 //FIXME sentencias solo ejecutables
-				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
+							
+				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());
+				  						  Nodo nodo = new Nodo("CASE",(Nodo)$5.obj,null);
+				  						  $$.obj = nodo;												 
 										 }
 				| CASE '(' error ')' bloque_control  				
 										 {
@@ -254,13 +256,34 @@ sent_control	: CASE '(' ID ')' bloque_control
 										 }
 				;
 
-bloque_control 	: '{' linea_control '}'
+bloque_control 	: '{' linea_control '}' {$$.obj = ((Nodo)$2.obj);}
 				|  linea_control '}' error {addError("Error sintactico: falta '{' para iniciar el bloque de sentencias de control ", ((Token)$1.obj).getNroLine());}
 				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
 				;
 				
-linea_control	: 	CTE ':' DO bloque_sin_declaracion','
-				|	linea_control CTE ':' DO bloque_sin_declaracion','
+linea_control	: 	CTE ':' DO bloque_sin_declaracion','   	{	
+																Nodo padre = ((Nodo)$4.obj).getFuncionPadre();
+																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+														  		if (raiz == padre){
+														  			System.out.println("ENTRO");
+														  			raiz = null;
+														  		}
+																Nodo nodoLctrl = new Nodo(((Token)$1.obj).getLexema(),null,((Nodo)$4.obj));
+																$$.obj = nodoLctrl;				
+															}
+				| 	CTE ':' DO bloque_sin_declaracion',' linea_control	{	
+																		Nodo padre = ((Nodo)$4.obj).getFuncionPadre();
+																		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+																  		if (raiz == padre){
+																  			System.out.println("ENTRO");
+																  			raiz = null;
+																  		}
+																			Nodo nodoLctrl = new Nodo(((Token)$1.obj).getLexema(),((Nodo)$6.obj),((Nodo)$4.obj));
+																			$$.obj = nodoLctrl;
+																		}
+			
+			
+			
 				//| 	CTE ':' DO bloque_de_sentencias error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
 				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
 				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
