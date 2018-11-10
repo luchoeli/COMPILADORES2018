@@ -417,15 +417,17 @@ public class CompilerUI {
 				}
 			raiz = parser.getRaiz();
 			funciones = parser.getFunciones();
-			if (raiz != null){
-				parser.getRaiz().imprimirNodo();
+			if (raiz != null && errors.size()==0){
+				//parser.getRaiz().imprimirNodo();
 				btnArbol.setEnabled(true);
 				
 			}
+			/*
 			for (Nodo n : parser.getFunciones()){
 				System.out.println("******* funcion : "+n.getLexema()+" *******");
 				n.imprimirNodo();
 			}
+			*/
 			}	
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
