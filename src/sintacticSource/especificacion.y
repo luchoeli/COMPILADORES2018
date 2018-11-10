@@ -67,8 +67,9 @@ list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
 				 |  list_sentencias sent_declarativa{$$.obj =  (Nodo)$1.obj;}
 				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
-				 									
+				 									System.out.println(((Nodo)$2.obj).getLexema());
 					 								if (raiz == null){
+					 									System.out.println("si");
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
 					 									
@@ -258,11 +259,11 @@ bloque_control 	: '{' linea_control '}'
 				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
 				;
 				
-linea_control	: 	CTE ':' DO bloque_de_sentencias','
-				|	linea_control CTE ':' DO bloque_de_sentencias','
+linea_control	: 	CTE ':' DO bloque_sin_declaracion','
+				|	linea_control CTE ':' DO bloque_sin_declaracion','
 				//| 	CTE ':' DO bloque_de_sentencias error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
-				| 	CTE DO bloque_de_sentencias ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
-				| 	CTE ':' bloque_de_sentencias ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
+				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
+				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
 sent_seleccion : sent_if END_IF {
@@ -270,6 +271,12 @@ sent_seleccion : sent_if END_IF {
 								}
 	
 			   | sent_if ELSE bloque_sin_declaracion END_IF{
+			   													Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
+																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+														  		if (raiz == padre){
+														  			System.out.println("ENTRO");
+														  			raiz = null;
+														  		}
 			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
 			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
@@ -281,8 +288,14 @@ sent_seleccion : sent_if END_IF {
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
 			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
-sent_if :	IF '('expresion_logica')'  
-			bloque_sin_declaracion {
+sent_if :	IF '('expresion_logica')'  	
+			bloque_sin_declaracion {	
+										Nodo padre = ((Nodo)$5.obj).getFuncionPadre();
+										/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+								  		if (raiz == padre){
+								  			System.out.println("ENTRO");
+								  			raiz = null;
+								  		}
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
 			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
@@ -500,12 +513,13 @@ factor : CTE 	{
 	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
 	   ;
-
+/*
 bloque_de_sentencias : '{'list_sentencias'}' {
 												
 												$$.obj = ((Nodo)$2.obj).getFuncionPadre();
 											 }
 					   ;
+*/
 %%
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";
