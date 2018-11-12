@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.GridLayout;
@@ -31,6 +32,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
+import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -69,6 +71,8 @@ public class CompilerUI {
 	private DefaultTableModel dtm;
 	private DefaultTableModel tableDtm;
 	private JTable table_Tok;
+	private Nodo raiz = null;
+	private ArrayList<Nodo> funciones = null;
 	
 	
 	private String namefile="untitled";
@@ -117,7 +121,7 @@ public class CompilerUI {
 		frmCompiler = new JFrame();
 		frmCompiler.setIconImage(Toolkit.getDefaultToolkit().getImage(CompilerUI.class.getResource("/icons/genericregister_obj.gif")));
 		frmCompiler.setTitle("Compiler1.0");
-		frmCompiler.setBounds(100, 100, 723, 533);
+		frmCompiler.setBounds(100, 100, 980, 628);
 		frmCompiler.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmCompiler.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 		
@@ -181,7 +185,7 @@ public class CompilerUI {
 		scrollPane_Tokens.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
 		String[] colums={"ID","Tipo","Lexema","Linea"};		
-		final DefaultTableModel dtm=new DefaultTableModel(null,colums);
+		dtm = new DefaultTableModel(null,colums);
 		table_Tok = new JTable(dtm);
 		scrollPane_Tokens.setViewportView(table_Tok);
 		GroupLayout gl_Tokens = new GroupLayout(Tokens);
@@ -222,8 +226,8 @@ public class CompilerUI {
 		JScrollPane scrollPane_TS= new JScrollPane();
 		scrollPane_TS.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
-		String[] tableColumns={"Tipo","Nombre","Cant referencias"};
-		tableDtm=new DefaultTableModel(null,tableColumns);
+		String[] tableColumns={"Tipo","Nombre","Cant referencias","Uso","Ámbito"};
+		tableDtm = new DefaultTableModel(null,tableColumns);
 		JTable table_TS = new JTable(tableDtm);
 		scrollPane_TS.setViewportView(table_TS);
 		GroupLayout gl_TS = new GroupLayout(tablaSimbolos);
@@ -236,9 +240,7 @@ public class CompilerUI {
 				.addComponent(scrollPane_TS, GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
 		);
 		tablaSimbolos.setLayout(gl_TS);
-		
-		
-		
+	
 		//-------------------------------------- TEXT AREA -----------------------------------------
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -323,18 +325,35 @@ public class CompilerUI {
 			
 		//------------------------------------------ BOTONES ---------------------------------------
 		/**
+		 * ----------- BOTON ARBOL ---------------
+		 */
+		
+		final JButton btnArbol = new JButton("Arbol");
+		btnArbol.setEnabled(false);
+		btnArbol.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ArbolFrame panel = new ArbolFrame();
+				panel.setRaiz(raiz);
+				panel.setFunciones(funciones);
+				panel.setVisible(true);
+				
+				//panel.setContentPane(raiz.getdibujo());
+				
+				
+				
+			}
+		});
+		/**
 		 * ----------- BOTON RUN ---------------
 		 */
 		final JButton btnRun = new JButton("");
 		btnRun.setEnabled(false);
 		btnRun.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent arg0) {
 				clear();
-//				dtm.setRowCount(0);
-//				structDtm.setRowCount(0);
-				tableDtm.setRowCount(0);
-				//TODO aksa -------------//		
-				
+						
 				String program = textArea.getText();
 				Table table=new Table();
 		
@@ -365,7 +384,7 @@ public class CompilerUI {
 				
 				for(Error error : errors){
 					drawLine(error.nroLine-1, error.severity);
-					problems.setText(problems.getText() + error.description + "En linea: "+error.nroLine+"\n");
+					problems.setText(problems.getText() + error.description + " En linea: "+error.nroLine+"\n");
 				}
 				
 
@@ -387,17 +406,27 @@ public class CompilerUI {
 					structDtm.addRow(data);
 				}
 				
-				
-				
 				for (TableRecord tr : records){
-					String[] data=new String[3];
+					String[] data=new String[5];
 					data[0]=tr.getType();
 					data[1]=tr.getLexema();
 		            data[2]=String.valueOf((tr.getRef()));
+		            data[3]=tr.getUso();
+		            data[4]=tr.getAmbito();
 		            tableDtm.addRow(data);
 				}
-		
+			raiz = parser.getRaiz();
+			funciones = parser.getFunciones();
+			if (raiz != null){
+				parser.getRaiz().imprimirNodo();
+				btnArbol.setEnabled(true);
+				
 			}
+			for (Nodo n : parser.getFunciones()){
+				System.out.println("******* funcion : "+n.getLexema()+" *******");
+				n.imprimirNodo();
+			}
+			}	
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
 		
@@ -452,23 +481,39 @@ public class CompilerUI {
 				btnRun.setEnabled(true);
 			}
 		});
+		/**
+		 * ----------- BOTON CLEAR ---------------
+		 */
+		JButton btnClear = new JButton("Clear");
+		btnClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				textArea.setText("");
+				textArea.setEnabled(false);
+				btnRun.setEnabled(false);
+				btnArbol.setEnabled(false);
+				clear();
+				
+			}
+		});
+		
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel.createSequentialGroup()
-					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-						.addGroup(Alignment.LEADING, gl_panel.createSequentialGroup()
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel.createSequentialGroup()
 							.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-							.addContainerGap())
-						.addGroup(gl_panel.createSequentialGroup()
-							.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
-								.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 697, Short.MAX_VALUE)
-								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 697, Short.MAX_VALUE))
-							.addGap(8))))
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnArbol)
+							.addPreferredGap(ComponentPlacement.RELATED, 582, Short.MAX_VALUE)
+							.addComponent(btnClear))
+						.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
+						.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE))
+					.addGap(8))
 		);
 		gl_panel.setVerticalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -477,20 +522,25 @@ public class CompilerUI {
 						.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 							.addComponent(btnNewButton)
 							.addComponent(btnOpen))
-						.addComponent(btnRun))
+						.addComponent(btnRun)
+						.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+							.addComponent(btnArbol)
+							.addComponent(btnClear)))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE))
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE))
 		);
 		panel.setLayout(gl_panel);
 		//panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{textArea, btnNewButton, btnOpen, btnRun, tabbedPane, Problems, scrollPane_Problems, problems, Console, scrollPane_Console, console, Tokens, scrollPane_Tokens, table, scrollPane, lines}));
 		
 	}
 	private void clear(){
-		String text=this.textArea.getText();
-		this.textArea.setText(null);
-		this.textArea.setText(text);
+		//this.textArea.setText(null);
+		structDtm.setRowCount(0);
+		tableDtm.setRowCount(0);
+		dtm.setRowCount(0);
+		problems.setText("");
 	}
 
 
@@ -519,5 +569,4 @@ public class CompilerUI {
 
 
 	}
-
 }

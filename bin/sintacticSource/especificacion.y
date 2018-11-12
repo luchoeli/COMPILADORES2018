@@ -6,6 +6,7 @@
 	import semanticSource.SemanticAction;
 	import semanticSource.CheckRangeAction;
 	import java.util.Enumeration;
+	import java.util.HashSet;
 	import java.util.Vector;
 %}
 
@@ -44,75 +45,60 @@
 		DISTINTO
 		EOF
 %%
-/*reglas gramaticales*/	
+/*-------------------------------------- reglas gramaticales ------------------------------------*/	
 
-/*-----------------------------------------------------------------------------------------------------------------
-Programa:
-
-*Programa constituido por un conjunto de sentencias, que pueden ser declarativas o ejecutables.
-Las sentencias declarativas pueden aparecer en cualquier lugar del cÃ³digo fuente, exceptuando los bloques de las sentencias de control.
-
-*El programa no tendrÃ¡ ningÃºn delimitador.
-
-*Cada sentencia debe terminar con " , ".
-
-*Sentencias declarativas:
-	<tipo> <lista_de_variables>, //o la estructura que corresponda al tema asignado (11 a 13)
-
-	<tipo> ID ( <tipo> ID) {
-		<cuerpo_de_la_funcion> // conjunto de sentencias declarativas y ejecutables
-		return ( <retorno> )
-	}
-	Donde <retorno> es expresion
-
-*Sentencias ejecutables:
-	*ClÃ¡usula de selecciÃ³n (if). Cada rama de la selecciÃ³n serÃ¡ un bloque de sentencias. La condiciÃ³n serÃ¡ una comparaciÃ³n entre expresiones aritmÃ©ticas, variables o constantes, y debe escribirse entre ( ). La estructura de la selecciÃ³n serÃ¡, entonces:
-	if (<condicion>) <bloque_de_sentencias> else <bloque_de_sentencias> end_if
-	El bloque para el else puede estar ausente.
-
-	* Un bloque de sentencias puede estar constituido por una sola sentencia, o un conjunto de sentencias delimitadas por â€˜{â€˜ y â€˜}â€™.
-
-	* Sentencia de control segÃºn tipo especial asignado al grupo. (Temas 7 al 10 del Trabajo prÃ¡ctico 1)
-	Debe permitirse anidamiento de sentencias de control. Por ejemplo, puede haber una iteraciÃ³n dentro de una rama de una selecciÃ³n.
-	* Sentencia de salida de mensajes por pantalla. El formato serÃ¡ print(cadena). Las cadenas de caracteres sÃ³lo podrÃ¡n ser usadas en esta sentencia, y tendrÃ¡n el formato asignado al grupo en el Trabajo PrÃ¡ctico 1.
-	* Los operandos de las expresiones aritmÃ©ticas pueden ser variables, constantes, u otras expresiones aritmÃ©ticas.
-	No se permiten anidamientos de expresiones con parÃ©ntesis.
-	
-	*Incorporar la invocaciÃ³n de funciones, con la siguiente sintaxis:
-		ID(<nombre_parametro>;<lista_permisos>),
-
-	Donde <lista_permisos> puede ser: readonly / write / pass / write ; pass
-	La invocaciÃ³n puede aparecer en cualquier lugar donde pueda aparecer una expresiÃ³n aritmÃ©tica.
-
-*Sentencias de control
-	case do (tema 10 en TP1)
-		case ( variable ){
-			valor1: do <bloque> .
-			valor2: do <bloque> .
-			...
-			valorN: do <bloque> .
-		} .
-	Nota: Los valores valor1, valor2, etc., sÃ³lo podrÃ¡n ser constantes del mismo tipo que la variable.
-	La restricciÃ³n de tipo serÃ¡ chequeada en la etapa 3 del trabajo prÃ¡ctico.
-------------------------------------------------------------------------------------------------------------*/
-programa:	list_sentencias {System.out.println("TERMINO GRAMATICA");}
+programa:	list_sentencias {
+								System.out.println("TERMINO GRAMATICA");
+								this.raiz = (Nodo)$1.obj;
+								raiz.imprimirNodo();							
+							}
 		;
 
-list_sentencias:   sent_declarativa 
-				 | sent_ejecutable 
-			
-				 | list_sentencias sent_declarativa
-				 | list_sentencias sent_ejecutable
+list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
+				 | sent_ejecutable {
+				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+		 								if (raiz == null){
+					 						raiz = nuevo;
+					 						nuevo.setPadre(null);
+		 								}
+		 								$$.obj = nuevo;
+				 				   }	
+				 		
+				 |  list_sentencias sent_declarativa{$$.obj =  (Nodo)$1.obj;}
+				 |  list_sentencias sent_ejecutable{	
+				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+				 									
+					 								if (raiz == null){
+					 									raiz = nuevo;
+					 									nuevo.setPadre(null);
+					 									
+					 								}else{	
+					 									if (((Nodo)$1.obj).getLexema().equals("null")){					 										
+					 										((Nodo)$1.obj).setLexema("S");
+				 											((Nodo)$1.obj).setIzq((Nodo)$2.obj);
+				 											((Nodo)$1.obj).setDer(null); 
+				 											
+				 										}else{
+				 											((Nodo)$1.obj).setProximaSentencia(nuevo);
+					 										nuevo.setPadre((Nodo)$1.obj);	
+				 										}
+					 								}
+					 								$$.obj =nuevo;
+					 								}
 				 ;
 			  
-sent_declarativa	:	declaracion_variable ','
-					|	declaracion_funcion ','
+sent_declarativa	:	declaracion_variable ',' 
+					|	declaracion_funcion ',' {
+													if (!((Nodo)$1.obj).equals(null)){
+														funciones.add((Nodo)$1.obj);
+													}
+												}
 					;
 					
-declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion variable");
+declaracion_variable	:	tipo list_variables {
 												 setRegla(((Token)$1.obj).getNroLine(), "Declaracion de variables", ((Token)$1.obj).getLexema());
-												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema());												 
-												 }
+												 updateTable(((Vector<Token>)$2.obj), ((Token)$1.obj).getLexema(), "Identificador de variable",ambito.get(ambito.size()-1));
+												}
 						| tipo list_variables error {
 														Vector<Token> tokens = (Vector<Token>)$2.obj;
 														if (tokens.size()>1){
@@ -123,22 +109,60 @@ declaracion_variable	:	tipo list_variables {//System.out.println("Declaracion va
 													}
 						;
 
-declaracion_funcion	: tipo ID '(' tipo ID')' '{'
-					  list_sentencias // conjunto de sentencias declarativas y ejecutables
-					  RETURN '(' expresion ')'
-					  '}' {
-					  		setRegla(((Token)$1.obj).getNroLine(), "Declaracion de funcion ", ((Token)$1.obj).getLexema()+" "+((Token)$2.obj).getLexema());
-					  		Vector<Token> vec = new Vector<Token>(); 
-					  		vec.add((Token)$2.obj);
-					  		updateTable(vec, ((Token)$1.obj).getLexema());
-					  	  } 
-					
-					| tipo ID '(' tipo ID')' '{'
-					  list_sentencias // conjunto de sentencias declarativas y ejecutables
-					  '}' {this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$1.obj).getNroLine());}
-					;
+encabezado : tipo ID '(' tipo ID ')'	{	
+										  	String ambit = ambito.get(ambito.size()-1);
+									  		System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
+									  		if (ambit.equals("main")){
+									  			//System.out.println("declarar ");
+												Vector<Token> vec = new Vector<Token>(); 
+										  		vec.add((Token)$2.obj);
+										  		updateTable(vec, ((Token)$1.obj).getLexema(), FUNCION,ambit);	
+										  		ambit = ((Token)$2.obj).getLexema();
+												apilarAmbito(ambit);
+										  		vec.removeAllElements();
+										  		vec.add((Token)$5.obj);
+										  		updateTable(vec, ((Token)$4.obj).getLexema(), PARAMETRO,ambit);
+										  		Nodo nuevo = new Nodo(((Token)$2.obj).getLexema(),null,null);
+										  		$$.obj = nuevo;
+										  	}else{
+										  		System.out.println("en "+ambit+"Error semantico: no se puede declarar "+((Token)$2.obj).getLexema());
+										  		this.addError("Error semantico: no se puede declarar funcion dentro de otra ", ((Token)$2.obj).getNroLine());
+										  		//FIXME
+										  		//Error error = new Error("Error semantico: no se puede declarar funcion dentro de otra ",((Token)$5.obj).getNroLine());
+										  		$$.obj = new Nodo(null,null,null);
+										  	}
+									  		
+										}
 
-						  
+		   ;
+
+declaracion_funcion	: encabezado '{' list_sentencias
+									 RETURN '(' expresion ')'
+								 '}' {	
+								 		System.out.println("wepa "+((Nodo)$3.obj).getLexema());
+								  		Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
+								  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
+								  		Nodo nuevo = ((Nodo)$1.obj);
+								  		nuevo.setIzq(padre);					  		
+								  		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+								  		if (raiz == padre){
+								  			System.out.println("ENTRO");
+								  			raiz = null;
+								  		}
+					  		
+					  					$$.obj = nuevo;
+					  					
+					  					desapilarAmbito();
+								 	 }
+					| encabezado '{'
+					  list_sentencias // conjunto de sentencias declarativas y ejecutables
+					  '}' 	{
+					  			System.out.println("rmpo");
+					  			this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$4.obj).getNroLine());
+					  		}
+					  		
+					;
+								 
 list_variables		:	list_variables ';' ID  {
 											Vector<Token> tokens = (Vector<Token>)$1.obj;
 											Token token = (Token)$3.obj;
@@ -164,37 +188,58 @@ tipo	:	USINTEGER
 		;
 			
 
-sent_ejecutable  : sent_seleccion ','
+sent_ejecutable  : sent_seleccion ',' {$$.obj = ((Token)$1.obj).getNodo();}
 				 | sent_control ','
 				 | imprimir ','
-				 | asignacion ',' //{System.out.println("Asignacion realizada");}
-				 | invocacion ','
+				 | asignacion ',' {$$.obj = ((Token)$1.obj).getNodo();} 
+				 
 				 ;
 				 
-invocacion	:	ID '(' nombre_parametro ';' lista_permisos')'{
-																setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
-															 }
+invocacion	:	ID '(' ID ';' lista_permisos')' { 	if (isFunDeclarated(((Token)$1.obj).getLexema())){
+														//TODO chequear ambito de $2.obj !
+														System.out.println("Declatada la funcion");
+														if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
+															setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+															Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
+															TableRecord tr = table.get(((Token)$1.obj).getLexema());
+															nodoFun.setTableRec(tr);
+															Nodo nodoCall = new Nodo("Call",nodoFun,null);
+															
+															$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
+														}else{
+															addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
+															System.out.println("No cumple chqueo de permisos");
+														}
+													}else{
+														System.out.println("FUNC NO DECLARADA");
+														addError("Error semantico: la funcion '"+((Token)$1.obj).getLexema()+"' no esta declarada", ((Token)$1.obj).getNroLine());
+													}
+												 }
+/*															 
 			|	ID nombre_parametro ';' lista_permisos')'  {
 																	addError("Error sintactico: falta '(' al inicio de la invocacion ", ((Token)$1.obj).getNroLine());
 															 	}
 															 	
 			|	ID '('nombre_parametro ';' lista_permisos  {
 																addError("Error sintactico: falta ')' al final de la invocacion ", ((Token)$1.obj).getNroLine());
-															}
+														}
+													
 			;
 
 nombre_parametro :	ID
 				 |  CTE
 				 ;
-
-lista_permisos	: READONLY
-				| WRITE
-				| PASS
-				| WRITE ';' PASS
+*/
+lista_permisos	: READONLY  {$$.obj = "READONLY";}
+				| WRITE	{$$.obj = "WRITE";}
+				| PASS	{$$.obj = "PASS";}
+				| WRITE ';' PASS	{$$.obj = "WRITE;PASS";}
 				;
 
 sent_control	: CASE '(' ID ')' bloque_control  				
 										 {System.out.println("Case do");
+										 //TODO chequear ambito de $3.obj, 
+										 //FIXME sentencias solo ejecutables
 				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
 										 }
 				| CASE '(' error ')' bloque_control  				
@@ -208,23 +253,37 @@ bloque_control 	: '{' linea_control '}'
 				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
 				;
 				
-linea_control	: 	CTE ':' DO bloque_sin_declaracion','
-				|	linea_control CTE ':' DO bloque_sin_declaracion','
-				//| 	CTE ':' DO bloque_sin_declaracion error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
-				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
-				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
+linea_control	: 	CTE ':' DO bloque_de_sentencias','
+				|	linea_control CTE ':' DO bloque_de_sentencias','
+				//| 	CTE ':' DO bloque_de_sentencias error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
+				| 	CTE DO bloque_de_sentencias ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
+				| 	CTE ':' bloque_de_sentencias ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
-sent_seleccion : sent_if END_IF
+sent_seleccion : sent_if END_IF {
+									//$$.obj = ((Token)$1.obj).getNodo();
+								}
 	
-			   | sent_if ELSE bloque_sin_declaracion END_IF{setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
-			   			  									}
+			   | sent_if ELSE bloque_sin_declaracion END_IF{
+			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
+			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
+			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
+			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)$3.obj,null); 
+			   													
+			   													ifNodo.getDer().setDer(elseNodo);
+			   													
+			   			  								   }
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
 			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
 sent_if :	IF '('expresion_logica')'  
 			bloque_sin_declaracion {
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
+			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
+			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
+			   				  	    	Nodo nuevo = new Nodo("IF",(Nodo)$3.obj,cuerpoNodo);
+										((Token)$1.obj).setNodo(nuevo);
+			   				  	    	//$$.obj = nuevo;
 			   			   		   }
 		|	IF '(' expresion_logica 
 			bloque_sin_declaracion error {
@@ -241,20 +300,56 @@ sent_if :	IF '('expresion_logica')'
  		 		
 	    ;
 
-bloque_sin_declaracion : '{'list_sentencias_no_declarables'}'
-					   ;
-
-list_sentencias_no_declarables : list_sentencias_no_declarables sent_ejecutable
-								| sent_ejecutable
-								//| sent_ejecutable error {addError("Error sintactico: falta la coma",((Token)$2.obj).getNroLine());}
-								| sent_declarativa error{ 
-															addError("Error sint�ctico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
-														}
+bloque_sin_declaracion : '{'list_sentencias_no_declarables'}' {$$.obj = ((Nodo)$2.obj).getFuncionPadre();}
+					   ;			  
+list_sentencias_no_declarables :    sent_declarativa {
+														$$.obj = new Nodo("null",null,null);
+														addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$1.obj).getNroLine());
+													 }
+								| sent_ejecutable{
+								 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+						 								if (raiz == null){
+									 						raiz = nuevo;
+									 						nuevo.setPadre(null);
+						 								}
+						 								$$.obj = nuevo;
+								 				   }
+								|	list_sentencias_no_declarables sent_ejecutable {	
+												 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+												 									
+													 								if (raiz == null){
+													 									raiz = nuevo;
+													 									nuevo.setPadre(null);
+													 									
+													 								}else{	
+													 									if (((Nodo)$1.obj).getLexema().equals("null")){					 										
+													 										((Nodo)$1.obj).setLexema("S");
+												 											((Nodo)$1.obj).setIzq((Nodo)$2.obj);
+												 											((Nodo)$1.obj).setDer(null); 
+												 											
+												 										}else{
+												 											((Nodo)$1.obj).setProximaSentencia(nuevo);
+													 										nuevo.setPadre((Nodo)$1.obj);	
+												 										}
+													 								}
+													 								$$.obj =nuevo;
+													 								}
+				 				| list_sentencias_no_declarables sent_declarativa	{
+				 																			$$.obj =  (Nodo)$1.obj;
+																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)$2.obj).getNroLine());
+				 																	}
+				 				
+							
 								;
 								
 
 
-expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Token)$2.obj).getLexema());}
+expresion_logica : expresion comparador expresion { 
+														setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Nodo)$2.obj).getLexema());
+														Nodo comparador = new Nodo(((Nodo)$2.obj).getLexema(),((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());	
+														Nodo nuevo = new Nodo("Condicion",comparador,null);
+														$$.obj = nuevo;
+												  }
 				 		
 				|expresion error expresion  	{
 													addError("Errorsintactico: Comparador invalido. ", ((Token)$1.obj).getNroLine());
@@ -267,66 +362,117 @@ expresion_logica : expresion comparador expresion { setRegla(((Token)$1.obj).get
 												}
 				 ;
 
-comparador : MAYORIGUAL
-		   | MENORIGUAL
-		   | IGUAL
-		   | DISTINTO
-		   | '>'
-		   | '<'
+comparador : MAYORIGUAL {
+						 Nodo nuevo = new Nodo(">=");
+						 $$.obj = nuevo;
+						}
+		   | MENORIGUAL {	
+						Nodo nuevo = new Nodo("<=");
+						$$.obj = nuevo;
+		   				}
+		   | IGUAL {	
+		   				Nodo nuevo = new Nodo("==");
+		   				$$.obj = nuevo;	
+		   		   }
+		   | DISTINTO {	
+		   				Nodo nuevo = new Nodo("!=");
+		   				$$.obj = nuevo;
+		   			  }
+		   | '>' {	
+		   			Nodo nuevo = new Nodo(">");
+		   			$$.obj = nuevo;
+		   		}
+		   | '<' {	
+		   			Nodo nuevo = new Nodo("<");
+		   			$$.obj = nuevo;
+		   		}
 		   ;
 
 
-expresion : expresion '+' termino{
-									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-									Nodo nuevo = new Nodo("+",arbol.getE(),arbol.getT());
-	   								arbol.setE(nuevo);
+expresion : expresion '+' termino{	
+									Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+		   								
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error sem�ntico: Los tipos de datos de la operacion + no coinciden. ", ((Token)$1.obj).getNroLine());
+	   									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+	   								}
 								 } 
 		  | expresion '-' termino{
-									$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-									Nodo nuevo = new Nodo("-",arbol.getE(),arbol.getT());
-	   								arbol.setE(nuevo);
+		  							if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+										Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
+		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   							}else{
+	   									addError("Error sem�ntico: Los tipos de datos de la operacion - no coinciden. ", ((Token)$1.obj).getNroLine());
+	   								}
 								 }
 		  | termino	{
-		  				arbol.setE(arbol.getT());
+		  				$$.obj = (Token)$1.obj;
 		  			}
 		  ;
 
-termino : termino '*' factor{
-								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-								Nodo nuevo = new Nodo("*",arbol.getT(),arbol.getF());
-	   							arbol.setT(nuevo);
+termino : termino '*' factor{	
+							
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+	   							}else{
+	   								addError("Error sem�ntico: Los tipos de datos de la operacion * no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| termino '/' factor{
-								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
-								Nodo nuevo = new Nodo("/",arbol.getT(),arbol.getF());
-	   							arbol.setT(nuevo);
+								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+									Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+		   						}else{
+	   								addError("Error sem�ntico: Los tipo de datos de la operacion / no coinciden. ", ((Token)$1.obj).getNroLine());
+	   							}
 							}
 		| factor	{
-						arbol.setT(arbol.getF());
+						$$.obj = (Token)$1.obj;
 					}
+		| invocacion  '+'{
+							$$.obj = (Token)$1.obj;
+						}
+		
 		;
 
 imprimir	:	PRINT '('CADENA')'
+				//TODO chequear ambito de la cadena
 				{setRegla(((Token)$1.obj).getNroLine(), "Impresion",((Token)$1.obj).getLexema()+"("+((Token)$3.obj).getLexema()+")" ) ;}
 			| 	PRINT '(' error ')' {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)$1.obj).getNroLine());}
 			;
 			
-asignacion 	:	ID ASIGNACION expresion {
-											if (isDeclarated((Token)$1.obj)){	
-												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
-												Nodo nuevo = new Nodo(":=", new Nodo(table.get(((Token)$1.obj).getLexema())), arbol.getE());
-												//arbol.setA(nuevo);
-												arbol.add(nuevo);
-																								
+asignacion 	:	ID ASIGNACION expresion {	
+											if (isDeclarated((Token)$1.obj)){
+												if (checkAmbito(((Token)$1.obj).getLexema())){
+													setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
+													Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
+													Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
+													//$$.obj = nuevo;
+													((Token)$1.obj).setNodo(nuevo);
+													registrarEscritura(((Token)$1.obj).getLexema());
+												}else{
+													addError("Error Semantico: la variable '"+((Token)$1.obj).getLexema()+"' no pertenece al ambito '"+ambito.get(ambito.size()-1)+"'.",((Token)$1.obj).getNroLine());
+												}
+											}
+											else{
+												System.out.println(((Token)$1.obj).getLexema()+ "  no esta declarada");
 											}
 										}
-			|	ID ASIGNACION error { 
+			|	ID ASIGNACION error {
+							System.out.println("ERROR"); 
 							addError("Asignacion erronea ", ((Token)$1.obj).getNroLine());
+							//((Token)$1.obj).se
+							//$$.obj = new 
+							//FIXME arreglar esto, tendria que devolver un nodo para que no me tire error.
 						 }
 			;
 
-factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
-	   				arbol.setF(nuevo);
+factor : CTE 	{	
+					Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
+					((Token)$1.obj).setNodo(nuevo);
 	   			}
 	   | '-' factor {
 	   				System.out.println("Un negative "+((Token)$2.obj).getRecord().getType());
@@ -335,44 +481,69 @@ factor : CTE 	{	Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   					//$$.obj = error;
 	   				}else{
 	   					updateTableNegative(   ((Token)$2.obj).getLexema()   );
-	   					$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null);
 	   					Nodo nuevo = new Nodo(table.get("-"+((Token)$2.obj).getLexema()));
-	   					arbol.setF(nuevo);
+						$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 	   				}
 
 	   			 }
 	   
 	   | ID  { 
 	   			isDeclarated((Token)$1.obj);
+	   			//TODO �chequeo ambito? �chequeo de declaracion?
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
-	   			arbol.setF(nuevo);
+	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
+	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
-	   | invocacion','
-	   	{
-	   		//TODO 	poner la invocacion en una variable auxuliar y agregarla a la tabla de simbolos 
-	   	}
-	   		 
 	   ;
 
-//bloque_de_sentencias : '{'list_sentencias'}'
-//					   ;
+bloque_de_sentencias : '{'list_sentencias'}' {
+												
+												$$.obj = ((Nodo)$2.obj).getFuncionPadre();
+											 }
+					   ;
 %%
-/**/
+/*******************************************************************************************************/
+private static final String FUNCION = "ID funcion";
+private static final String PARAMETRO = "ID parametro";
+private static final String IDENTIFICADOR = "IDENTIFICADOR";
+ArrayList<String> ambito = new ArrayList<String>();
 LexicalAnalizer lexico;
 Table table;
+Nodo raiz = null;
+Nodo actual = null;
+ArrayList<Nodo> funciones = new ArrayList<Nodo>();
+HashSet<String> alcanceActual = new HashSet<String>();
 public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructure>();
 public ArrayList<Error> errors = new ArrayList<Error>();
 public ArbolSintactico arbol = new ArbolSintactico();
 
+private void apilarAmbito(String ambito){
+	this.ambito.add(ambito);
+}
+
+private void desapilarAmbito(){
+	int pos = this.ambito.size()-1;
+	if (pos >= 0){
+		this.ambito.remove(pos);
+	}
+}
+
 public Parser(String programa, Table table) {
     lexico = new LexicalAnalizer(programa, table);
 	this.table = table;
+	this.ambito.add("main");
 }
 
 public ArbolSintactico getArbol(){
 	return arbol;
 }
+public ArrayList<Nodo> getFunciones(){
+	return funciones;
+}
 
+public Nodo getRaiz(){
+	return raiz;
+}
 private int yylex() {
 	Token token=lexico.getToken();
 
@@ -419,29 +590,44 @@ public LexicalAnalizer getLexical(){
 	return lexico;
 }
 
-public void updateTable(Vector<Token> tokens, String type){  //type double o usinteger, tokens son identificadores
+public void updateTable(Vector<Token> tokens, String type, String uso, String ambito){  //type double o usinteger, tokens son identificadores
 	/*setea el tipo del _id en la tabla de simbolos*/
 	Enumeration e = tokens.elements();
 	while (e.hasMoreElements()){
 		Token token = (Token)e.nextElement();
 		TableRecord tr = token.getRecord();
 		String lexema = tr.getLexema();
+		//System.out.println("-- "+(table.get(lexema).getUso()));
 		
-		if (table.containsLexema(lexema)){
-			//System.out.println("esta en la tabla");
-			
-			if  (table.get(lexema).getType()!="IDENTIFICADOR"){
-				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+			 if (table.containsLexema(lexema)){
+			 
+				//System.out.println("esta en la tabla");
+				
+				if ((table.get(lexema).getType()==FUNCION) && (ambito != "main") ){
+					System.out.println("declaracion en declaracion");
+					addError("Error semantico: no se puede declarar funcion dentro de una funcion.",token.getNroLine());
+				}else{
+					if  ((table.get(lexema).getType()!=IDENTIFICADOR)){
+						addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+					}
+					else{
+							//TableRecord ntr = token.getRecord();
+							(table.get(lexema,uso)).setType(type);
+							(table.get(lexema)).setUso(uso);
+							(table.get(lexema)).setAmbito(ambito);
+					}
+				}
 			}
 			else{
-				(table.get(lexema)).setType(type);
-			}
-		}
-		else{
-			System.out.println("No esta asignado en la tabla");				
+				System.out.println("No esta asignado en la tabla");				
 			}
 	}
-}	
+}
+
+public void setAmbito(Vector<Token> tokens, String ambito){
+	
+
+}
 
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
@@ -492,7 +678,7 @@ public TableRecord updateTableNegative(String key ){//key: 2.0
 }
 
 public boolean isDeclarated(Token id){
-	if (table.get(id.getLexema()).getType() == "IDENTIFICADOR" )
+	if (table.get(id.getLexema()).getType() == IDENTIFICADOR )
         {
             this.addError("Error sintactico: Variable "+id.getLexema()+" no declarada.", id.getNroLine());
             this.table.remove(id.getRecord().getLexema());
@@ -503,3 +689,118 @@ public boolean isDeclarated(Token id){
         	return true;
         }
 }
+
+private boolean datosCompatibles(String type, String type2) {
+	if (type == type2){
+	return true;
+	}
+	return false;
+}
+
+/*
+public void registrarUso(String id, String accion){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito(); 
+		switch(accion){
+			case PASS: {table.get(ambito)};
+			case WRITE:{}; 
+			
+		}
+	}
+}
+*/
+public void registrarEscritura(String id){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito();
+		TableRecord funcionTR = table.get(ambito);
+		System.out.println("escritado en "+funcionTR.getLexema());
+		funcionTR.setWritten(true);		
+	}
+}
+
+
+public void registrarPasaje(String id){
+	TableRecord tr = table.get(id);
+	if (tr.getUso() == PARAMETRO){
+		String ambito = tr.getAmbito();
+		TableRecord funcionTR = table.get(ambito);
+		System.out.println("pasado en "+ambito);
+		funcionTR.setPassed(true);
+	}
+}
+
+public boolean checkPermisos(String func, String permiso){
+	TableRecord tr = table.get(func);
+	boolean written = tr.isWritten();
+	boolean passed = tr.isPassed();
+	System.out.println(tr.getLexema()+" writen="+written+" passed="+passed);
+	System.out.println("Lexema de LLLa func "+tr.getLexema()+" --- permiso "+permiso+"-");
+	switch (permiso){
+		case ("READONLY") :
+			if (written || passed){
+			 	return false ;
+			}
+			break;
+		case ("WRITE") : 
+			
+			if (passed){
+				return false;
+			}
+			break;
+		case ("written") : 
+			if (passed){
+				return false;
+			}
+			break;
+		case ("WRITE;PASS") : 
+			return true;
+		default : System.out.println("Mandaron cualquira");
+				  return false;
+	}	
+	System.out.println("permisos aceptados");
+	return true;
+}
+
+private boolean isFunDeclarated(String funcion){
+	System.out.println("=="+funcion);
+	if (table.contains(funcion)){
+		System.out.println("contiene la fun: "+funcion);
+		TableRecord funTR = table.get(funcion);
+		if (funTR.getUso()!=null && funTR.getUso().equals(FUNCION)){
+			System.out.println("es tipo funcion");
+			return true;
+		}
+		System.out.println("no es tipo funcion: "+funTR.getUso()+" != "+FUNCION);
+		return false;
+	}
+	System.out.println("la tabla no contiene a: "+funcion);
+	return false;
+	
+}
+
+private boolean checkAmbito(String lexema){
+	if (table.contains(lexema)){
+		System.out.println("contiene el lex: "+lexema);
+		TableRecord tr = table.get(lexema);
+		int pos = ambito.size()-1;
+		if (tr.getAmbito()!=null){
+			while (pos>=0 && !tr.getAmbito().equals(ambito.get(pos))){
+				pos-=1; 
+			}
+			if (pos<0){
+				System.out.println("no esta en ambito!");
+				return false;			
+			}
+			System.out.println("esta en ambito!");
+			return true;
+		}
+		System.out.println("no esta en ambito, ambito de "+lexema+" es '"+tr.getAmbito()+"' != de "+ambito.get(ambito.size()-1));
+		return false;
+	}
+	System.out.println("la tabla no contiene a: "+lexema);
+	return false;
+	
+}
+

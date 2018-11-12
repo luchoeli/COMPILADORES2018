@@ -21,9 +21,9 @@ public class CheckRangeAction extends SimpleSemanticAction{
 		boolean error=true;
 		try{			
 			value = Double.parseDouble(entero);
-			System.out.println(min+" < "+value+" < "+max);
+			//System.out.println(min+" < "+value+" < "+max);
 			if (((value < max) && (value > min)) || (value==0.0)){
-				System.out.println("CUMPLE RANGO");
+				//System.out.println("CUMPLE RANGO");
 				error=false;}
     	} catch (Exception ex) {
     		Logger.getLogger(CheckRangeAction.class.getName()).log(Level.SEVERE, null, ex);
