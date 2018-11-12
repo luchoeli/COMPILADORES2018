@@ -67,8 +67,9 @@ list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
 				 |  list_sentencias sent_declarativa{$$.obj =  (Nodo)$1.obj;}
 				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
-				 									
+				 									System.out.println(((Nodo)$2.obj).getLexema());
 					 								if (raiz == null){
+					 									System.out.println("si");
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
 					 									
@@ -111,7 +112,7 @@ declaracion_variable	:	tipo list_variables {
 
 encabezado : tipo ID '(' tipo ID ')'	{	
 										  	String ambit = ambito.get(ambito.size()-1);
-									  		System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
+									  		//System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));
 									  		if (ambit.equals("main")){
 									  			//System.out.println("declarar ");
 												Vector<Token> vec = new Vector<Token>(); 
@@ -139,7 +140,7 @@ encabezado : tipo ID '(' tipo ID ')'	{
 declaracion_funcion	: encabezado '{' list_sentencias
 									 RETURN '(' expresion ')'
 								 '}' {	
-								 		System.out.println("wepa "+((Nodo)$3.obj).getLexema());
+								 		//System.out.println("wepa "+((Nodo)$3.obj).getLexema());
 								  		Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
 								  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
 								  		Nodo nuevo = ((Nodo)$1.obj);
@@ -197,18 +198,23 @@ sent_ejecutable  : sent_seleccion ',' {$$.obj = ((Token)$1.obj).getNodo();}
 				 
 invocacion	:	ID '(' ID ';' lista_permisos')' { 	if (isFunDeclarated(((Token)$1.obj).getLexema())){
 														//TODO chequear ambito de $2.obj !
-														System.out.println("Declatada la funcion");
-														if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
-															setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
-															Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
-															TableRecord tr = table.get(((Token)$1.obj).getLexema());
-															nodoFun.setTableRec(tr);
-															Nodo nodoCall = new Nodo("Call",nodoFun,null);
-															
-															$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
+														//System.out.println("Declatada la funcion");
+														System.out.println("amito actual "+ambito.get(ambito.size()-1));
+														if (checkAmbito(((Token)$1.obj).getLexema())){
+															if (checkPermisos( ((Token)$1.obj).getLexema() , ((String)$5.obj))){
+																setRegla(((Token)$1.obj).getNroLine(), "Invocacion", ((Token)$1.obj).getLexema());
+																Nodo nodoFun = new Nodo( ((Token)$1.obj).getLexema(),null,null);
+																TableRecord tr = table.get(((Token)$1.obj).getLexema());
+																nodoFun.setTableRec(tr);
+																Nodo nodoCall = new Nodo("Call",nodoFun,null);
+																
+																$$.obj = new Token(0, ((Token)$1.obj).getLexema()+"()", ((Token)$1.obj).getNroLine(), "", null,nodoCall);
+															}else{
+																addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
+																System.out.println("No cumple chqueo de permisos");
+															}
 														}else{
-															addError("Error semantico: la funcion "+((Token)$1.obj).getLexema()+" no permite el pasaje de parametros por "+(String)$5.obj, ((Token)$1.obj).getNroLine());
-															System.out.println("No cumple chqueo de permisos");
+															//no esta en el ambito correspondiente
 														}
 													}else{
 														System.out.println("FUNC NO DECLARADA");
@@ -239,8 +245,10 @@ lista_permisos	: READONLY  {$$.obj = "READONLY";}
 sent_control	: CASE '(' ID ')' bloque_control  				
 										 {System.out.println("Case do");
 										 //TODO chequear ambito de $3.obj, 
-										 //FIXME sentencias solo ejecutables
-				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());												 
+							
+				  						  setRegla(((Token)$1.obj).getNroLine(), "Sentencia de control", ((Token)$1.obj).getLexema());
+				  						  Nodo nodo = new Nodo("CASE",(Nodo)$5.obj,null);
+				  						  $$.obj = nodo;												 
 										 }
 				| CASE '(' error ')' bloque_control  				
 										 {
@@ -248,16 +256,37 @@ sent_control	: CASE '(' ID ')' bloque_control
 										 }
 				;
 
-bloque_control 	: '{' linea_control '}'
+bloque_control 	: '{' linea_control '}' {$$.obj = ((Nodo)$2.obj);}
 				|  linea_control '}' error {addError("Error sintactico: falta '{' para iniciar el bloque de sentencias de control ", ((Token)$1.obj).getNroLine());}
 				| '{' linea_control error {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)$3.obj).getNroLine());}
 				;
 				
-linea_control	: 	CTE ':' DO bloque_de_sentencias','
-				|	linea_control CTE ':' DO bloque_de_sentencias','
+linea_control	: 	CTE ':' DO bloque_sin_declaracion','   	{	
+																Nodo padre = ((Nodo)$4.obj).getFuncionPadre();
+																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+														  		if (raiz == padre){
+														  			System.out.println("ENTRO");
+														  			raiz = null;
+														  		}
+																Nodo nodoLctrl = new Nodo(((Token)$1.obj).getLexema(),null,((Nodo)$4.obj));
+																$$.obj = nodoLctrl;				
+															}
+				| 	CTE ':' DO bloque_sin_declaracion',' linea_control	{	
+																		Nodo padre = ((Nodo)$4.obj).getFuncionPadre();
+																		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+																  		if (raiz == padre){
+																  			System.out.println("ENTRO");
+																  			raiz = null;
+																  		}
+																			Nodo nodoLctrl = new Nodo(((Token)$1.obj).getLexema(),((Nodo)$6.obj),((Nodo)$4.obj));
+																			$$.obj = nodoLctrl;
+																		}
+			
+			
+			
 				//| 	CTE ':' DO bloque_de_sentencias error {addError("Error sintactico: los bloques de las sentencias de control deben estar separados con ',' ", ((Token)$5.obj).getNroLine());}
-				| 	CTE DO bloque_de_sentencias ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
-				| 	CTE ':' bloque_de_sentencias ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
+				| 	CTE DO bloque_sin_declaracion ',' {addError("Error sintactico: falta ':' antes del 'do'", ((Token)$1.obj).getNroLine());}
+				| 	CTE ':' bloque_sin_declaracion ','{addError("Error sintactico: falta 'do' despues del ':'", ((Token)$1.obj).getNroLine());}
 				;
 				
 sent_seleccion : sent_if END_IF {
@@ -265,6 +294,12 @@ sent_seleccion : sent_if END_IF {
 								}
 	
 			   | sent_if ELSE bloque_sin_declaracion END_IF{
+			   													Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
+																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+														  		if (raiz == padre){
+														  			System.out.println("ENTRO");
+														  			raiz = null;
+														  		}
 			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
 			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
 			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
@@ -276,8 +311,14 @@ sent_seleccion : sent_if END_IF {
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
 			   | sent_if END_IF ELSE bloque_sin_declaracion END_IF { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)$3.obj).getNroLine());}
 			   ;			  									
-sent_if :	IF '('expresion_logica')'  
-			bloque_sin_declaracion {
+sent_if :	IF '('expresion_logica')'  	
+			bloque_sin_declaracion {	
+										Nodo padre = ((Nodo)$5.obj).getFuncionPadre();
+										/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
+								  		if (raiz == padre){
+								  			System.out.println("ENTRO");
+								  			raiz = null;
+								  		}
 			   				  	    	setRegla(((Token)$1.obj).getNroLine(), "Sentencia de Control", "if");
 			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
 			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
@@ -491,16 +532,17 @@ factor : CTE 	{
 	   			isDeclarated((Token)$1.obj);
 	   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
-	   			System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
+	   			//System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
 	   			((Token)$1.obj).setNodo(nuevo);
 	   		 }
 	   ;
-
+/*
 bloque_de_sentencias : '{'list_sentencias'}' {
 												
 												$$.obj = ((Nodo)$2.obj).getFuncionPadre();
 											 }
 					   ;
+*/
 %%
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";
@@ -632,7 +674,7 @@ public void setAmbito(Vector<Token> tokens, String ambito){
 public TableRecord updateTableNegative(String key ){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
 		String newLexema = "-"+ key;
-		System.out.println("NEWKEY: "+newLexema);
+		//System.out.println("NEWKEY: "+newLexema);
 		//FIXME supongo que e ya se que es double 
 		SemanticAction as = new CheckRangeAction(lexico,LexicalAnalizer.minNega, LexicalAnalizer.maxDou);
 		if (!as.execute(newLexema, ' ')) { //Si no cumple rango retorno null
@@ -715,7 +757,7 @@ public void registrarEscritura(String id){
 	if (tr.getUso() == PARAMETRO){
 		String ambito = tr.getAmbito();
 		TableRecord funcionTR = table.get(ambito);
-		System.out.println("escritado en "+funcionTR.getLexema());
+		//System.out.println("escritado en "+funcionTR.getLexema());
 		funcionTR.setWritten(true);		
 	}
 }
@@ -726,7 +768,7 @@ public void registrarPasaje(String id){
 	if (tr.getUso() == PARAMETRO){
 		String ambito = tr.getAmbito();
 		TableRecord funcionTR = table.get(ambito);
-		System.out.println("pasado en "+ambito);
+		//System.out.println("pasado en "+ambito);
 		funcionTR.setPassed(true);
 	}
 }
@@ -735,8 +777,8 @@ public boolean checkPermisos(String func, String permiso){
 	TableRecord tr = table.get(func);
 	boolean written = tr.isWritten();
 	boolean passed = tr.isPassed();
-	System.out.println(tr.getLexema()+" writen="+written+" passed="+passed);
-	System.out.println("Lexema de LLLa func "+tr.getLexema()+" --- permiso "+permiso+"-");
+	//System.out.println(tr.getLexema()+" writen="+written+" passed="+passed);
+	//System.out.println("Lexema de LLLa func "+tr.getLexema()+" --- permiso "+permiso+"-");
 	switch (permiso){
 		case ("READONLY") :
 			if (written || passed){
@@ -759,17 +801,17 @@ public boolean checkPermisos(String func, String permiso){
 		default : System.out.println("Mandaron cualquira");
 				  return false;
 	}	
-	System.out.println("permisos aceptados");
+	//System.out.println("permisos aceptados");
 	return true;
 }
 
 private boolean isFunDeclarated(String funcion){
-	System.out.println("=="+funcion);
+	//System.out.println("=="+funcion);
 	if (table.contains(funcion)){
-		System.out.println("contiene la fun: "+funcion);
+		//System.out.println("contiene la fun: "+funcion);
 		TableRecord funTR = table.get(funcion);
 		if (funTR.getUso()!=null && funTR.getUso().equals(FUNCION)){
-			System.out.println("es tipo funcion");
+			//System.out.println("es tipo funcion");
 			return true;
 		}
 		System.out.println("no es tipo funcion: "+funTR.getUso()+" != "+FUNCION);
@@ -782,7 +824,7 @@ private boolean isFunDeclarated(String funcion){
 
 private boolean checkAmbito(String lexema){
 	if (table.contains(lexema)){
-		System.out.println("contiene el lex: "+lexema);
+		//System.out.println("contiene el lex: "+lexema);
 		TableRecord tr = table.get(lexema);
 		int pos = ambito.size()-1;
 		if (tr.getAmbito()!=null){
@@ -793,7 +835,7 @@ private boolean checkAmbito(String lexema){
 				System.out.println("no esta en ambito!");
 				return false;			
 			}
-			System.out.println("esta en ambito!");
+			//System.out.println("esta en ambito!");
 			return true;
 		}
 		System.out.println("no esta en ambito, ambito de "+lexema+" es '"+tr.getAmbito()+"' != de "+ambito.get(ambito.size()-1));
