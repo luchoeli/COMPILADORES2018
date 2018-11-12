@@ -1,16 +1,13 @@
-__13
-double _a;_c,
-_a:=1.,
-double _fun (double _e) {
-	double _Adm,
-	_c:=3.,
-	usinteger _b,
-	if (_a != 4.) {
-		_a:=5. + 4.0,
-		_c:=6. + 1.,		
-	}end_if,
-	_e:=7.,
-	return (_a)
+usinteger _a;_b,
+
+case (_a){
+	2_ui : do { _a:=3_ui,
+				_b:=3_ui,
+			  },
+			  
+	5_ui : do { _a:=6_ui,
+				_b:=6_ui,
+			  },
 },
-_b:=2.,
-_c:=_fun2(_a;pass)+,
+
+
