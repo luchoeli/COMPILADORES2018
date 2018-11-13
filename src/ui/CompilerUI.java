@@ -56,6 +56,7 @@ import javax.swing.RowSorter;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
+import assembler.Assembler;
 import lexicalSource.Table;
 
 import java.awt.Component;
@@ -73,6 +74,7 @@ public class CompilerUI {
 	private JTable table_Tok;
 	private Nodo raiz = null;
 	private ArrayList<Nodo> funciones = null;
+	private Assembler assembler = null;
 	
 	
 	private String namefile="untitled";
@@ -328,7 +330,7 @@ public class CompilerUI {
 		 * ----------- BOTON ARBOL ---------------
 		 */
 		
-		final JButton btnArbol = new JButton("Arbol");
+		final JButton btnArbol = new JButton("Tree");
 		btnArbol.setEnabled(false);
 		btnArbol.addActionListener(new ActionListener() {
 
@@ -342,6 +344,34 @@ public class CompilerUI {
 				
 				
 				
+			}
+		});
+		/**
+		 * ----------- BOTON ASSEMBLER ---------------
+		 */
+		final JButton btnAssembler = new JButton("Assembler");
+		btnAssembler.setEnabled(false);
+		btnAssembler.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//TODO 
+				JFileChooser fc = new JFileChooser(".");		
+				fc.setDialogTitle("Save File");			
+				fc.setMultiSelectionEnabled(false);
+				int option = fc.showSaveDialog(btnAssembler);
+				if (option == JFileChooser.APPROVE_OPTION){
+					try {
+						String path = fc.getSelectedFile().getAbsolutePath();
+						assembler.setPath(path);
+						assembler.ejecutable();
+						File file = assembler.getArchivo();
+						System.out.println("ss- "+file.getAbsolutePath());							
+						
+					}catch (Exception ex){ 
+						ex.printStackTrace(); 
+						} 	
+	
+					
+				}
 			}
 		});
 		/**
@@ -359,6 +389,8 @@ public class CompilerUI {
 		
 				Parser parser = new Parser(program,table);
 				parser.Parse();
+				
+				assembler = new Assembler(parser, program);
 				//-----------//
 				
 				//Ininicializo estructuras para mostrar las salidas.
@@ -420,6 +452,7 @@ public class CompilerUI {
 			if (raiz != null && errors.size()==0){
 				//parser.getRaiz().imprimirNodo();
 				btnArbol.setEnabled(true);
+				btnAssembler.setEnabled(true);
 				
 			}
 			/*
@@ -428,6 +461,8 @@ public class CompilerUI {
 				n.imprimirNodo();
 			}
 			*/
+			
+			
 			}	
 		});
 		btnRun.setIcon(new ImageIcon(CompilerUI.class.getResource("/icons/lrun_obj.gif")));
@@ -441,7 +476,7 @@ public class CompilerUI {
 				textArea.setEnabled(true);
 				btnRun.setEnabled(true);
 				JFileChooser fc = new JFileChooser(".");
-				
+		
 				fc.setDialogTitle("Open a File");
 				FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos de Texto", "txt");
 				fc.setFileFilter(filter);
@@ -498,6 +533,8 @@ public class CompilerUI {
 			}
 		});
 		
+	
+		
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -511,7 +548,9 @@ public class CompilerUI {
 							.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(btnArbol)
-							.addPreferredGap(ComponentPlacement.RELATED, 582, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnAssembler)
+							.addPreferredGap(ComponentPlacement.RELATED, 512, Short.MAX_VALUE)
 							.addComponent(btnClear))
 						.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE)
 						.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 954, Short.MAX_VALUE))
@@ -527,7 +566,8 @@ public class CompilerUI {
 						.addComponent(btnRun)
 						.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 							.addComponent(btnArbol)
-							.addComponent(btnClear)))
+							.addComponent(btnClear)
+							.addComponent(btnAssembler)))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)

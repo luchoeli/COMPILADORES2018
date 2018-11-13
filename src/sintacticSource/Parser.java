@@ -456,7 +456,7 @@ private static final String PARAMETRO = "ID parametro";
 private static final String IDENTIFICADOR = "IDENTIFICADOR";
 ArrayList<String> ambito = new ArrayList<String>();
 LexicalAnalizer lexico;
-Table table;
+private Table table;
 Nodo raiz = null;
 Nodo actual = null;
 ArrayList<Nodo> funciones = new ArrayList<Nodo>();
@@ -465,6 +465,10 @@ public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructu
 public ArrayList<Error> errors = new ArrayList<Error>();
 public ArbolSintactico arbol = new ArbolSintactico();
 
+public Table getTable(){
+	return this.table;
+}
+	
 private void apilarAmbito(String ambito){
 	this.ambito.add(ambito);
 }
@@ -752,7 +756,7 @@ private boolean checkAmbito(String lexema){
 	
 }
 
-//#line 684 "Parser.java"
+//#line 688 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1512,7 +1516,7 @@ case 76:
 	   			((Token)val_peek(0).obj).setNodo(nuevo);
 	   		 }
 break;
-//#line 1439 "Parser.java"
+//#line 1443 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
