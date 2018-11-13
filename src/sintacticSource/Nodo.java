@@ -100,4 +100,48 @@ public class Nodo {
 	public ArbolExpresionGrafico getdibujo() {
         return new ui.ArbolExpresionGrafico(this);
     }
+	
+	/** true si tengo un hijo null y el otro es una hoja**/
+	private boolean soyUnario(){
+		if ((getIzq()==null && getDer().imAleave()) || (getDer() == null && getIzq().imAleave()) ){
+			return true;
+		}
+		return false;
+	}
+	/** true si soy una hoja**/
+	private boolean imAleave(){
+		if (getDer()==null && getIzq()==null){
+			return true;
+		}
+		return false;
+	}
+	/** true si soy un subarbol sintactico,
+	 *  es decir:
+	 *  	- que mis dos hijos son hojas
+	 *  	o
+	 *  	- uno es unario y el otro es null**/
+	private boolean imLeftSubTree(){
+		if (getDer().imAleave() && getIzq().imAleave()){
+			return true;
+		}
+		if (soyUnario()){
+			return true;
+		}
+		return false;
+	}
+	/** devuelvo mi proximo leftSubTree **/
+	public Nodo getLeftSubTree(){
+		if (this.imLeftSubTree()){
+			return this;
+		}
+		
+		if (getIzq()!=null && !getIzq().imLeftSubTree()){
+			getIzq().getLeftSubTree();
+		}
+		if(getDer()!=null && !getDer().imLeftSubTree()){
+			getDer().getLeftSubTree();	
+		}
+		
+		return this;
+	}
 }
