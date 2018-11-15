@@ -67,21 +67,27 @@ list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
 				 |  list_sentencias sent_declarativa{$$.obj =  (Nodo)$1.obj;}
 				 |  list_sentencias sent_ejecutable{	
 				 									Nodo nuevo = new Nodo("S", (Nodo)$2.obj, null);
+				 									((Nodo)$2.obj).setPadre(nuevo);
 				 									System.out.println(((Nodo)$2.obj).getLexema());
+				 									
 					 								if (raiz == null){
 					 									System.out.println("si");
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
+					 									((Nodo)$2.obj).setPadre(nuevo);
 					 									
 					 								}else{	
-					 									if (((Nodo)$1.obj).getLexema().equals("null")){					 										
+					 									if (((Nodo)$1.obj).getLexema().equals("null")){		
+					 										System.out.println("listapadre null");			 										
 					 										((Nodo)$1.obj).setLexema("S");
 				 											((Nodo)$1.obj).setIzq((Nodo)$2.obj);
-				 											((Nodo)$1.obj).setDer(null); 
+				 											((Nodo)$1.obj).setDer(null);
+				 											((Nodo)$2.obj).setPadre((Nodo)$1.obj); 
 				 											
 				 										}else{
+				 											System.out.println("listapadre != null");
 				 											((Nodo)$1.obj).setProximaSentencia(nuevo);
-					 										nuevo.setPadre((Nodo)$1.obj);	
+					 										//nuevo.setPadre((Nodo)$1.obj);	
 				 										}
 					 								}
 					 								$$.obj =nuevo;
@@ -431,9 +437,11 @@ comparador : MAYORIGUAL {
 
 
 expresion : expresion '+' termino{	
-									Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
 		   								
+										Nodo nuevo = new Nodo ("+",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
+									if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
+										((Token)$1.obj).getNodo().setPadre(nuevo);
+										((Token)$3.obj).getNodo().setPadre(nuevo);
 		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "+" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 		   							}else{
 	   									addError("Error semántico: Los tipos de datos de la operacion + no coinciden. ", ((Token)$1.obj).getNroLine());
@@ -441,8 +449,10 @@ expresion : expresion '+' termino{
 	   								}
 								 } 
 		  | expresion '-' termino{
+										Nodo nuevo = new Nodo ("-",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
 		  							if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
-										Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
+										((Token)$1.obj).getNodo().setPadre(nuevo);
+										((Token)$3.obj).getNodo().setPadre(nuevo);
 		   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 		   							}else{
 	   									addError("Error semántico: Los tipos de datos de la operacion - no coinciden. ", ((Token)$1.obj).getNroLine());
@@ -457,7 +467,9 @@ termino : termino '*' factor{
 							
 								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
 									Nodo nuevo = new Nodo ("*",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+									Token token = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+									token.setRecord(((Token)$1.obj).getRecord());
+		   							$$.obj = token; 
 	   							}else{
 	   								addError("Error semántico: Los tipos de datos de la operacion * no coinciden. ", ((Token)$1.obj).getNroLine());
 	   							}
@@ -491,6 +503,8 @@ asignacion 	:	ID ASIGNACION expresion {
 													setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 													Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
 													Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
+													nodoId.setPadre(nuevo);
+													((Token)$3.obj).getNodo().setPadre(nuevo);
 													//$$.obj = nuevo;
 													((Token)$1.obj).setNodo(nuevo);
 													registrarEscritura(((Token)$1.obj).getLexema());
@@ -512,6 +526,8 @@ asignacion 	:	ID ASIGNACION expresion {
 			;
 
 factor : CTE 	{	
+					TableRecord tr = table.get(((Token)$1.obj).getLexema());
+					
 					Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 					((Token)$1.obj).setNodo(nuevo);
 	   			}
@@ -534,6 +550,7 @@ factor : CTE 	{
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   			//System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());
 	   			((Token)$1.obj).setNodo(nuevo);
+	   			$$.obj = table.get(((Token)$1.obj).getLexema()); 
 	   		 }
 	   ;
 /*
@@ -730,13 +747,14 @@ public boolean isDeclarated(Token id){
             this.table.remove(id.getRecord().getLexema());
             return false;
         }
-        else{
-        	table.get(id.getLexema()).increment();
-        	return true;
-        }
+    else{
+    	table.get(id.getLexema()).increment();
+    	return true;
+    }
 }
 
 private boolean datosCompatibles(String type, String type2) {
+	System.out.println(type+" ** "+type2);
 	if (type == type2){
 	return true;
 	}

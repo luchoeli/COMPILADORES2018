@@ -1,13 +1,6 @@
 usinteger _a;_b,
+double _c;_d,
 
-case (_a){
-	2_ui : do { _a:=3_ui,
-				_b:=3_ui,
-			  },
-			  
-	5_ui : do { _a:=6_ui,
-				_b:=6_ui,
-			  },
-},
-
-
+_a:=1_ui,
+_b:=2_ui,
+_a := 1_ui - 2_ui,

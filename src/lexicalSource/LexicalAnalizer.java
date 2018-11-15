@@ -513,8 +513,10 @@ public class LexicalAnalizer {
 				
 				//record = this.addConstanteToTable(new TableRecord(buffer, id, value[0]));
 			}else if  (buffer.contains(".")){
-				
-				record = new TableRecord(buffer,id);
+				//FIXME agregar al constreuctor del TR el value
+				String dable=buffer.substring(0, buffer.length());
+				dable = dable.replace("D","E");
+				record = new TableRecord(buffer,id,dable);
 				record.setType("double");
 				record = this.addConstanteToTable(record);
 				
