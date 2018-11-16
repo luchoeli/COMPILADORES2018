@@ -449,14 +449,14 @@ final static String yyrule[] = {
 "factor : ID",
 };
 
-//#line 547 "especificacion.y"
+//#line 591 "especificacion.y"
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";
 private static final String PARAMETRO = "ID parametro";
 private static final String IDENTIFICADOR = "IDENTIFICADOR";
 ArrayList<String> ambito = new ArrayList<String>();
 LexicalAnalizer lexico;
-Table table;
+private Table table;
 Nodo raiz = null;
 Nodo actual = null;
 ArrayList<Nodo> funciones = new ArrayList<Nodo>();
@@ -465,6 +465,10 @@ public ArrayList<SintacticStructure> structures = new ArrayList<SintacticStructu
 public ArrayList<Error> errors = new ArrayList<Error>();
 public ArbolSintactico arbol = new ArbolSintactico();
 
+public Table getTable(){
+	return this.table;
+}
+	
 private void apilarAmbito(String ambito){
 	this.ambito.add(ambito);
 }
@@ -539,7 +543,7 @@ public LexicalAnalizer getLexical(){
 }
 
 public void updateTable(Vector<Token> tokens, String type, String uso, String ambito){  //type double o usinteger, tokens son identificadores
-	/*setea el tipo del _id en la tabla de simbolos*/
+	/*setea el tipo del _id en la tabla de simbolos, el uso*/
 	Enumeration e = tokens.elements();
 	while (e.hasMoreElements()){
 		Token token = (Token)e.nextElement();
@@ -547,18 +551,43 @@ public void updateTable(Vector<Token> tokens, String type, String uso, String am
 		String lexema = tr.getLexema();
 		//System.out.println("-- "+(table.get(lexema).getUso()));
 		
-			 if (table.containsLexema(lexema)){
-			 
-				//System.out.println("esta en la tabla");
-				
-				if ((table.get(lexema).getType()==FUNCION) && (ambito != "main") ){
-					System.out.println("declaracion en declaracion");
-					addError("Error semantico: no se puede declarar funcion dentro de una funcion.",token.getNroLine());
+		if (table.containsLexema(lexema) && tr.getIdToken() == ID){
+			if  ((table.get(lexema).getType()!=null)){
+				addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
+			}	
+			else{
+				if (uso == FUNCION){
+					if (ambito != "main"){
+						System.out.println("declaracion en declaracion '"+lexema+"' declarada en '"+ambito+"'");
+						addError("Error semantico: no se puede declarar funcion dentro de una funcion. ",token.getNroLine());
+					}else{
+						(table.get(lexema,uso)).setType(type);
+						(table.get(lexema)).setUso(uso);
+						(table.get(lexema)).setAmbito(ambito);
+					}
 				}else{
-					if  ((table.get(lexema).getType()!=IDENTIFICADOR)){
+					(table.get(lexema,uso)).setType(type);
+					(table.get(lexema)).setUso(uso);
+					(table.get(lexema)).setAmbito(ambito);
+				}
+			}
+		}else{
+				System.out.println("No esta asignado en la tabla");
+		}
+				
+		
+			/*		
+			 if (table.containsLexema(lexema) && tr.getIdToken() == ID){
+			 
+				if (ambito != "main" && uso==FUNCION) {
+					System.out.println("declaracion en declaracion '"+lexema+"' declarada en '"+ambito+"'");
+					addError("Error semantico: no se puede declarar funcion dentro de una funcion. ",token.getNroLine());
+				}else{
+					if  ((table.get(lexema).getType()!=null)){
 						addError("Error sintactico: la variable ya fue declarada ",token.getNroLine());
 					}
 					else{
+							// SETEO TYPE -> DOUBLE O USINTEGER
 							//TableRecord ntr = token.getRecord();
 							(table.get(lexema,uso)).setType(type);
 							(table.get(lexema)).setUso(uso);
@@ -569,6 +598,7 @@ public void updateTable(Vector<Token> tokens, String type, String uso, String am
 			else{
 				System.out.println("No esta asignado en la tabla");				
 			}
+			*/
 	}
 }
 
@@ -577,7 +607,7 @@ public void setAmbito(Vector<Token> tokens, String ambito){
 
 }
 
-public TableRecord updateTableNegative(String key ){//key: 2.0
+public TableRecord updateTableNegative(String key){//key: 2.0
 	{	TableRecord tr = (TableRecord)table.get(key); //tomo el el tr de la tabla de simbolos
 		String newLexema = "-"+ key;
 		//System.out.println("NEWKEY: "+newLexema);
@@ -632,15 +662,16 @@ public boolean isDeclarated(Token id){
             this.table.remove(id.getRecord().getLexema());
             return false;
         }
-        else{
-        	table.get(id.getLexema()).increment();
-        	return true;
-        }
+    else{
+    	table.get(id.getLexema()).increment();
+    	return true;
+    }
 }
 
 private boolean datosCompatibles(String type, String type2) {
-	if (type == type2){
-	return true;
+	//System.out.println(type+" ** "+type2);
+	if (type.equals(type2)){
+		return true;
 	}
 	return false;
 }
@@ -752,7 +783,7 @@ private boolean checkAmbito(String lexema){
 	
 }
 
-//#line 684 "Parser.java"
+//#line 715 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -937,28 +968,34 @@ case 5:
 //#line 68 "especificacion.y"
 {	
 				 									Nodo nuevo = new Nodo("S", (Nodo)val_peek(0).obj, null);
+				 									((Nodo)val_peek(0).obj).setPadre(nuevo);
 				 									System.out.println(((Nodo)val_peek(0).obj).getLexema());
+				 									
 					 								if (raiz == null){
 					 									System.out.println("si");
 					 									raiz = nuevo;
 					 									nuevo.setPadre(null);
+					 									((Nodo)val_peek(0).obj).setPadre(nuevo);
 					 									
 					 								}else{	
-					 									if (((Nodo)val_peek(1).obj).getLexema().equals("null")){					 										
+					 									if (((Nodo)val_peek(1).obj).getLexema().equals("null")){		
+					 										System.out.println("listapadre null");			 										
 					 										((Nodo)val_peek(1).obj).setLexema("S");
 				 											((Nodo)val_peek(1).obj).setIzq((Nodo)val_peek(0).obj);
-				 											((Nodo)val_peek(1).obj).setDer(null); 
+				 											((Nodo)val_peek(1).obj).setDer(null);
+				 											((Nodo)val_peek(0).obj).setPadre((Nodo)val_peek(1).obj); 
 				 											
 				 										}else{
+				 											System.out.println("listapadre != null");
 				 											((Nodo)val_peek(1).obj).setProximaSentencia(nuevo);
-					 										nuevo.setPadre((Nodo)val_peek(1).obj);	
+					 										/*nuevo.setPadre((Nodo)$1.obj);	 YA LO HAGO EN LA SENT ANTERIOR*/
 				 										}
 					 								}
 					 								yyval.obj =nuevo;
 					 								}
 break;
 case 7:
-//#line 92 "especificacion.y"
+//#line 98 "especificacion.y"
 {
 													if (!((Nodo)val_peek(1).obj).equals(null)){
 														funciones.add((Nodo)val_peek(1).obj);
@@ -966,14 +1003,14 @@ case 7:
 												}
 break;
 case 8:
-//#line 99 "especificacion.y"
+//#line 105 "especificacion.y"
 {
 												 setRegla(((Token)val_peek(1).obj).getNroLine(), "Declaracion de variables", ((Token)val_peek(1).obj).getLexema());
 												 updateTable(((Vector<Token>)val_peek(0).obj), ((Token)val_peek(1).obj).getLexema(), "Identificador de variable",ambito.get(ambito.size()-1));
 												}
 break;
 case 9:
-//#line 103 "especificacion.y"
+//#line 109 "especificacion.y"
 {
 														Vector<Token> tokens = (Vector<Token>)val_peek(1).obj;
 														if (tokens.size()>1){
@@ -984,7 +1021,7 @@ case 9:
 													}
 break;
 case 10:
-//#line 113 "especificacion.y"
+//#line 119 "especificacion.y"
 {	
 										  	String ambit = ambito.get(ambito.size()-1);
 									  		/*System.out.println("Encabezado ambito: "+ambit+" - "+ambito.get(ambito.size()-1));*/
@@ -1011,7 +1048,7 @@ case 10:
 										}
 break;
 case 11:
-//#line 142 "especificacion.y"
+//#line 148 "especificacion.y"
 {	
 								 		/*System.out.println("wepa "+((Nodo)$3.obj).getLexema());*/
 								  		Nodo padre = ((Nodo)val_peek(5).obj).getFuncionPadre();
@@ -1030,14 +1067,14 @@ case 11:
 								 	 }
 break;
 case 12:
-//#line 160 "especificacion.y"
+//#line 166 "especificacion.y"
 {
 					  			System.out.println("rmpo");
 					  			this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)val_peek(0).obj).getNroLine());
 					  		}
 break;
 case 13:
-//#line 167 "especificacion.y"
+//#line 173 "especificacion.y"
 {
 											Vector<Token> tokens = (Vector<Token>)val_peek(2).obj;
 											Token token = (Token)val_peek(0).obj;
@@ -1047,7 +1084,7 @@ case 13:
 											}
 break;
 case 14:
-//#line 174 "especificacion.y"
+//#line 180 "especificacion.y"
 {
 							Vector<Token> tokens = new Vector<Token>();
 							Token token = (Token)val_peek(0).obj;
@@ -1056,35 +1093,39 @@ case 14:
 							}
 break;
 case 17:
-//#line 184 "especificacion.y"
+//#line 190 "especificacion.y"
 {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 18:
-//#line 185 "especificacion.y"
+//#line 191 "especificacion.y"
 {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 19:
-//#line 186 "especificacion.y"
+//#line 192 "especificacion.y"
 {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 20:
-//#line 187 "especificacion.y"
+//#line 193 "especificacion.y"
 {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 21:
-//#line 188 "especificacion.y"
+//#line 194 "especificacion.y"
 {this.addError("Error sintactico: Tipo de dato invalido. ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 22:
-//#line 192 "especificacion.y"
+//#line 198 "especificacion.y"
+{yyval.obj = ((Token)val_peek(1).obj).getNodo();}
+break;
+case 24:
+//#line 200 "especificacion.y"
 {yyval.obj = ((Token)val_peek(1).obj).getNodo();}
 break;
 case 25:
-//#line 195 "especificacion.y"
+//#line 201 "especificacion.y"
 {yyval.obj = ((Token)val_peek(1).obj).getNodo();}
 break;
 case 26:
-//#line 199 "especificacion.y"
+//#line 205 "especificacion.y"
 { 	if (isFunDeclarated(((Token)val_peek(5).obj).getLexema())){
 														/*TODO chequear ambito de $2.obj !*/
 														/*System.out.println("Declatada la funcion");*/
@@ -1112,23 +1153,23 @@ case 26:
 												 }
 break;
 case 27:
-//#line 239 "especificacion.y"
+//#line 245 "especificacion.y"
 {yyval.obj = "READONLY";}
 break;
 case 28:
-//#line 240 "especificacion.y"
+//#line 246 "especificacion.y"
 {yyval.obj = "WRITE";}
 break;
 case 29:
-//#line 241 "especificacion.y"
+//#line 247 "especificacion.y"
 {yyval.obj = "PASS";}
 break;
 case 30:
-//#line 242 "especificacion.y"
+//#line 248 "especificacion.y"
 {yyval.obj = "WRITE;PASS";}
 break;
 case 31:
-//#line 246 "especificacion.y"
+//#line 252 "especificacion.y"
 {System.out.println("Case do");
 										 /*TODO chequear ambito de $3.obj, */
 							
@@ -1138,25 +1179,25 @@ case 31:
 										 }
 break;
 case 32:
-//#line 254 "especificacion.y"
+//#line 260 "especificacion.y"
 {
 				  						  addError("Error sintactico: condicion erronea ", ((Token)val_peek(3).obj).getNroLine());												 
 										 }
 break;
 case 33:
-//#line 259 "especificacion.y"
+//#line 265 "especificacion.y"
 {yyval.obj = ((Nodo)val_peek(1).obj);}
 break;
 case 34:
-//#line 260 "especificacion.y"
+//#line 266 "especificacion.y"
 {addError("Error sintactico: falta '{' para iniciar el bloque de sentencias de control ", ((Token)val_peek(2).obj).getNroLine());}
 break;
 case 35:
-//#line 261 "especificacion.y"
+//#line 267 "especificacion.y"
 {addError("Error sintactico: falta '}' para terminar el bloque de sentencias de control ", ((Token)val_peek(0).obj).getNroLine());}
 break;
 case 36:
-//#line 264 "especificacion.y"
+//#line 270 "especificacion.y"
 {	
 																Nodo padre = ((Nodo)val_peek(1).obj).getFuncionPadre();
 																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
@@ -1169,7 +1210,7 @@ case 36:
 															}
 break;
 case 37:
-//#line 274 "especificacion.y"
+//#line 280 "especificacion.y"
 {	
 																		Nodo padre = ((Nodo)val_peek(2).obj).getFuncionPadre();
 																		/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
@@ -1182,21 +1223,21 @@ case 37:
 																		}
 break;
 case 38:
-//#line 288 "especificacion.y"
+//#line 294 "especificacion.y"
 {addError("Error sintactico: falta ':' antes del 'do'", ((Token)val_peek(3).obj).getNroLine());}
 break;
 case 39:
-//#line 289 "especificacion.y"
+//#line 295 "especificacion.y"
 {addError("Error sintactico: falta 'do' despues del ':'", ((Token)val_peek(3).obj).getNroLine());}
 break;
 case 40:
-//#line 292 "especificacion.y"
+//#line 298 "especificacion.y"
 {
 									/*$$.obj = ((Token)$1.obj).getNodo();*/
 								}
 break;
 case 41:
-//#line 296 "especificacion.y"
+//#line 302 "especificacion.y"
 {
 			   													Nodo padre = ((Nodo)val_peek(1).obj).getFuncionPadre();
 																/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
@@ -1214,15 +1255,15 @@ case 41:
 			   			  								   }
 break;
 case 42:
-//#line 311 "especificacion.y"
+//#line 317 "especificacion.y"
 { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)val_peek(0).obj).getNroLine());}
 break;
 case 43:
-//#line 312 "especificacion.y"
+//#line 318 "especificacion.y"
 { addError("Error sintactico: 'else' incorrecto luego del 'end_if' ",((Token)val_peek(2).obj).getNroLine());}
 break;
 case 44:
-//#line 315 "especificacion.y"
+//#line 321 "especificacion.y"
 {	
 										Nodo padre = ((Nodo)val_peek(0).obj).getFuncionPadre();
 										/*lo siguiente es para evitar que la raiz apunte a la primera sentencia de la funcion*/
@@ -1239,36 +1280,36 @@ case 44:
 			   			   		   }
 break;
 case 45:
-//#line 330 "especificacion.y"
+//#line 336 "especificacion.y"
 {
 											addError("Falta parentesis de cierre ')'",((Token)val_peek(3).obj).getNroLine());
  									     }
 break;
 case 46:
-//#line 334 "especificacion.y"
+//#line 340 "especificacion.y"
 {
 										  	addError("Falta parentesis de apertura '('",((Token)val_peek(3).obj).getNroLine());
  									     }
 break;
 case 47:
-//#line 338 "especificacion.y"
+//#line 344 "especificacion.y"
 {
 				   		addError("Error sintactico en el bloque ",((Token)val_peek(3).obj).getNroLine());
  			      }
 break;
 case 48:
-//#line 344 "especificacion.y"
+//#line 350 "especificacion.y"
 {yyval.obj = ((Nodo)val_peek(1).obj).getFuncionPadre();}
 break;
 case 49:
-//#line 346 "especificacion.y"
+//#line 352 "especificacion.y"
 {
 														yyval.obj = new Nodo("null",null,null);
 														addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)val_peek(0).obj).getNroLine());
 													 }
 break;
 case 50:
-//#line 350 "especificacion.y"
+//#line 356 "especificacion.y"
 {
 								 						Nodo nuevo = new Nodo("S",(Nodo)val_peek(0).obj, null);
 						 								if (raiz == null){
@@ -1279,37 +1320,38 @@ case 50:
 								 				   }
 break;
 case 51:
-//#line 358 "especificacion.y"
+//#line 364 "especificacion.y"
 {	
 												 									Nodo nuevo = new Nodo("S", (Nodo)val_peek(0).obj, null);
-												 									
+												 									((Nodo)val_peek(0).obj).setPadre(nuevo);
 													 								if (raiz == null){
 													 									raiz = nuevo;
-													 									nuevo.setPadre(null);
+					 																	nuevo.setPadre(null);
+					 																	((Nodo)val_peek(0).obj).setPadre(nuevo);
 													 									
 													 								}else{	
 													 									if (((Nodo)val_peek(1).obj).getLexema().equals("null")){					 										
 													 										((Nodo)val_peek(1).obj).setLexema("S");
 												 											((Nodo)val_peek(1).obj).setIzq((Nodo)val_peek(0).obj);
 												 											((Nodo)val_peek(1).obj).setDer(null); 
-												 											
+												 											((Nodo)val_peek(0).obj).setPadre((Nodo)val_peek(1).obj);
 												 										}else{
 												 											((Nodo)val_peek(1).obj).setProximaSentencia(nuevo);
-													 										nuevo.setPadre((Nodo)val_peek(1).obj);	
+													 										/*nuevo.setPadre((Nodo)$1.obj);	*/
 												 										}
 													 								}
 													 								yyval.obj =nuevo;
 													 								}
 break;
 case 52:
-//#line 378 "especificacion.y"
+//#line 385 "especificacion.y"
 {
 				 																			yyval.obj =  (Nodo)val_peek(1).obj;
 																							addError("Error semantico: no se permiten sentencias declarativas dentro de un bloque de control ",((Token)val_peek(0).obj).getNroLine());
 				 																	}
 break;
 case 53:
-//#line 388 "especificacion.y"
+//#line 395 "especificacion.y"
 { 
 														setRegla(((Token)val_peek(2).obj).getNroLine(), "expresion logica", ((Nodo)val_peek(1).obj).getLexema());
 														Nodo comparador = new Nodo(((Nodo)val_peek(1).obj).getLexema(),((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());	
@@ -1318,72 +1360,75 @@ case 53:
 												  }
 break;
 case 54:
-//#line 395 "especificacion.y"
+//#line 402 "especificacion.y"
 {
 													addError("Errorsintactico: Comparador invalido. ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 55:
-//#line 398 "especificacion.y"
+//#line 405 "especificacion.y"
 {
 													addError("Error sintactico: Expresion derecha invalida ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 56:
-//#line 401 "especificacion.y"
+//#line 408 "especificacion.y"
 {
 													addError("Error sintactico: Expresion izquierda invalida ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 57:
-//#line 406 "especificacion.y"
+//#line 413 "especificacion.y"
 {
 						 Nodo nuevo = new Nodo(">=");
 						 yyval.obj = nuevo;
 						}
 break;
 case 58:
-//#line 410 "especificacion.y"
+//#line 417 "especificacion.y"
 {	
 						Nodo nuevo = new Nodo("<=");
 						yyval.obj = nuevo;
 		   				}
 break;
 case 59:
-//#line 414 "especificacion.y"
+//#line 421 "especificacion.y"
 {	
-		   				Nodo nuevo = new Nodo("==");
+		   				Nodo nuevo = new Nodo("=");
 		   				yyval.obj = nuevo;	
 		   		   }
 break;
 case 60:
-//#line 418 "especificacion.y"
+//#line 425 "especificacion.y"
 {	
 		   				Nodo nuevo = new Nodo("!=");
 		   				yyval.obj = nuevo;
 		   			  }
 break;
 case 61:
-//#line 422 "especificacion.y"
+//#line 429 "especificacion.y"
 {	
 		   			Nodo nuevo = new Nodo(">");
 		   			yyval.obj = nuevo;
 		   		}
 break;
 case 62:
-//#line 426 "especificacion.y"
+//#line 433 "especificacion.y"
 {	
 		   			Nodo nuevo = new Nodo("<");
 		   			yyval.obj = nuevo;
 		   		}
 break;
 case 63:
-//#line 433 "especificacion.y"
+//#line 440 "especificacion.y"
 {	
+		   								
 									Nodo nuevo = new Nodo ("+",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
 									if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
-		   								
-		   								yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "+" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), "", null,nuevo);
+										String type = ((Token)val_peek(0).obj).getRecord().getType();
+										((Token)val_peek(2).obj).getNodo().setPadre(nuevo);
+										((Token)val_peek(0).obj).getNodo().setPadre(nuevo);
+		   								yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "+" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), type, null,nuevo);
 		   							}else{
 	   									addError("Error semántico: Los tipos de datos de la operacion + no coinciden. ", ((Token)val_peek(2).obj).getNroLine());
 	   									yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "+" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), "", null,nuevo);
@@ -1391,87 +1436,116 @@ case 63:
 								 }
 break;
 case 64:
-//#line 443 "especificacion.y"
+//#line 453 "especificacion.y"
 {
+									Nodo nuevo = new Nodo ("-",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
 		  							if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
-										Nodo nuevo = new Nodo ("-",(Nodo)val_peek(2).obj,(Nodo)val_peek(0).obj);
-		   								yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "-" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), "", null,nuevo);
+		  								String type = ((Token)val_peek(0).obj).getRecord().getType();
+										((Token)val_peek(2).obj).getNodo().setPadre(nuevo);
+										((Token)val_peek(0).obj).getNodo().setPadre(nuevo);
+		   								yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "-" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), type, null,nuevo);
 		   							}else{
 	   									addError("Error semántico: Los tipos de datos de la operacion - no coinciden. ", ((Token)val_peek(2).obj).getNroLine());
 	   								}
 								 }
 break;
 case 65:
-//#line 451 "especificacion.y"
+//#line 464 "especificacion.y"
 {
 		  				yyval.obj = (Token)val_peek(0).obj;
 		  			}
 break;
 case 66:
-//#line 456 "especificacion.y"
+//#line 469 "especificacion.y"
 {	
 							
 								if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
+									String type = ((Token)val_peek(0).obj).getRecord().getType();
 									Nodo nuevo = new Nodo ("*",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
-		   							yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "*" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), "", null,nuevo);
+									Token token = new Token(0, ((Token)val_peek(2).obj).getLexema() + "*" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), type, null,nuevo);
+									token.setRecord(((Token)val_peek(2).obj).getRecord());
+		   							yyval.obj = token; 
 	   							}else{
+	   								/*$$.obj  = new Error("ss", 2);*/
 	   								addError("Error semántico: Los tipos de datos de la operacion * no coinciden. ", ((Token)val_peek(2).obj).getNroLine());
 	   							}
 							}
 break;
 case 67:
-//#line 465 "especificacion.y"
+//#line 482 "especificacion.y"
 {
 								if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
+									String type = ((Token)val_peek(0).obj).getRecord().getType();
 									Nodo nuevo = new Nodo ("/",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
-		   							yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "/" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(), "", null,nuevo);
+		   							yyval.obj = new Token(0, ((Token)val_peek(2).obj).getLexema() + "/" +((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(2).obj).getNroLine(),type, null,nuevo);
 		   						}else{
 	   								addError("Error semántico: Los tipo de datos de la operacion / no coinciden. ", ((Token)val_peek(2).obj).getNroLine());
 	   							}
 							}
 break;
 case 68:
-//#line 473 "especificacion.y"
+//#line 491 "especificacion.y"
 {
 						yyval.obj = (Token)val_peek(0).obj;
 					}
 break;
 case 69:
-//#line 476 "especificacion.y"
+//#line 494 "especificacion.y"
 {
 							yyval.obj = (Token)val_peek(1).obj;
 						}
 break;
 case 70:
-//#line 484 "especificacion.y"
-{setRegla(((Token)val_peek(3).obj).getNroLine(), "Impresion",((Token)val_peek(3).obj).getLexema()+"("+((Token)val_peek(1).obj).getLexema()+")" ) ;}
+//#line 502 "especificacion.y"
+{	
+					/*System.out.println(((Token)$1.obj).getRecord().getIdToken());*/
+					/*	if (((Token)$1.obj).getRecord().getIdToken()==lexico.CADENA){*/
+						setRegla(((Token)val_peek(3).obj).getNroLine(), "Impresion",((Token)val_peek(3).obj).getLexema()+"("+((Token)val_peek(1).obj).getLexema()+")" ) ;
+						Nodo nodoCadena = new Nodo(((Token)val_peek(1).obj).getLexema());
+						Nodo nuevo = new Nodo(((Token)val_peek(3).obj).getLexema(), nodoCadena, null);
+						((Token)val_peek(3).obj).setNodo(nuevo);
+					/*}*/
+				}
 break;
 case 71:
-//#line 485 "especificacion.y"
+//#line 511 "especificacion.y"
 {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)val_peek(3).obj).getNroLine());}
 break;
 case 72:
-//#line 488 "especificacion.y"
+//#line 514 "especificacion.y"
 {	
+
+											((Token)val_peek(2).obj).setNodo(new Nodo(null, null, ((Token)val_peek(0).obj).getNodo())); /*nodo basura*/
+											((Token)val_peek(2).obj).setRecord(table.get(((Token)val_peek(2).obj).getLexema()));								
 											if (isDeclarated((Token)val_peek(2).obj)){
-												if (checkAmbito(((Token)val_peek(2).obj).getLexema())){
-													setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());
-													Nodo nodoId = new Nodo(table.get(((Token)val_peek(2).obj).getLexema()));
-													Nodo nuevo = new Nodo(":=", nodoId, ((Token)val_peek(0).obj).getNodo());
-													/*$$.obj = nuevo;*/
-													((Token)val_peek(2).obj).setNodo(nuevo);
-													registrarEscritura(((Token)val_peek(2).obj).getLexema());
+												if (datosCompatibles( ((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getType())){
+													if (checkAmbito(((Token)val_peek(2).obj).getLexema())){
+														setRegla(((Token)val_peek(2).obj).getNroLine(), "Asignacion", ((Token)val_peek(2).obj).getLexema()+":="+((Token)val_peek(0).obj).getLexema());
+														Nodo nodoId = new Nodo(table.get(((Token)val_peek(2).obj).getLexema()));
+														Nodo nuevo = new Nodo(":=", nodoId, ((Token)val_peek(0).obj).getNodo());
+														nodoId.setPadre(nuevo);
+														System.out.println("Datos Compatibles");
+														((Token)val_peek(0).obj).getNodo().setPadre(nuevo);
+														/*$$.obj = nuevo;*/
+														((Token)val_peek(2).obj).setNodo(nuevo);
+														registrarEscritura(((Token)val_peek(2).obj).getLexema());
+													}else{
+														addError("Error Semantico: identificador '"+((Token)val_peek(2).obj).getLexema()+"' no pertenece al ambito '"+ambito.get(ambito.size()-1)+"'.",((Token)val_peek(2).obj).getNroLine());
+													}
 												}else{
-													addError("Error Semantico: la variable '"+((Token)val_peek(2).obj).getLexema()+"' no pertenece al ambito '"+ambito.get(ambito.size()-1)+"'.",((Token)val_peek(2).obj).getNroLine());
+												 	
+													addError("Error semántico: Los tipos de la asignacion no coinciden. ", ((Token)val_peek(1).obj).getNroLine());
 												}
 											}
 											else{
-												System.out.println(((Token)val_peek(2).obj).getLexema()+ "  no esta declarada");
+														System.out.println(((Token)val_peek(2).obj).getLexema()+ "  no esta declarada");
+														/*$$.obj = new Nodo(null, null, ((Token)$3.obj).getNodo());*/
+														addError("Error Sintactico: identificador '"+((Token)val_peek(2).obj).getLexema()+"' no esta declarado.",((Token)val_peek(2).obj).getNroLine());
 											}
 										}
 break;
 case 73:
-//#line 505 "especificacion.y"
+//#line 544 "especificacion.y"
 {
 							System.out.println("ERROR"); 
 							addError("Asignacion erronea ", ((Token)val_peek(2).obj).getNroLine());
@@ -1481,14 +1555,15 @@ case 73:
 						 }
 break;
 case 74:
-//#line 514 "especificacion.y"
+//#line 553 "especificacion.y"
 {	
+					TableRecord tr = table.get(((Token)val_peek(0).obj).getLexema());
 					Nodo nuevo = new Nodo(table.get(((Token)val_peek(0).obj).getLexema()));
 					((Token)val_peek(0).obj).setNodo(nuevo);
 	   			}
 break;
 case 75:
-//#line 518 "especificacion.y"
+//#line 558 "especificacion.y"
 {
 	   				System.out.println("Un negative "+((Token)val_peek(0).obj).getRecord().getType());
 	   				if (((Token)val_peek(0).obj).getRecord().getType() == "usinteger"){
@@ -1503,16 +1578,20 @@ case 75:
 	   			 }
 break;
 case 76:
-//#line 531 "especificacion.y"
+//#line 571 "especificacion.y"
 { 
+	   
 	   			isDeclarated((Token)val_peek(0).obj);
 	   			/*TODO ¿chequeo ambito? ¿chequeo de declaracion?*/
 	   			Nodo nuevo = new Nodo(table.get(((Token)val_peek(0).obj).getLexema()));
-	   			/*System.out.println(table.get(((Token)$1.obj).getLexema()).getLexema());*/
+	   			TableRecord tr = table.get(((Token)val_peek(0).obj).getLexema());
+	   			nuevo.setTableRec(tr);
 	   			((Token)val_peek(0).obj).setNodo(nuevo);
+	   			((Token)val_peek(0).obj).setRecord(tr);
+	   			 
 	   		 }
 break;
-//#line 1439 "Parser.java"
+//#line 1518 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

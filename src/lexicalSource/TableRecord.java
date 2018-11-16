@@ -1,14 +1,15 @@
 package lexicalSource;
 
-import java.util.ArrayList;
-
+import lexicalSource.LexicalAnalizer;
+ 
 public class TableRecord {
 	private String lexema; 
-	private int idToken;
+	private int idToken;	// id o constante
 	private String type; // Tipo de identificador o constante ( INT o UNSIGNED LONG)
 	private int ref; // Cantidad de referencias.
 	private String uso; 
 	private String ambito;
+	private String value = "0";
 	
 	private boolean written ;
 	private boolean passed ;
@@ -26,7 +27,7 @@ public class TableRecord {
 		this.ref = ref;
 	}
 
-	private String value = "0";
+
 	
 	public TableRecord(String lexema, int idToken){
 		this.lexema = lexema;
@@ -34,6 +35,13 @@ public class TableRecord {
 		this.ref = 1;
 		setWritten(false);
 		setPassed(false);
+		
+		if (idToken == LexicalAnalizer.DOUBLE){
+			
+		}
+		if (idToken == LexicalAnalizer.USINTEGER){
+			
+		}
 	}
 
 	public TableRecord(String lexema, int idToken, String value){
@@ -119,5 +127,6 @@ public class TableRecord {
 	public void setPassed(boolean passed) {
 		this.passed = passed;
 	}
+	
 
 }

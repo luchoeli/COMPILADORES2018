@@ -12,7 +12,7 @@ public class Nodo {
 	private Nodo izq;
 	private Nodo der;
 	private Nodo padre;
-		
+	
 	public Nodo(TableRecord tr){
 		tableRec = tr;
 		this.lexema = tr.getLexema();
@@ -80,6 +80,8 @@ public class Nodo {
 			pos = pos.getDer();
 		}
 		pos.setDer(nodo);
+		nodo.setPadre(pos);
+		//System.out.println("al nodo "+nodo.getLexema()+" es el hijo der de '"+ pos.getLexema() +"' ");
 	}
 	
 	public Nodo getFuncionPadre(){
@@ -100,4 +102,87 @@ public class Nodo {
 	public ArbolExpresionGrafico getdibujo() {
         return new ui.ArbolExpresionGrafico(this);
     }
+	
+	/** true si tengo un hijo null y el otro es una hoja**/
+	private boolean soyUnario(){
+		//FIXME LOS UNARIOS VAN A LA IZQ;
+		/*
+		if ((getIzq()==null && getDer()!=null && getDer().imAleave())){
+			System.out.println("1");
+			return true;
+		}
+		*/
+		if (getDer() == null && getIzq()!=null&&getIzq().imAleave()){
+			System.out.println("2");
+			return true;
+		}
+		return false;
+	}
+	/** true si soy una hoja**/
+	private boolean imAleave(){
+		if (getDer()==null && getIzq()==null){
+			
+			//System.out.println(getLexema()+": soy hoja");
+			return true;
+		}
+		return false;
+	}
+	/** true si soy un subarbol izquierdo (nodo con hijos sin nietos),
+	 *  es decir:
+	 *  	- que mis dos hijos son hojas
+	 *  	o
+	 *  	- uno es unario y el otro es null**/
+	private boolean imLeftSubTree(){
+		//FIXME no puede ser ni S ni then, ni else, ni cuerpo, ni cond 
+		if (getLexema().equals("S")){
+			return false;
+		}
+		if (imAleave()){
+			//System.out.println("HOJA");
+			return false;
+		}
+		if (soyUnario()){
+			//System.out.println("UNARIO");
+			return true;
+		}
+		if(getIzq()!=null &&  getDer()!=null){
+			if (getDer().imAleave() && getIzq().imAleave()){
+				return true;
+			}
+		}
+		return false;
+	}
+	/** devuelvo mi proximo leftSubTree **/
+	public Nodo getLeftSubTree(){
+		
+
+		if (imLeftSubTree()){
+			//System.out.println("<><SUBTREE><><><><> ");
+			//this.imprimirNodo();
+			//System.out.println("<><><><><><><><><><><");
+			return this;
+		}else{
+			if (getIzq()!=null && !getIzq().imAleave()){
+				return getIzq().getLeftSubTree();
+			}
+			
+			if(getDer()!=null && !getDer().imAleave()){
+				return getDer().getLeftSubTree();	
+			}
+			return null;
+		}
+		
+		
+		//return null;
+	}
+	
+	public void reemplazarSubtree(Nodo reemplazo){
+		Nodo padre = this.getPadre();
+		//System.out.println(padre);
+		if (padre.getIzq()!=null && padre.getIzq().equals(this))
+			padre.setIzq(reemplazo);
+		if (padre.getDer()!=null && padre.getDer().equals(this))
+			padre.setDer(reemplazo);
+	}
+	
 }
