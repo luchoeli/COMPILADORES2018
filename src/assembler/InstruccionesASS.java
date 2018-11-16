@@ -59,4 +59,42 @@ public class InstruccionesASS {
 		codigo += "FSTP " + varAux + "\n";
 		return codigo;
 	}
+
+	public String multiplicaUsinteger(String left, String rigth, String varAux) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String multiplicaDouble(String left, String rigth, String varAux) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String divideDouble(String left, String rigth, String varAux) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String divideUsinteger(String left, String rigth, String varAux) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String igualUsintComparador(String left, String rigth) {
+		String codigo="";
+		codigo += "MOV ax, " + left + "\n";
+		codigo += "CMP ax, " + rigth + "\n";
+		return codigo;
+	}
+
+	public String igualDoubleComparador(String left, String rigth) {
+		String codigo="";
+		codigo += "FLD " + rigth + "\n";
+		codigo += "FLD " + left + "\n";
+		codigo += "FCOM" + "\n";
+		codigo += "FSTSW aux_mem_2bytes" + "\n";
+		codigo += "MOV AX , aux_mem_2bytes" + "\n";
+		codigo += "SAHF" + "\n";
+		return codigo;
+	}
 }

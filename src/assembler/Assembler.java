@@ -104,18 +104,19 @@ public class Assembler {
 	private String generarAssembler() {
 		String codigo="";
 		while (raiz.getLeftSubTree()!=null){// && raiz.getLeftSubTree()!=raiz){ //&& codigo.equals("")){
-			/*
+			
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			*/
+			
 			
 			Nodo subTree = raiz.getLeftSubTree();
 			subTree.imprimirNodo();
 			System.out.println("SUBTREE "+subTree.getLexema() + "->" +subTree.getDer().getLexema()+"<-");
+			
 			Nodo nodoI=null,nodoD = null;
 			nodoI = subTree.getIzq();
 			nodoD = subTree.getDer();
@@ -123,6 +124,7 @@ public class Assembler {
 			String rigth=dameValoresOids(nodoD.getTableRec());
 			String varAux = null;
 			TableRecord trI=null,trD = null;
+			
 			if (nodoI!=null){
 				trI = subTree.getIzq().getTableRec();
 				left = dameValoresOids(trI);
@@ -172,7 +174,8 @@ public class Assembler {
 				tablaSimbAux.put(varAux, auxTR);
 				break;
 			}
-			case "-": //usi + usi || doub + doubl
+			case "-": //usi + usi || doub + doubl  //------------------------------------------------------------------------ RESTA ---//
+				
 			{
 				varAux=dameNombreAux();
 				if (trI.getType().equals("usinteger")){
@@ -191,6 +194,70 @@ public class Assembler {
 				tablaSimbAux.put(varAux, auxTR);
 				break;
 			}
+			
+			
+			case "*"://------------------------------------------------------------------------ MULTIPLICATION ---//
+			{
+				varAux=dameNombreAux();
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.multiplicaUsinteger(left,rigth,varAux);
+				}
+				if (trI.getType().equals("double")){
+					codigo+= instrucciones.multiplicaDouble(left,rigth,varAux);
+				}
+				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
+				//System.out.println("CCCCC: \n"+codigo);
+				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
+				auxTR.setType(trI.getType());
+				Nodo auxN = new Nodo(varAux);
+				auxN.setTableRec(auxTR);
+				subTree.reemplazarSubtree(auxN);
+				tablaSimbAux.put(varAux, auxTR);
+				break;
+				
+			}
+			case "/"://------------------------------------------------------------------------ divide ---//
+			{
+				varAux=dameNombreAux();
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.divideUsinteger(left,rigth,varAux);
+				}
+				if (trI.getType().equals("double")){
+					codigo+= instrucciones.divideDouble(left,rigth,varAux);
+				}
+				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
+				//System.out.println("CCCCC: \n"+codigo);
+				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
+				auxTR.setType(trI.getType());
+				Nodo auxN = new Nodo(varAux);
+				auxN.setTableRec(auxTR);
+				subTree.reemplazarSubtree(auxN);
+				tablaSimbAux.put(varAux, auxTR);
+				break;
+				
+			}
+			case "="://-------------------------------------------------------------------------------------------------igualdad----///
+			{	
+				codigo+= instrucciones.igualUsintComparador(left,rigth);
+				codigo+=instrucciones.igualDoubleComparador(left,rigth);
+			}
+			case ">"://-------------------------------------------------------------------------------------------------igualdad----///
+			{
+				
+			}
+			case "<"://-------------------------------------------------------------------------------------------------igualdad----///
+			{
+				
+			}
+			case ">="://-------------------------------------------------------------------------------------------------igualdad----///
+			{
+				
+			}
+			case "<="://-------------------------------------------------------------------------------------------------igualdad----///
+			{
+				
+			}
+			
 			}
 			
 			

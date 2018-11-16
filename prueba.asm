@@ -12,24 +12,22 @@ overflow db "Ha ocurrido Overflow" , 0
 divideZero db "Se ha intentado dividir por cero" , 0
 aux_mem_2bytes dw ?
 perdidaInfo db "Se ha producido perdida de informacion" , 0
-_d	dd ?
-_c	dd ?
-_b	dw ?
-_a	dw ?
-@aux0	dw ?
+_b	dd ?
+_a	dd ?
+@aux0	dd ?
 
 .code
 start:
-MOV ax, 1
-MOV _a, ax
-MOV ax, 2
-MOV _b, ax
-MOV ax, 1
-SUB ax, 2
+FLD 1.
+FSTP _a
+FLD 2.
+FSTP _b
+MOV ax, _b
+ADD ax, _a
 MOV @aux0, ax
-JS @LABEL_PERDIDAINFO:
-MOV ax, @aux0
-MOV _a, ax
+JO @LABEL_OVERFLOW
+FLD @aux0
+FSTP _a
 invoke HelloWorld, NULL, addr HelloWorld,addr HelloWorld,MB_OK
 JMP @LABEL_END
 @LABEL_OVERFLOW:

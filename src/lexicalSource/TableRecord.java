@@ -4,7 +4,7 @@ import lexicalSource.LexicalAnalizer;
  
 public class TableRecord {
 	private String lexema; 
-	private int idToken;
+	private int idToken;	// id o constante
 	private String type; // Tipo de identificador o constante ( INT o UNSIGNED LONG)
 	private int ref; // Cantidad de referencias.
 	private String uso; 
