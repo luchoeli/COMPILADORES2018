@@ -1,6 +1,5 @@
 package semanticSource;
 import lexicalSource.*;
-import sintacticSource.Error;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;

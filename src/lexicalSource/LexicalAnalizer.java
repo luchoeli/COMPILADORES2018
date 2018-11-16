@@ -369,7 +369,7 @@ public class LexicalAnalizer {
 	}
 	public void setBuffer(String buffer) {
 		this.buffer = buffer;
-	}
+	}//
 	
 	public Token getToken() { //in es String entrada
 		int state = 0;
@@ -492,35 +492,41 @@ public class LexicalAnalizer {
 	
 	public void makeToken(String buffer){
 		int id = getID(buffer);
-		String type = getType(id);
+		String type= getType(id);
 		TableRecord record=null;
-		if (type == "IDENTIFICADOR") {
+		if (id == ID) {
 			//System.out.println("//////////makeToken//////////");
 			record = new TableRecord(buffer,id);
-			record.setType(type);
+			record.setType(null);
 			record = this.addIdentificadorToTable(record);
 			//System.out.println("////////////////");
 			
 			//record = this.addIdentificadorToTable(new TableRecord(buffer, id));
-		}else if (type == "CONSTANTE") {
+		}else if (id == CTE) {
 			
 			if (buffer.contains("_ui")){
 				String value[] = buffer.split("_");
-				
 				record = new TableRecord(buffer,id,value[0]);
-				record.setType("usinteger");
+				type = "usinteger";
+				record.setType(type);
 				record = this.addConstanteToTable(record);
 				
 				//record = this.addConstanteToTable(new TableRecord(buffer, id, value[0]));
 			}else if  (buffer.contains(".")){
-				
-				record = new TableRecord(buffer,id);
-				record.setType("double");
+				//FIXME agregar al constreuctor del TR el value
+				String dable=buffer.substring(0, buffer.length());
+				dable = dable.replace("D","E");
+				record = new TableRecord(buffer,id,dable);
+				type="double";
+				record.setType(type);
 				record = this.addConstanteToTable(record);
 				
 				//record = this.addConstanteToTable(new TableRecord(buffer, id));
 			}	
 			
+		}else if (id == CADENA){
+			record = new TableRecord(buffer,id,null);
+			record = this.addConstanteToTable(record);
 		}
 		Token t=new Token(id,buffer,this.line,type,record,null);	
 		tokens.add(t);		
