@@ -369,7 +369,7 @@ public class LexicalAnalizer {
 	}
 	public void setBuffer(String buffer) {
 		this.buffer = buffer;
-	}
+	}//
 	
 	public Token getToken() { //in es String entrada
 		int state = 0;
