@@ -112,6 +112,10 @@ public class Nodo {
 			return true;
 		}
 		*/
+		
+		if (this.getLexema().equals("Condicion") && imAleave()){
+			return true;
+		}
 		if (getDer() == null && getIzq()!=null&&getIzq().imAleave()){
 			System.out.println("2");
 			return true;
@@ -137,13 +141,13 @@ public class Nodo {
 		if (getLexema().equals("S")){
 			return false;
 		}
-		if (imAleave()){
-			//System.out.println("HOJA");
-			return false;
-		}
 		if (soyUnario()){
 			//System.out.println("UNARIO");
 			return true;
+		}
+		if (imAleave()){
+			//System.out.println("HOJA");
+			return false;
 		}
 		if(getIzq()!=null &&  getDer()!=null){
 			if (getDer().imAleave() && getIzq().imAleave()){
@@ -178,7 +182,7 @@ public class Nodo {
 	
 	public void reemplazarSubtree(Nodo reemplazo){
 		Nodo padre = this.getPadre();
-		//System.out.println(padre);
+		System.out.println(padre);
 		if (padre.getIzq()!=null && padre.getIzq().equals(this))
 			padre.setIzq(reemplazo);
 		if (padre.getDer()!=null && padre.getDer().equals(this))

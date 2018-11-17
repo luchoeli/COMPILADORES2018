@@ -57,6 +57,7 @@ programa:	list_sentencias {
 list_sentencias:   sent_declarativa {$$.obj = new Nodo("null",null,null);}
 				 | sent_ejecutable {
 				 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+				 						((Nodo)$1.obj).setPadre(nuevo);
 		 								if (raiz == null){
 					 						raiz = nuevo;
 					 						nuevo.setPadre(null);
@@ -100,6 +101,7 @@ sent_declarativa	:	declaracion_variable ','
 														funciones.add((Nodo)$1.obj);
 													}
 												}
+					
 					;
 					
 declaracion_variable	:	tipo list_variables {
@@ -136,7 +138,7 @@ encabezado : tipo ID '(' tipo ID ')'	{
 										  		this.addError("Error semantico: no se puede declarar funcion dentro de otra ", ((Token)$2.obj).getNroLine());
 										  		//FIXME
 										  		//Error error = new Error("Error semantico: no se puede declarar funcion dentro de otra ",((Token)$5.obj).getNroLine());
-										  		$$.obj = new Nodo(null,null,null);
+										  		$$.obj = new Nodo("null",null,null);
 										  	}
 									  		
 										}
@@ -167,7 +169,7 @@ declaracion_funcion	: encabezado '{' list_sentencias
 					  			System.out.println("rmpo");
 					  			this.addError("Error sintactico: falta return en la declaracion de la funcion ", ((Token)$4.obj).getNroLine());
 					  		}
-					  		
+			
 					;
 								 
 list_variables		:	list_variables ';' ID  {
@@ -311,6 +313,8 @@ sent_seleccion : sent_if END_IF {
 			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
 			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)$3.obj,null); 
 			   													
+			   													((Nodo)$3.obj).setPadre(elseNodo);
+			   													elseNodo.setPadre(ifNodo);
 			   													ifNodo.getDer().setDer(elseNodo);
 			   													
 			   			  								   }
@@ -329,20 +333,30 @@ sent_if :	IF '('expresion_logica')'
 			   				  	    	Nodo thenNodo = new Nodo("THEN",(Nodo)$5.obj,null);
 			   				  	    	Nodo cuerpoNodo = new Nodo("Cuerpo",thenNodo,null);
 			   				  	    	Nodo nuevo = new Nodo("IF",(Nodo)$3.obj,cuerpoNodo);
+			   				  	    	((Nodo)$5.obj).setPadre(thenNodo);
+			   				  	    	((Nodo)$3.obj).setPadre(nuevo);
+			   				  	    	thenNodo.setPadre(cuerpoNodo);
+			   				  	    	cuerpoNodo.setPadre(nuevo);
 										((Token)$1.obj).setNodo(nuevo);
 			   				  	    	//$$.obj = nuevo;
 			   			   		   }
 		|	IF '(' expresion_logica 
 			bloque_sin_declaracion error {
 											addError("Falta parentesis de cierre ')'",((Token)$2.obj).getNroLine());
+											((Token)$1.obj).setNodo(new Nodo("null",null,null));
+											$$.obj = ((Token)$1.obj);
  									     }
  		|	IF expresion_logica ')' 
 			bloque_sin_declaracion error {
 										  	addError("Falta parentesis de apertura '('",((Token)$2.obj).getNroLine());
+										  	((Token)$1.obj).setNodo(new Nodo("null",null,null));
+											$$.obj = ((Token)$1.obj);
  									     }
 		|	IF '('expresion_logica ')' 
 			error {
 				   		addError("Error sintactico en el bloque ",((Token)$2.obj).getNroLine());
+				   		((Token)$1.obj).setNodo(new Nodo("null",null,null));
+						$$.obj = ((Token)$1.obj);
  			      }
  		 		
 	    ;
@@ -355,6 +369,7 @@ list_sentencias_no_declarables :    sent_declarativa {
 													 }
 								| sent_ejecutable{
 								 						Nodo nuevo = new Nodo("S",(Nodo)$1.obj, null);
+								 						((Nodo)$1.obj).setPadre(nuevo);
 						 								if (raiz == null){
 									 						raiz = nuevo;
 									 						nuevo.setPadre(null);
@@ -396,6 +411,7 @@ expresion_logica : expresion comparador expresion {
 														setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Nodo)$2.obj).getLexema());
 														Nodo comparador = new Nodo(((Nodo)$2.obj).getLexema(),((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());	
 														Nodo nuevo = new Nodo("Condicion",comparador,null);
+														comparador.setPadre(nuevo);
 														$$.obj = nuevo;
 												  }
 				 		
@@ -483,7 +499,9 @@ termino : termino '*' factor{
 								if (datosCompatibles(((Token)$1.obj).getRecord().getType(),((Token)$3.obj).getRecord().getType())){
 									String type = ((Token)$3.obj).getRecord().getType();
 									Nodo nuevo = new Nodo ("/",((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());
-		   							$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "/" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(),type, null,nuevo);
+									Token token = new Token(0, ((Token)$1.obj).getLexema() + "*" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), type, null,nuevo);
+									token.setRecord(((Token)$1.obj).getRecord());
+		   							$$.obj = token;
 		   						}else{
 	   								addError("Error semántico: Los tipo de datos de la operacion / no coinciden. ", ((Token)$1.obj).getNroLine());
 	   							}
@@ -572,6 +590,7 @@ factor : CTE 	{
 	   
 	   			isDeclarated((Token)$1.obj);
 	   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
+	   			System.out.println(((Token)$1.obj).getLexema());
 	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   			TableRecord tr = table.get(((Token)$1.obj).getLexema());
 	   			nuevo.setTableRec(tr);
@@ -698,6 +717,9 @@ public void updateTable(Vector<Token> tokens, String type, String uso, String am
 					if (ambito != "main"){
 						System.out.println("declaracion en declaracion '"+lexema+"' declarada en '"+ambito+"'");
 						addError("Error semantico: no se puede declarar funcion dentro de una funcion. ",token.getNroLine());
+						(table.get(lexema,uso)).setType(type);
+						(table.get(lexema)).setUso(uso);
+						(table.get(lexema)).setAmbito(ambito);
 					}else{
 						(table.get(lexema,uso)).setType(type);
 						(table.get(lexema)).setUso(uso);
@@ -794,7 +816,7 @@ public TableRecord updateTableNegative(String key){//key: 2.0
 }
 
 public boolean isDeclarated(Token id){
-	if (table.get(id.getLexema()).getType() == IDENTIFICADOR )
+	if (table.get(id.getLexema()).getType() == null )
         {
             this.addError("Error sintactico: Variable "+id.getLexema()+" no declarada.", id.getNroLine());
             this.table.remove(id.getRecord().getLexema());
@@ -807,7 +829,7 @@ public boolean isDeclarated(Token id){
 }
 
 private boolean datosCompatibles(String type, String type2) {
-	//System.out.println(type+" ** "+type2);
+	System.out.println(type+" ** "+type2);
 	if (type.equals(type2)){
 		return true;
 	}

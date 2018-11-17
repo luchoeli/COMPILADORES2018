@@ -14,20 +14,24 @@ aux_mem_2bytes dw ?
 perdidaInfo db "Se ha producido perdida de informacion" , 0
 _b	dd ?
 _a	dd ?
-@aux0	dd ?
+var_aux_dx dw ?
+@0 dw 0
 
 .code
 start:
-FLD 1.
-FSTP _a
+;-------------  COMP DOUBLE ---- (_a comp 2.)
 FLD 2.
-FSTP _b
-MOV ax, _b
-ADD ax, _a
-MOV @aux0, ax
-JO @LABEL_OVERFLOW
-FLD @aux0
+FLD _a
+FCOM
+FSTSW aux_mem_2bytes
+MOV AX , aux_mem_2bytes
+SAHF
+;-------------  ASIG DOUBLE ---- (_a:=2.23E+2)
+FLD 2.23E+2
 FSTP _a
+;-------------  ASIG DOUBLE ---- (_b:=65.)
+FLD 65.
+FSTP _b
 invoke HelloWorld, NULL, addr HelloWorld,addr HelloWorld,MB_OK
 JMP @LABEL_END
 @LABEL_OVERFLOW:
