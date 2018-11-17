@@ -1,6 +1,17 @@
-usinteger _a;_b,
-double _c;_d,
+__13
+double _a,
+double _fun (double _c) {
+	_a:=2.,
+	usinteger _b,
+	
+	
+	double _fun2 (double _x) {
+		_x:=2.,
+		return (_a)
+	},
+	if (_a != 2.4) {
+		_a:=4.,		
+	}end_if,
+	return (_a)
+},
 
-_a:=1_ui,
-_b:=2_ui,
-_a := 1_ui - 2_ui,

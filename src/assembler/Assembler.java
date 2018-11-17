@@ -104,14 +104,14 @@ public class Assembler {
 	private String generarAssembler() {
 		String codigo="";
 		while (raiz.getLeftSubTree()!=null){// && raiz.getLeftSubTree()!=raiz){ //&& codigo.equals("")){
-			
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+//			
+//			try {
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			
 			
 			Nodo subTree = raiz.getLeftSubTree();
 			subTree.imprimirNodo();
@@ -164,8 +164,8 @@ public class Assembler {
 				if (trI.getType().equals("double")){
 					codigo+= instrucciones.sumaDouble(left,rigth,varAux);
 				}
-				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
-				//System.out.println("CCCCC: \n"+codigo);
+				
+				
 				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
 				auxTR.setType(trI.getType());
 				Nodo auxN = new Nodo(varAux);
@@ -184,8 +184,6 @@ public class Assembler {
 				if (trI.getType().equals("double")){
 					codigo+= instrucciones.restaDouble(left,rigth,varAux);
 				}
-				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
-				//System.out.println("CCCCC: \n"+codigo);
 				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
 				auxTR.setType(trI.getType());
 				Nodo auxN = new Nodo(varAux);
@@ -205,8 +203,7 @@ public class Assembler {
 				if (trI.getType().equals("double")){
 					codigo+= instrucciones.multiplicaDouble(left,rigth,varAux);
 				}
-				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
-				//System.out.println("CCCCC: \n"+codigo);
+				
 				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
 				auxTR.setType(trI.getType());
 				Nodo auxN = new Nodo(varAux);
@@ -225,8 +222,7 @@ public class Assembler {
 				if (trI.getType().equals("double")){
 					codigo+= instrucciones.divideDouble(left,rigth,varAux);
 				}
-				//agrego aux a la tabla de simbolos FIXME ver en que tabla lo hago
-				//System.out.println("CCCCC: \n"+codigo);
+				
 				TableRecord auxTR = new TableRecord(varAux, lexico.ID);
 				auxTR.setType(trI.getType());
 				Nodo auxN = new Nodo(varAux);
@@ -238,22 +234,66 @@ public class Assembler {
 			}
 			case "="://-------------------------------------------------------------------------------------------------igualdad----///
 			{	
-				codigo+= instrucciones.igualUsintComparador(left,rigth);
-				codigo+=instrucciones.igualDoubleComparador(left,rigth);
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+				
+				}
+				proxSalto="JNE";
 			}
-			case ">"://-------------------------------------------------------------------------------------------------igualdad----///
+			case "<="://-------------------------------------------------------------------------------------------------igualdad----///
 			{
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+					proxSalto="JA";
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+					proxSalto="JG";
+				}
+				
+			}
+			case ">="://-------------------------------------------------------------------------------------------------igualdad----///
+			{	
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+					proxSalto="JB";
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+					proxSalto="JL";
+				}
 				
 			}
 			case "<"://-------------------------------------------------------------------------------------------------igualdad----///
 			{
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+					proxSalto="JAE";
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+					proxSalto="JGE";
+				}
 				
 			}
-			case ">="://-------------------------------------------------------------------------------------------------igualdad----///
+			case ">"://-------------------------------------------------------------------------------------------------igualdad----///
 			{
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+					proxSalto="JBE";
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+					proxSalto="JLE";
+				}
 				
+				subTree.reemplazarSubtree(null);
 			}
-			case "<="://-------------------------------------------------------------------------------------------------igualdad----///
+			
+			case "CONDICION":
 			{
 				
 			}
@@ -289,6 +329,8 @@ public class Assembler {
 	
 	private String declararVariablesAux() {
 		String auxiliares="";
+		auxiliares += "var_aux_dx dw ?" + "\n";
+		auxiliares += "@0 dw 0" + "\n";
 		for (TableRecord tr : tablaSimbAux.getElements()) {
 			tr.print();
 			if (tr.getIdToken() == lexico.ID){ 

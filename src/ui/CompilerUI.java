@@ -60,6 +60,8 @@ import assembler.Assembler;
 import lexicalSource.Table;
 
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.SystemColor;
 
 public class CompilerUI {
 
@@ -248,6 +250,8 @@ public class CompilerUI {
 		JScrollPane scrollPane = new JScrollPane();
 		
 		textArea = new JTextArea();
+		textArea.setBackground(Color.WHITE);
+		textArea.setFont(new Font("Monospaced", Font.BOLD, 17));
 		textArea.setEnabled(false);
 
 		//--------------------------------------MENU BAR -------------------------------------------
@@ -286,6 +290,7 @@ public class CompilerUI {
 		
 		//------------------------------------------- NUMERO DE LINEAS -----------------------------------
 		lines = new JTextArea("1");
+		lines.setFont(new Font("Monospaced", Font.BOLD, 17));
 		 
 		lines.setBackground(Color.LIGHT_GRAY);
 		lines.setEditable(false);
