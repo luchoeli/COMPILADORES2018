@@ -5,7 +5,7 @@ public class InstruccionesASS {
 
 	public String sumaUsinteger(String izq, String der, String aux) {
 		
-		String codigo=";-------------  ADD USINT ---- ("+izq+":="+der+") \n";
+		String codigo=";-------------  ADD USINT ---- ("+izq+"+"+der+") \n";
 		codigo += "MOV ax, " + izq + "\n";
 		codigo += "ADD ax, " + der + "\n";
 		codigo += "MOV "+aux+", ax" + "\n";
@@ -15,7 +15,7 @@ public class InstruccionesASS {
 	
 	public String sumaDouble(String izq, String der, String aux) {
 		
-		String codigo=";-------------  ADD DOUBLE ---- ("+izq+":="+der+") \n";
+		String codigo=";-------------  ADD DOUBLE ---- ("+izq+"+"+der+") \n";
 		codigo += "MOV ax, " + izq + "\n";
 		codigo += "ADD ax, " + der + "\n";
 		codigo += "MOV "+aux+", ax" + "\n";
@@ -60,8 +60,13 @@ public class InstruccionesASS {
 	}
 
 	public String multiplicaUsinteger(String left, String rigth, String varAux) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		String codigo=";-------------  MULT USINT---- ("+left+"*"+rigth+")\n";
+		codigo += "MOV ax, " + left + "\n";
+		codigo += "MOV bx, " + rigth + "\n";
+		codigo += "MUL bx" + "\n";
+		codigo += "MOV "+varAux+ ", ax" + "\n";
+		return codigo;
 	}
 
 	public String multiplicaDouble(String left, String rigth, String varAux) {

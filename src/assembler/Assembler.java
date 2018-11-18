@@ -7,6 +7,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
+
+import java.util.Stack;
+
 import com.sun.javafx.font.Disposer;
 
 import lexicalSource.*;
@@ -22,10 +26,14 @@ public class Assembler {
 	private String program;
 	private String codigo;
 	private String path;
+	private boolean huboElse = false;
 	private Nodo raiz;
 	private ArrayList<Nodo> funciones;
 	private InstruccionesASS instrucciones = new InstruccionesASS();
 	private int auxNro=0;
+	private Stack<String> labelsStack = new Stack<String>();
+	private int nroLabel = 0;
+	private static final String LABEL ="@Label";
 	public String getPath() {
 		return path;
 	}
@@ -43,7 +51,7 @@ public class Assembler {
 		this.program = program;	
 		this.raiz = parser.getRaiz();
 		this.funciones = parser.getFunciones();
-	
+		this.raiz.setLexema("RAIZ");
 	}
 		
 
@@ -82,7 +90,7 @@ public class Assembler {
 		p.println("start:");
 		p.print(aux);
 		p.println("invoke HelloWorld, NULL, addr HelloWorld,addr HelloWorld,MB_OK");
-		
+		//TODO Codigo de las Funciones!! ver donde se declaran las variables!
 		p.println("JMP @LABEL_END");
 		p.println("@LABEL_OVERFLOW:");
 		p.println("invoke MessageBox, NULL, addr overflow, addr overflow, MB_OK");
@@ -103,42 +111,48 @@ public class Assembler {
 
 	private String generarAssembler() {
 		String codigo="";
+		//raiz.limpiarTree();
+		
 		while (raiz.getLeftSubTree()!=null){// && raiz.getLeftSubTree()!=raiz){ //&& codigo.equals("")){
-//			
-//			try {
-//				Thread.sleep(2000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			
 			
 			Nodo subTree = raiz.getLeftSubTree();
-			subTree.imprimirNodo();
-			System.out.println("SUBTREE "+subTree.getLexema() + "->" +subTree.getDer().getLexema()+"<-");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			//subTree.imprimirNodo();
+			System.out.println("-------------- SUBTREE "+subTree.getLexema());
 			
 			Nodo nodoI=null,nodoD = null;
-			nodoI = subTree.getIzq();
-			nodoD = subTree.getDer();
-			String left = dameValoresOids(nodoI.getTableRec());
-			String rigth=dameValoresOids(nodoD.getTableRec());
-			String varAux = null;
-			TableRecord trI=null,trD = null;
+			String left="",rigth="";
+			TableRecord trI=null,trD=null;
+			if (subTree.getIzq()!=null){
+				nodoI = subTree.getIzq();
+				if (nodoI.getTableRec()!=null){
+					trI=nodoI.getTableRec();
+					left = dameValoresOids(trI);
+				}
+			}
+			if (subTree.getDer()!=null){
+				nodoD = subTree.getDer();
+				if (nodoD.getTableRec()!=null){
+					trD = nodoD.getTableRec();
+					rigth=dameValoresOids(trD);					
+				}
+			}
 			
-			if (nodoI!=null){
-				trI = subTree.getIzq().getTableRec();
-				left = dameValoresOids(trI);
-			}
-			if (nodoD!=null){
-				trD = subTree.getDer().getTableRec();
-				rigth = dameValoresOids(trD);
-			}
+			String varAux = null;
 			
 			
 			switch (subTree.getLexema()){
 			//------------------------------------------------------------------------ ASIGNACION ---//
 			// _a:= 3.,  _a:= _b,  _a:= @aux,
 			case ":=":
+			{
 				//System.out.println("ASIGNACION");
 				if (trI.getType().equals("usinteger")){
 					codigo+=instrucciones.asignacionUSINT(left, rigth);
@@ -150,9 +164,10 @@ public class Assembler {
 				}
 				
 				//-------------------------- elimino el bubtree -----------------------///
-				
 				subTree.reemplazarSubtree(null);
+				
 				break;
+			}
 				//------------------------------------------------------------------------ SUMA ---//
 			case "+": //usi + usi || doub + doubl
 			{
@@ -174,7 +189,7 @@ public class Assembler {
 				tablaSimbAux.put(varAux, auxTR);
 				break;
 			}
-			case "-": //usi + usi || doub + doubl  //------------------------------------------------------------------------ RESTA ---//
+			case "-" : //------------------------------------------------------------------------ RESTA ---//
 				
 			{
 				varAux=dameNombreAux();
@@ -242,6 +257,8 @@ public class Assembler {
 				
 				}
 				proxSalto="JNE";
+				subTree.reemplazarSubtree(null);
+				break;
 			}
 			case "<="://-------------------------------------------------------------------------------------------------igualdad----///
 			{
@@ -253,7 +270,8 @@ public class Assembler {
 					codigo+=instrucciones.doubleComparador(left,rigth);
 					proxSalto="JG";
 				}
-				
+				subTree.reemplazarSubtree(null);
+				break;
 			}
 			case ">="://-------------------------------------------------------------------------------------------------igualdad----///
 			{	
@@ -265,7 +283,8 @@ public class Assembler {
 					codigo+=instrucciones.doubleComparador(left,rigth);
 					proxSalto="JL";
 				}
-				
+				subTree.reemplazarSubtree(null);
+				break;
 			}
 			case "<"://-------------------------------------------------------------------------------------------------igualdad----///
 			{
@@ -277,7 +296,8 @@ public class Assembler {
 					codigo+=instrucciones.doubleComparador(left,rigth);
 					proxSalto="JGE";
 				}
-				
+				subTree.reemplazarSubtree(null);
+				break;
 			}
 			case ">"://-------------------------------------------------------------------------------------------------igualdad----///
 			{
@@ -291,17 +311,60 @@ public class Assembler {
 				}
 				
 				subTree.reemplazarSubtree(null);
+				break;
 			}
 			
-			case "CONDICION":
+			case "Condicion":
+			{	
+				String label = dameNextLabel();
+				codigo+=proxSalto + " " + label+" \n" ;
+				codigo+=";--------------------------------------------------------------------------[THEN]----------\n";
+				labelsStack.push(label);
+				subTree.reemplazarSubtree(null);
+				break;
+			}
+			
+			
+			case "THEN" :
 			{
+				String label = dameNextLabel();
+				codigo+="JMP "+label+" \n";
+				codigo+=labelsStack.pop()+" \n";
+				labelsStack.push(label);
+				subTree.reemplazarSubtree(null);
+				codigo+=";--------------------------------------------------------------------------[ELSE/FIN]----------\n";
+				break;
+			}
+			
+			case "ELSE":
+			{
+				codigo+=labelsStack.pop()+" \n";
+				subTree.reemplazarSubtree(null);
+				huboElse = true;
+				break;
+			}
+			
+			case "Cuerpo" :
+			{
+				System.out.println("<cuerpo>");
+				subTree.reemplazarSubtree(null);
+				if (!huboElse){
+					codigo+=labelsStack.pop()+" \n";
+				}
+				break;
+			}
+			
+			case "IF" :
+			{
+				System.out.println("<IF>");
+				subTree.reemplazarSubtree(null);
+				break;
+			}
 				
 			}
 			
-			}
 			
-			
-			
+			raiz.limpiarTree();
 		}
 		
 		return codigo;
@@ -316,10 +379,10 @@ public class Assembler {
 			tr.print();
 			if (tr.getIdToken() == lexico.ID){ 
 				if ((tr.getType() != null) && (tr.getType().equals("usinteger"))){
-					auxiliares +=tr.getLexema() + "\t" + "dw ?" + "\n";
+					auxiliares +=tr.getLexema() + "\t" + "dw ?" + "\n";  // 2 bytess - 16 bit 
 				}
-				if ((tr.getType() != null) && (tr.getType().equals("double"))){
-					auxiliares += tr.getLexema() + "\t" + "dd ?" + "\n";
+				if ((tr.getType() != null) && (tr.getType().equals("double"))){  //8 bytes - 64 bits
+					auxiliares += tr.getLexema() + "\t" + "dq ?" + "\n";
 				}
 			}
 			
@@ -327,6 +390,13 @@ public class Assembler {
 		return auxiliares;
 	}
 	
+	
+	private String dameNextLabel(){
+		String label = LABEL+nroLabel;
+		nroLabel++;
+		return label;
+		
+	}
 	private String declararVariablesAux() {
 		String auxiliares="";
 		auxiliares += "var_aux_dx dw ?" + "\n";
