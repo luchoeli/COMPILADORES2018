@@ -34,6 +34,8 @@ public class Assembler {
 	private Stack<String> labelsStack = new Stack<String>();
 	private int nroLabel = 0;
 	private static final String LABEL ="@Label";
+	private String consola;
+	
 	public String getPath() {
 		return path;
 	}
@@ -52,6 +54,7 @@ public class Assembler {
 		this.raiz = parser.getRaiz();
 		this.funciones = parser.getFunciones();
 		this.raiz.setLexema("RAIZ");
+		this.consola = "";
 	}
 		
 
@@ -360,6 +363,13 @@ public class Assembler {
 				subTree.reemplazarSubtree(null);
 				break;
 			}
+			case "print" :
+			{
+				System.out.println("<print>");
+				consola+=subTree.getIzq().getLexema()+" \n";
+				subTree.reemplazarSubtree(null);
+				break;
+			}
 				
 			}
 			
@@ -435,6 +445,10 @@ public class Assembler {
 		String auxiliar = "@aux"+String.valueOf(auxNro);
 		auxNro++;
 		return auxiliar;
+	}
+	
+	public String getConsola(){
+		return consola;
 	}
 
 }
