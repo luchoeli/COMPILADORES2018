@@ -106,13 +106,16 @@ public class Nodo {
 	/** true si tengo un hijo null y el otro es una hoja**/
 	private boolean soyUnario(){
 		//TODO Cuerpo?, IF?
-		if ((this.getLexema().equals("Condicion") || 
+		if (((this.getLexema().equals("Condicion") || 
 				this.getLexema().equals("ELSE") || 
 				this.getLexema().equals("THEN") || 
 				this.getLexema().equals("IF") ||
-				this.getLexema().equals("Cuerpo"))	&& imAleave()){
+				this.getLexema().equals("Cuerpo"))	&& imAleave()) ||
+				this.getLexema().equals("print")){
 			return true;
 		}
+		
+		
 		/*
 		if (getDer() == null && getIzq()!=null&&getIzq().imAleave()){
 			System.out.println(this.getLexema()+" 2");

@@ -158,7 +158,7 @@ public class CompilerUI {
 		Problems.setLayout(gl_Problems);
 		
 		// -------------------------------- PANEL CONSOLE ------------------------------------------
-		/*
+		
 		JPanel Console = new JPanel();
 		tabbedPane.addTab("Console", new ImageIcon(CompilerUI.class.getResource("/icons/console_view.gif")), Console, null);
 		
@@ -180,7 +180,7 @@ public class CompilerUI {
 					.addGap(0))
 		);
 		Console.setLayout(gl_Console);
-		*/
+		
 		// -------------------------------- PANEL TOKENS ------------------------------------------
 		
 		JPanel Tokens = new JPanel();
@@ -368,6 +368,7 @@ public class CompilerUI {
 						String path = fc.getSelectedFile().getAbsolutePath();
 						assembler.setPath(path);
 						assembler.ejecutable();
+						console.append(assembler.getConsola());
 						File file = assembler.getArchivo();
 						System.out.println("ss- "+file.getAbsolutePath());							
 						
@@ -459,6 +460,8 @@ public class CompilerUI {
 				btnArbol.setEnabled(true);
 				btnAssembler.setEnabled(true);
 				
+			}else{
+				console.setText("el programa no pudo compilar ya que tuvo "+errors.size()+" errores \n");
 			}
 			/*
 			for (Nodo n : parser.getFunciones()){
