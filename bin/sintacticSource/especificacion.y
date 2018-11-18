@@ -309,13 +309,13 @@ sent_seleccion : sent_if END_IF {
 														  			raiz = null;
 														  		}
 			   													setRegla(((Token)$2.obj).getNroLine(), "Sentencia de Control", "else");
-			   													//Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);
 			   													Nodo ifNodo = ((Token)$1.obj).getNodo();
+			   													Nodo cuerpo = ifNodo.getDer();
 			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)$3.obj,null); 
 			   													
 			   													((Nodo)$3.obj).setPadre(elseNodo);
-			   													elseNodo.setPadre(ifNodo);
-			   													ifNodo.getDer().setDer(elseNodo);
+			   													elseNodo.setPadre(cuerpo);
+			   													cuerpo.setDer(elseNodo);
 			   													
 			   			  								   }
 			   | sent_if error { addError("Error sintactico: Falta palabra reservada 'end_if' luego del bloque ",((Token)$2.obj).getNroLine());}
@@ -409,7 +409,11 @@ list_sentencias_no_declarables :    sent_declarativa {
 
 expresion_logica : expresion comparador expresion { 
 														setRegla(((Token)$1.obj).getNroLine(), "expresion logica", ((Nodo)$2.obj).getLexema());
+														Nodo comp1 =((Token)$1.obj).getNodo();
+														Nodo comp2 =((Token)$3.obj).getNodo();
 														Nodo comparador = new Nodo(((Nodo)$2.obj).getLexema(),((Token)$1.obj).getNodo(),((Token)$3.obj).getNodo());	
+														comp1.setPadre(comparador);
+														comp2.setPadre(comparador);
 														Nodo nuevo = new Nodo("Condicion",comparador,null);
 														comparador.setPadre(nuevo);
 														$$.obj = nuevo;

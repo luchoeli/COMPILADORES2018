@@ -449,7 +449,7 @@ final static String yyrule[] = {
 "factor : ID",
 };
 
-//#line 610 "especificacion.y"
+//#line 614 "especificacion.y"
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";
 private static final String PARAMETRO = "ID parametro";
@@ -1250,13 +1250,13 @@ case 41:
 														  			raiz = null;
 														  		}
 			   													setRegla(((Token)val_peek(2).obj).getNroLine(), "Sentencia de Control", "else");
-			   													/*Nodo = new Nodo("IF",(Nodo)$3.obj,(Nodo)$5.obj);*/
 			   													Nodo ifNodo = ((Token)val_peek(3).obj).getNodo();
+			   													Nodo cuerpo = ifNodo.getDer();
 			   													Nodo elseNodo = new Nodo("ELSE",(Nodo)val_peek(1).obj,null); 
 			   													
 			   													((Nodo)val_peek(1).obj).setPadre(elseNodo);
-			   													elseNodo.setPadre(ifNodo);
-			   													ifNodo.getDer().setDer(elseNodo);
+			   													elseNodo.setPadre(cuerpo);
+			   													cuerpo.setDer(elseNodo);
 			   													
 			   			  								   }
 break;
@@ -1371,74 +1371,78 @@ case 53:
 //#line 410 "especificacion.y"
 { 
 														setRegla(((Token)val_peek(2).obj).getNroLine(), "expresion logica", ((Nodo)val_peek(1).obj).getLexema());
+														Nodo comp1 =((Token)val_peek(2).obj).getNodo();
+														Nodo comp2 =((Token)val_peek(0).obj).getNodo();
 														Nodo comparador = new Nodo(((Nodo)val_peek(1).obj).getLexema(),((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());	
+														comp1.setPadre(comparador);
+														comp2.setPadre(comparador);
 														Nodo nuevo = new Nodo("Condicion",comparador,null);
 														comparador.setPadre(nuevo);
 														yyval.obj = nuevo;
 												  }
 break;
 case 54:
-//#line 418 "especificacion.y"
+//#line 422 "especificacion.y"
 {
 													addError("Errorsintactico: Comparador invalido. ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 55:
-//#line 421 "especificacion.y"
+//#line 425 "especificacion.y"
 {
 													addError("Error sintactico: Expresion derecha invalida ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 56:
-//#line 424 "especificacion.y"
+//#line 428 "especificacion.y"
 {
 													addError("Error sintactico: Expresion izquierda invalida ", ((Token)val_peek(2).obj).getNroLine());
 												}
 break;
 case 57:
-//#line 429 "especificacion.y"
+//#line 433 "especificacion.y"
 {
 						 Nodo nuevo = new Nodo(">=");
 						 yyval.obj = nuevo;
 						}
 break;
 case 58:
-//#line 433 "especificacion.y"
+//#line 437 "especificacion.y"
 {	
 						Nodo nuevo = new Nodo("<=");
 						yyval.obj = nuevo;
 		   				}
 break;
 case 59:
-//#line 437 "especificacion.y"
+//#line 441 "especificacion.y"
 {	
 		   				Nodo nuevo = new Nodo("=");
 		   				yyval.obj = nuevo;	
 		   		   }
 break;
 case 60:
-//#line 441 "especificacion.y"
+//#line 445 "especificacion.y"
 {	
 		   				Nodo nuevo = new Nodo("!=");
 		   				yyval.obj = nuevo;
 		   			  }
 break;
 case 61:
-//#line 445 "especificacion.y"
+//#line 449 "especificacion.y"
 {	
 		   			Nodo nuevo = new Nodo(">");
 		   			yyval.obj = nuevo;
 		   		}
 break;
 case 62:
-//#line 449 "especificacion.y"
+//#line 453 "especificacion.y"
 {	
 		   			Nodo nuevo = new Nodo("<");
 		   			yyval.obj = nuevo;
 		   		}
 break;
 case 63:
-//#line 456 "especificacion.y"
+//#line 460 "especificacion.y"
 {	
 		   								
 									Nodo nuevo = new Nodo ("+",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
@@ -1454,7 +1458,7 @@ case 63:
 								 }
 break;
 case 64:
-//#line 469 "especificacion.y"
+//#line 473 "especificacion.y"
 {
 									Nodo nuevo = new Nodo ("-",((Token)val_peek(2).obj).getNodo(),((Token)val_peek(0).obj).getNodo());
 		  							if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
@@ -1468,13 +1472,13 @@ case 64:
 								 }
 break;
 case 65:
-//#line 480 "especificacion.y"
+//#line 484 "especificacion.y"
 {
 		  				yyval.obj = (Token)val_peek(0).obj;
 		  			}
 break;
 case 66:
-//#line 485 "especificacion.y"
+//#line 489 "especificacion.y"
 {	
 							
 								if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
@@ -1490,7 +1494,7 @@ case 66:
 							}
 break;
 case 67:
-//#line 498 "especificacion.y"
+//#line 502 "especificacion.y"
 {
 								if (datosCompatibles(((Token)val_peek(2).obj).getRecord().getType(),((Token)val_peek(0).obj).getRecord().getType())){
 									String type = ((Token)val_peek(0).obj).getRecord().getType();
@@ -1504,19 +1508,19 @@ case 67:
 							}
 break;
 case 68:
-//#line 509 "especificacion.y"
+//#line 513 "especificacion.y"
 {
 						yyval.obj = (Token)val_peek(0).obj;
 					}
 break;
 case 69:
-//#line 512 "especificacion.y"
+//#line 516 "especificacion.y"
 {
 							yyval.obj = (Token)val_peek(1).obj;
 						}
 break;
 case 70:
-//#line 520 "especificacion.y"
+//#line 524 "especificacion.y"
 {	
 					/*System.out.println(((Token)$1.obj).getRecord().getIdToken());*/
 					/*	if (((Token)$1.obj).getRecord().getIdToken()==lexico.CADENA){*/
@@ -1528,11 +1532,11 @@ case 70:
 				}
 break;
 case 71:
-//#line 529 "especificacion.y"
+//#line 533 "especificacion.y"
 {addError("Error sintactico: el contenido de impresion debe ser una cadena. ", ((Token)val_peek(3).obj).getNroLine());}
 break;
 case 72:
-//#line 532 "especificacion.y"
+//#line 536 "especificacion.y"
 {	
 
 											((Token)val_peek(2).obj).setNodo(new Nodo(null, null, ((Token)val_peek(0).obj).getNodo())); /*nodo basura*/
@@ -1565,7 +1569,7 @@ case 72:
 										}
 break;
 case 73:
-//#line 562 "especificacion.y"
+//#line 566 "especificacion.y"
 {
 							System.out.println("ERROR"); 
 							addError("Asignacion erronea ", ((Token)val_peek(2).obj).getNroLine());
@@ -1575,7 +1579,7 @@ case 73:
 						 }
 break;
 case 74:
-//#line 571 "especificacion.y"
+//#line 575 "especificacion.y"
 {	
 					TableRecord tr = table.get(((Token)val_peek(0).obj).getLexema());
 					Nodo nuevo = new Nodo(table.get(((Token)val_peek(0).obj).getLexema()));
@@ -1583,7 +1587,7 @@ case 74:
 	   			}
 break;
 case 75:
-//#line 576 "especificacion.y"
+//#line 580 "especificacion.y"
 {
 	   				System.out.println("Un negative "+((Token)val_peek(0).obj).getRecord().getType());
 	   				if (((Token)val_peek(0).obj).getRecord().getType() == "usinteger"){
@@ -1598,7 +1602,7 @@ case 75:
 	   			 }
 break;
 case 76:
-//#line 589 "especificacion.y"
+//#line 593 "especificacion.y"
 { 
 	   
 	   			isDeclarated((Token)val_peek(0).obj);
@@ -1612,7 +1616,7 @@ case 76:
 	   			 
 	   		 }
 break;
-//#line 1539 "Parser.java"
+//#line 1543 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

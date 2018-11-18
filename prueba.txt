@@ -1,17 +1,9 @@
-__13
-double _a,
-double _fun (double _c) {
-	_a:=2.,
-	usinteger _b,
-	
-	
-	double _fun2 (double _x) {
-		_x:=2.,
-		return (_a)
-	},
-	if (_a != 2.4) {
-		_a:=4.,		
-	}end_if,
-	return (_a)
-},
+double _a;_b,
 
+if (_a>2.){
+	_a:=2.23D+2,
+	_b:=3.,
+}else{
+	_b:=_a+_b,
+	_a:= 2.3 * 3.5,
+}end_if,
