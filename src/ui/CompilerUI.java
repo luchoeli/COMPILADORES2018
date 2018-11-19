@@ -459,9 +459,9 @@ public class CompilerUI {
 				//parser.getRaiz().imprimirNodo();
 				btnArbol.setEnabled(true);
 				btnAssembler.setEnabled(true);
-				
+				console.setText("El programa compilo correctamente. \n");
 			}else{
-				console.setText("el programa no pudo compilar ya que tuvo "+errors.size()+" errores \n");
+				console.setText("El programa no pudo compilar ya que tuvo "+errors.size()+" errores \n");
 			}
 			/*
 			for (Nodo n : parser.getFunciones()){

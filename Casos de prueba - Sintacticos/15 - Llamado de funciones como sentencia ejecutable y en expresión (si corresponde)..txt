@@ -1,10 +1,10 @@
 __15 llamado a 
-double _parametro;_a,
+usinteger _a,
 
-double _funcion1(usinteger _parametro){
-	_parametro:=3.2,
+usinteger _funcion1(usinteger _parametro){
+	_parametro:=1_ui,
 	print('cadena'),
-	return (_parametro) 
+	return (_parametro + _a) 
 },
  
- _a := _funcion1(_parametro;write;pass), + 2_ui,
+ _a := _funcion1(_parametro;write;pass)+,
