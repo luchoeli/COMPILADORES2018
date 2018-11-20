@@ -526,6 +526,7 @@ public class LexicalAnalizer {
 			
 		}else if (id == CADENA){
 			record = new TableRecord(buffer,id,null);
+			record.setType("cadena");
 			record = this.addConstanteToTable(record);
 		}
 		Token t=new Token(id,buffer,this.line,type,record,null);	

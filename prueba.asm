@@ -27,64 +27,27 @@ overflow db "Error en ejecucion: Ha ocurrido Overflow" , 0
 divideZero db "Error en ejecucion:Se ha intentado dividir por cero" , 0
 resultadoNegativo db "Error en ejecucion: Usinteger negativo" , 0
 aux_mem_2bytes dw ?
-_d	dw ?
-_c	dw ?
+_c	dq ?
 _b	dq ?
 _a	dq ?
 ;______________________VARIABLES AUXILIARES____________________
 var_aux_dx dw ?
 @0 dw 0
-@cte6	dw 6
-@aux1	dw ?
-@cte0$	dq 0.
-@cte4	dw 4
 @aux0	dq ?
-@cte7$	dq 7.
-@cte3$	dq 3.
+@cte18446744073709551615$p0	dq 18446744073709551615.0
+@cte234567$p0	dq 234567.0
 
 ;_____________________________CODE_____________________________
 .code
 start:
 main proc 
-	 FLD @cte3$             ;-------------  ASIG DOUBLE ---- (_a+@cte3$) 
-	 FSTP _a
-	 FLD @cte0$             ;-------------  ASIG DOUBLE ---- (_b+@cte0$) 
+	 FLD @cte18446744073709551615$p0;-------------  ASIG DOUBLE ---- (_b:=@cte18446744073709551615$p0) 
 	 FSTP _b
-	 FLD _b                 ;-------------  DIV DOUBLE ---- (_a/_b)
-	 FLDZ
-	 FCOM
-	 FSTSW aux_mem_2bytes
-	 MOV ax , aux_mem_2bytes
-	 SAHF
-	 JE @LABEL_DIVIDEZERO
-	 FLD _a
-	 FDIV _b
+	 FLD _b                 ;-------------  MULT DOUBLE ---- (_b*@cte234567$p0)
+	 FMUL @cte234567$p0
 	 FSTP @aux0
-	 FLD @cte7$             ;-------------  COMP DOUBLE ---- (@aux0 comp @cte7$)
-	 FLD @aux0
-	 FCOM
-	 FSTSW aux_mem_2bytes
-	 MOV AX , aux_mem_2bytes
-	 SAHF
-	 JNE @Label_0 
-;==================[THEN]==================
-	 print chr$("'si es = a 8'", 13,10) 
-	 JMP @Label_1 
-;==================[ELSE/FIN]==================
-@Label_0:
-	 print chr$("'distinto a 8'", 13,10) 
-@Label_1:
-;==================[FIN IF]==================
-	 MOV ax ,@cte4          ;-------------  ASIG USINT ---- (_c:=@cte4) 
-	 MOV _c, ax
-	 MOV ax, _c             ;-------------  SUB USINT ---- (_c-@cte6)
-	 SUB ax, @cte6
-	 MOV @aux1, ax
-	 MOV ax, _c
-	 CMP ax, @cte6
-	 JB @LABEL_RESULTADO
-	 MOV ax ,@aux1          ;-------------  ASIG USINT ---- (_d:=@aux1) 
-	 MOV _d, ax
+	 FLD @aux0              ;-------------  ASIG DOUBLE ---- (_b:=@aux0) 
+	 FSTP _b
 main endp 
 JMP @LABEL_END 
  
