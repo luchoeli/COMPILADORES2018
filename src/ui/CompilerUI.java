@@ -60,6 +60,8 @@ import assembler.Assembler;
 import lexicalSource.Table;
 
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.SystemColor;
 
 public class CompilerUI {
 
@@ -156,7 +158,7 @@ public class CompilerUI {
 		Problems.setLayout(gl_Problems);
 		
 		// -------------------------------- PANEL CONSOLE ------------------------------------------
-		/*
+		
 		JPanel Console = new JPanel();
 		tabbedPane.addTab("Console", new ImageIcon(CompilerUI.class.getResource("/icons/console_view.gif")), Console, null);
 		
@@ -178,7 +180,7 @@ public class CompilerUI {
 					.addGap(0))
 		);
 		Console.setLayout(gl_Console);
-		*/
+		
 		// -------------------------------- PANEL TOKENS ------------------------------------------
 		
 		JPanel Tokens = new JPanel();
@@ -248,6 +250,8 @@ public class CompilerUI {
 		JScrollPane scrollPane = new JScrollPane();
 		
 		textArea = new JTextArea();
+		textArea.setBackground(Color.WHITE);
+		textArea.setFont(new Font("Monospaced", Font.BOLD, 17));
 		textArea.setEnabled(false);
 
 		//--------------------------------------MENU BAR -------------------------------------------
@@ -286,6 +290,7 @@ public class CompilerUI {
 		
 		//------------------------------------------- NUMERO DE LINEAS -----------------------------------
 		lines = new JTextArea("1");
+		lines.setFont(new Font("Monospaced", Font.BOLD, 17));
 		 
 		lines.setBackground(Color.LIGHT_GRAY);
 		lines.setEditable(false);
@@ -363,6 +368,7 @@ public class CompilerUI {
 						String path = fc.getSelectedFile().getAbsolutePath();
 						assembler.setPath(path);
 						assembler.ejecutable();
+						console.append(assembler.getConsola());
 						File file = assembler.getArchivo();
 						System.out.println("ss- "+file.getAbsolutePath());							
 						
@@ -389,8 +395,7 @@ public class CompilerUI {
 		
 				Parser parser = new Parser(program,table);
 				parser.Parse();
-				
-				assembler = new Assembler(parser, program);
+	
 				//-----------//
 				
 				//Ininicializo estructuras para mostrar las salidas.
@@ -449,11 +454,16 @@ public class CompilerUI {
 				}
 			raiz = parser.getRaiz();
 			funciones = parser.getFunciones();
-			if (raiz != null && errors.size()==0){
-				//parser.getRaiz().imprimirNodo();
-				btnArbol.setEnabled(true);
-				btnAssembler.setEnabled(true);
-				
+			if (errors.size()==0){
+				if (raiz != null){
+					//parser.getRaiz().imprimirNodo();
+					assembler = new Assembler(parser, program);
+					btnArbol.setEnabled(true);
+					btnAssembler.setEnabled(true);
+				}
+				console.setText("El programa compilo correctamente. \n");
+			}else{
+				console.setText("El programa no pudo compilar ya que tuvo "+errors.size()+" errores \n");
 			}
 			/*
 			for (Nodo n : parser.getFunciones()){
@@ -526,6 +536,9 @@ public class CompilerUI {
 			public void actionPerformed(ActionEvent arg0) {
 				textArea.setText("");
 				textArea.setEnabled(false);
+				console.setText("");
+				btnArbol.setEnabled(false);
+				btnAssembler.setEnabled(false);
 				btnRun.setEnabled(false);
 				btnArbol.setEnabled(false);
 				clear();

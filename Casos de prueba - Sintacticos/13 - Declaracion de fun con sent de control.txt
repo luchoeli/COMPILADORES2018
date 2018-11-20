@@ -1,7 +1,8 @@
 __13
 double _a,
-double _fun (double _a) {
-	_a:=2.,
+usinteger _b,
+double _fun (double _parametro) {
+	_parametro:=2.,
 	usinteger _b,
 	if (_a != 2.4) {
 		_a:=4.,		
@@ -10,10 +11,19 @@ double _fun (double _a) {
 },
 
 __Error 
-
-double _fun (double _a) {
-	_a:=2.,
+double _fun2 (double _parametro2) {
+	_parametro2:=2.,
 	if (_a != 2.4) {
 		_a:=4.,		
 	}end_if,
+},
+
+__Error 
+double _fun3 (double _parametro3) {
+	_parametro2:=2.,
+	_b:=2_ui,	
+	if (_a != 2.4) {
+		_a:=4.,		
+	}end_if,
+	return (_b)
 },

@@ -105,24 +105,30 @@ public class Nodo {
 	
 	/** true si tengo un hijo null y el otro es una hoja**/
 	private boolean soyUnario(){
-		//FIXME LOS UNARIOS VAN A LA IZQ;
+		//TODO Cuerpo?, IF?
+		if (((this.getLexema().equals("Condicion") || 
+				this.getLexema().equals("ELSE")  || 
+				this.getLexema().equals("THEN")  || 
+				this.getLexema().equals("IF") 	 ||
+				this.getLexema().equals("Cuerpo"))	&& imAleave()) ||
+				this.getLexema().equals("print") ||
+				this.getLexema().equals("Call")  ||
+				this.getLexema().equals("CASE")) {
+			return true;
+		}
+		
+		
 		/*
-		if ((getIzq()==null && getDer()!=null && getDer().imAleave())){
-			System.out.println("1");
-			return true;
-		}
-		*/
 		if (getDer() == null && getIzq()!=null&&getIzq().imAleave()){
-			System.out.println("2");
+			System.out.println(this.getLexema()+" 2");
 			return true;
 		}
+		 */
 		return false;
 	}
 	/** true si soy una hoja**/
 	private boolean imAleave(){
 		if (getDer()==null && getIzq()==null){
-			
-			//System.out.println(getLexema()+": soy hoja");
 			return true;
 		}
 		return false;
@@ -133,17 +139,16 @@ public class Nodo {
 	 *  	o
 	 *  	- uno es unario y el otro es null**/
 	private boolean imLeftSubTree(){
-		//FIXME no puede ser ni S ni then, ni else, ni cuerpo, ni cond 
 		if (getLexema().equals("S")){
-			return false;
-		}
-		if (imAleave()){
-			//System.out.println("HOJA");
 			return false;
 		}
 		if (soyUnario()){
 			//System.out.println("UNARIO");
 			return true;
+		}
+		if (imAleave()){
+			//System.out.println("HOJA");
+			return false;
 		}
 		if(getIzq()!=null &&  getDer()!=null){
 			if (getDer().imAleave() && getIzq().imAleave()){
@@ -152,37 +157,55 @@ public class Nodo {
 		}
 		return false;
 	}
+	
 	/** devuelvo mi proximo leftSubTree **/
 	public Nodo getLeftSubTree(){
-		
-
+		System.out.println("getLeftSub:"+this.getLexema());
 		if (imLeftSubTree()){
-			//System.out.println("<><SUBTREE><><><><> ");
-			//this.imprimirNodo();
-			//System.out.println("<><><><><><><><><><><");
 			return this;
-		}else{
-			if (getIzq()!=null && !getIzq().imAleave()){
-				return getIzq().getLeftSubTree();
-			}
-			
-			if(getDer()!=null && !getDer().imAleave()){
-				return getDer().getLeftSubTree();	
-			}
-			return null;
 		}
 		
+		if (getIzq()!=null ){ //&& !getIzq().imAleave()
+			if(getIzq().imLeftSubTree())
+				return this.getIzq();
+			return getIzq().getLeftSubTree();
+		}
 		
-		//return null;
+		if(getDer()!=null){
+			if(getDer().imLeftSubTree())
+				return this.getDer();
+			return getDer().getLeftSubTree();	
+		}
+		
+		if (this.getPadre()!=null && this.getPadre().getDer()!=null){
+			return this.getPadre().getDer().getLeftSubTree();
+		}
+		System.out.println("aca es null");
+		return null;
+		
 	}
+	
 	
 	public void reemplazarSubtree(Nodo reemplazo){
 		Nodo padre = this.getPadre();
-		//System.out.println(padre);
+		System.out.println("PADRE: "+padre.getLexema());
 		if (padre.getIzq()!=null && padre.getIzq().equals(this))
 			padre.setIzq(reemplazo);
 		if (padre.getDer()!=null && padre.getDer().equals(this))
 			padre.setDer(reemplazo);
 	}
+	
+	public void limpiarTree(){
+		if (this.getIzq()!=null)
+			this.getIzq().limpiarTree();
+		
+		if (this.getDer()!=null)
+			this.getDer().limpiarTree();
+		
+		if (getLexema().equals("S") && (imAleave())){
+			reemplazarSubtree(null);
+		}
+	}
+	
 	
 }

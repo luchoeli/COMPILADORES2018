@@ -91,7 +91,7 @@ public class LexicalAnalizer {
 		this.idTokens.put("<", (int)'<');		
 		this.idTokens.put(">=", (int)MAYORIGUAL);
 		this.idTokens.put("<=", (int)MENORIGUAL);
-		this.idTokens.put("=", (int)'=');
+		this.idTokens.put("=", (int)IGUAL);
 		this.idTokens.put("!=", (int)DISTINTO);
 		//SIMBOLOS		
 		this.idTokens.put("(", (int)'(');
