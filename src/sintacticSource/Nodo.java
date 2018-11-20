@@ -107,11 +107,13 @@ public class Nodo {
 	private boolean soyUnario(){
 		//TODO Cuerpo?, IF?
 		if (((this.getLexema().equals("Condicion") || 
-				this.getLexema().equals("ELSE") || 
-				this.getLexema().equals("THEN") || 
-				this.getLexema().equals("IF") ||
+				this.getLexema().equals("ELSE")  || 
+				this.getLexema().equals("THEN")  || 
+				this.getLexema().equals("IF") 	 ||
 				this.getLexema().equals("Cuerpo"))	&& imAleave()) ||
-				this.getLexema().equals("print")){
+				this.getLexema().equals("print") ||
+				this.getLexema().equals("Call")  ||
+				this.getLexema().equals("CASE")) {
 			return true;
 		}
 		

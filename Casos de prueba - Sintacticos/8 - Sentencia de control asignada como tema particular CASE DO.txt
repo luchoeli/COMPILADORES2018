@@ -1,14 +1,14 @@
 usinteger _a;_b,
 
+_a:=3_ui,
+
 case (_a){
-	2_ui : do { _a:=3_ui,
-				_b:=3_ui,
-			  },
-			  
-	5_ui : do { _a:=6_ui,
-				_b:=6_ui,
-			  },
+	1_ui : do { 	print('salio 1'), },
+	2_ui : do { 	print('salio 2'), },
+	3_ui : do { 	print('salio 3'), },	
+	4_ui : do { 	print('salio 4'), },	
 },
+
 
 __errores
 
