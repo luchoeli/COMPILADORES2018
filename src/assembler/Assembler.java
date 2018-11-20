@@ -23,8 +23,6 @@ public class Assembler {
 	private LexicalAnalizer lexico;
 	private Parser parser;
 	private String proxSalto;
-	private String program;
-	private String codigo;
 	private String path;
 	private boolean huboElse = false;
 	private Nodo raiz;
@@ -47,10 +45,10 @@ public class Assembler {
 
 
 	public Assembler(Parser parser, String program) {
+		
 		this.parser = parser;
 		this.tablaSimbAux = new Table();
-		this.lexico = parser.getAnalizer();
-		this.program = program;	
+		this.lexico = parser.getAnalizer();	
 		this.raiz = parser.getRaiz();
 		this.funciones = parser.getFunciones();
 		this.raiz.setLexema("RAIZ");
@@ -96,10 +94,10 @@ public class Assembler {
 		p.println(";__________________________VARIABLES____________________________");
 		p.println(".data ");
 		p.println("HelloWorld db \"Hello freak bitches\", 0");
-		p.println("overflow db \"Ha ocurrido Overflow\" , 0");
-		p.println("divideZero db \"Se ha intentado dividir por cero\" , 0");
+		p.println("overflow db \"Error en ejecucion: Ha ocurrido Overflow\" , 0");
+		p.println("divideZero db \"Error en ejecucion:Se ha intentado dividir por cero\" , 0");
+		p.println("resultadoNegativo db \"Error en ejecucion: Usinteger negativo\" , 0");
 		p.println("aux_mem_2bytes dw ?");
-		p.println("perdidaInfo db \"Se ha producido perdida de informacion\" , 0");
 		p.print(declararVariables());		
 		p.println(";______________________VARIABLES AUXILIARES____________________");
 		String aux = generarAssembler();
@@ -115,9 +113,8 @@ public class Assembler {
 		p.println("@LABEL_DIVIDEZERO:"); 
 		p.println("invoke MessageBox, NULL, addr divideZero, addr divideZero, MB_OK");
 		p.println("JMP @LABEL_END");
-		p.println("@LABEL_PERDIDAINFO:");
-		p.println("invoke MessageBox, NULL, addr perdidaInfo, addr perdidaInfo, MB_OK");
-		p.println("JMP @LABEL_END");
+		p.println("@LABEL_RESULTADO:");
+		p.println("invoke MessageBox, NULL, addr resultadoNegativo, addr resultadoNegativo, MB_OK");
 		p.println("@LABEL_END:");
 		p.println("invoke ExitProcess, 0");
 		p.println("end start");
@@ -160,7 +157,7 @@ public class Assembler {
 				if (nodoI.getTableRec()!=null){
 					trI=nodoI.getTableRec();
 					left = dameValoresOids(trI);
-					if(trI.getType().equals("double"))
+					//if(trI.getType().equals("double"))
 						left = get_id_VarDouble(left);
 				}
 			}
@@ -169,7 +166,7 @@ public class Assembler {
 				if (nodoD.getTableRec()!=null){
 					trD = nodoD.getTableRec();
 					rigth=dameValoresOids(trD);	
-					if(trD.getType().equals("double"))
+					//if(trD.getType().equals("double"))
 						rigth=get_id_VarDouble(rigth);
 				}
 			}
@@ -480,7 +477,10 @@ public class Assembler {
 			tr.print();
 			if (tr.getIdToken() == lexico.ID){ 
 				if ((tr.getType() != null) && (tr.getType().equals("usinteger"))){
-					auxiliares +=tr.getLexema() + "\t" + "dw ?" + "\n";
+					if (tr.getLexema().contains("@cte"))
+						auxiliares +=tr.getLexema() + "\t" + "dw " + tr.getLexema().substring(4)+"\n";
+					else
+						auxiliares +=tr.getLexema() + "\t" + "dw ?" + "\n";
 				}
 				if ((tr.getType() != null) && (tr.getType().equals("double"))){
 					if (tr.getLexema().contains("@cte"))
@@ -490,20 +490,29 @@ public class Assembler {
 				}
 			}
 		}
-		return auxiliares;
+		return auxiliares;		
 	}
 	
 	private String get_id_VarDouble(String id_var) {
-		String aux;
+		String aux="";
 		{
-			if (id_var.contains("_") || id_var.contains("@"))
+			if ((id_var.contains("_") && !(id_var.contains("_ui")) || id_var.contains("@")))
 				return id_var;
 			else{
-				aux = "@cte" + id_var.replace(".", "$").replace("+", "");
-				TableRecord auxTR = new TableRecord(aux, lexico.CTE);
-				auxTR.setType("double");
-				auxTR.setIdToken(lexico.ID);
-				tablaSimbAux.put(aux, auxTR);		
+				TableRecord auxTR=null;
+				if (id_var.contains(".")){
+					aux = "@cte" + id_var.replace(".", "$").replace("+", "");
+					auxTR = new TableRecord(aux, lexico.CTE);
+					auxTR.setType("double");
+					auxTR.setIdToken(lexico.ID);
+				}
+				else if (id_var.contains("_ui")){
+					aux = "@cte" + id_var.replace("_ui", "");
+					auxTR = new TableRecord(aux, lexico.CTE);
+					auxTR.setType("usinteger");
+					auxTR.setIdToken(lexico.ID);
+				}
+				tablaSimbAux.put(aux, auxTR);
 			}
 		}
 		return aux;
@@ -516,7 +525,10 @@ public class Assembler {
 		int idtoken = tr.getIdToken();
 		
 		if (idtoken == lexico.CTE){
-			return tr.getValue();
+			if (tr.getType().equals("double"))
+				return tr.getValue();
+			else
+				return tr.getLexema();  // si es usint 3_ui, 
 		}
 		
 		if (idtoken == lexico.ID || tr.getLexema().contains("@")){

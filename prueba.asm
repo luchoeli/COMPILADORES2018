@@ -23,58 +23,65 @@ FUNCPTR         TYPEDEF PTR FUNCPROTO
 ;__________________________VARIABLES____________________________
 .data 
 HelloWorld db "Hello freak bitches", 0
-overflow db "Ha ocurrido Overflow" , 0
-divideZero db "Se ha intentado dividir por cero" , 0
+overflow db "Error en ejecucion: Ha ocurrido Overflow" , 0
+divideZero db "Error en ejecucion:Se ha intentado dividir por cero" , 0
+resultadoNegativo db "Error en ejecucion: Usinteger negativo" , 0
 aux_mem_2bytes dw ?
-perdidaInfo db "Se ha producido perdida de informacion" , 0
-_parametro	dw ?
-_b	dw ?
-_funcion1	dw ?
-_a	dw ?
+_d	dw ?
+_c	dw ?
+_b	real8 ?
+_a	real8 ?
 ;______________________VARIABLES AUXILIARES____________________
 var_aux_dx dw ?
 @0 dw 0
-@aux0	dw ?
+@cte4$5	real8 4.5
+@cte6	dw 6
+@aux1	dw ?
+@cte4	dw 4
+@aux0	real8 ?
+@cte3$5	real8 3.5
+@cte8$	real8 8.
 
 ;_____________________________CODE_____________________________
 .code
 start:
 main proc 
-	 MOV ax ,2              ;-------------  ASIG USINT ---- (_a:=2) 
-	 MOV _a, ax
-	 MOV ax ,10             ;-------------  ASIG USINT ---- (_b:=10) 
-	 MOV _b, ax
-	 print chr$("'main1'", 13,10) 
-	 print chr$("'main2'", 13,10) 
-	 CALL _funcion1F 
-	 MOV ax ,_funcion1      ;-------------  ASIG USINT ---- (_a:=_funcion1) 
-	 MOV _a, ax
-	 MOV ax, _a             ;-------------  COMP USINT ---- (_a comp 4)
-	 CMP ax, 4
+	 FLD @cte3$5            ;-------------  ASIG DOUBLE ---- (_a+@cte3$5) 
+	 FSTP _a
+	 FLD @cte4$5            ;-------------  ASIG DOUBLE ---- (_b+@cte4$5) 
+	 FSTP _b
+	 FLD _a                 ;-------------  SUB DOUBLE ---- (_a-_b)
+	 FILD _b
+	 FSUB 
+	 FSTP @aux0
+	 FLD @cte8$             ;-------------  COMP DOUBLE ---- (@aux0 comp @cte8$)
+	 FLD @aux0
+	 FCOM
+	 FSTSW aux_mem_2bytes
+	 MOV AX , aux_mem_2bytes
+	 SAHF
 	 JNE @Label_0 
 ;==================[THEN]==================
-	 print chr$("'a == 4'", 13,10) 
+	 print chr$("'si es = a 8'", 13,10) 
 	 JMP @Label_1 
 ;==================[ELSE/FIN]==================
 @Label_0:
-;==================[FIN IF]==================
+	 print chr$("'distinto a 8'", 13,10) 
 @Label_1:
-	 print chr$("'fin'", 13,10) 
+;==================[FIN IF]==================
+	 MOV ax ,@cte4          ;-------------  ASIG USINT ---- (_c:=@cte4) 
+	 MOV _c, ax
+	 MOV ax, _c             ;-------------  SUB USINT ---- (_c-@cte6)
+	 SUB ax, @cte6
+	 MOV @aux1, ax
+	 MOV ax, _c
+	 CMP ax, @cte6
+	 JB @LABEL_RESULTADO
+	 MOV ax ,@aux1          ;-------------  ASIG USINT ---- (_d:=@aux1) 
+	 MOV _d, ax
 main endp 
 JMP @LABEL_END 
  
-_funcion1F proc 
-	 MOV ax ,1              ;-------------  ASIG USINT ---- (_parametro:=1) 
-	 MOV _parametro, ax
-	 print chr$("'fun1'", 13,10) 
-	 MOV ax, _parametro     ;-------------  ADD USINT ---- (_parametro+_a) 
-	 ADD ax, _a
-	 MOV @aux0, ax
-	 JO @LABEL_OVERFLOW
-	 MOV ax ,@aux0          ;-------------  ASIG USINT ---- (_funcion1:=@aux0) 
-	 MOV _funcion1, ax
-ret 
-_funcion1F endp 
 JMP @LABEL_END
 @LABEL_OVERFLOW:
 invoke MessageBox, NULL, addr overflow, addr overflow, MB_OK
@@ -82,9 +89,8 @@ JMP @LABEL_END
 @LABEL_DIVIDEZERO:
 invoke MessageBox, NULL, addr divideZero, addr divideZero, MB_OK
 JMP @LABEL_END
-@LABEL_PERDIDAINFO:
-invoke MessageBox, NULL, addr perdidaInfo, addr perdidaInfo, MB_OK
-JMP @LABEL_END
+@LABEL_RESULTADO:
+invoke MessageBox, NULL, addr resultadoNegativo, addr resultadoNegativo, MB_OK
 @LABEL_END:
 invoke ExitProcess, 0
 end start

@@ -150,6 +150,7 @@ encabezado : tipo ID '(' tipo ID ')'	{
 declaracion_funcion	: encabezado '{' list_sentencias
 									 RETURN '(' expresion ')'
 								 '}' {	
+								 //TODO fichar los tipos de retorno coincidan con los del encabezado
 								 		//System.out.println("wepa "+((Nodo)$3.obj).getLexema());
 								  		Nodo padre = ((Nodo)$3.obj).getFuncionPadre();
 								  		//System.out.println("La primera del padre es "+padre.getLexema()+" -> "+(padre.getIzq().getLexema()+(padre.getIzq()).getDer().getLexema()));
@@ -276,7 +277,10 @@ sent_control	: CASE '(' ID ')' bloque_control
 										 }
 				| CASE '(' error ')' bloque_control  				
 										 {
-				  						  addError("Error sintactico: condicion erronea ", ((Token)$2.obj).getNroLine());												 
+										  Nodo nodo = new Nodo("error",null,null);
+				  						  $$.obj = nodo;									
+										  System.out.println("metiste cualquier en el case");
+				  						  addError("Error semantico: la codndicion del case debe ser una variable", ((Token)$2.obj).getNroLine());												 
 										 }
 				;
 
@@ -623,8 +627,8 @@ factor : CTE 	{
 	   			isDeclarated((Token)$1.obj);
 	   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
 	   			System.out.println(((Token)$1.obj).getLexema());
-	   			Nodo nuevo = new Nodo(table.get(((Token)$1.obj).getLexema()));
 	   			TableRecord tr = table.get(((Token)$1.obj).getLexema());
+	   			Nodo nuevo = new Nodo(tr.getLexema(),null,null);
 	   			nuevo.setTableRec(tr);
 	   			((Token)$1.obj).setNodo(nuevo);
 	   			((Token)$1.obj).setRecord(tr);

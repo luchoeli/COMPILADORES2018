@@ -395,8 +395,7 @@ public class CompilerUI {
 		
 				Parser parser = new Parser(program,table);
 				parser.Parse();
-				
-				assembler = new Assembler(parser, program);
+	
 				//-----------//
 				
 				//Ininicializo estructuras para mostrar las salidas.
@@ -455,10 +454,13 @@ public class CompilerUI {
 				}
 			raiz = parser.getRaiz();
 			funciones = parser.getFunciones();
-			if (raiz != null && errors.size()==0){
-				//parser.getRaiz().imprimirNodo();
-				btnArbol.setEnabled(true);
-				btnAssembler.setEnabled(true);
+			if (errors.size()==0){
+				if (raiz != null){
+					//parser.getRaiz().imprimirNodo();
+					assembler = new Assembler(parser, program);
+					btnArbol.setEnabled(true);
+					btnAssembler.setEnabled(true);
+				}
 				console.setText("El programa compilo correctamente. \n");
 			}else{
 				console.setText("El programa no pudo compilar ya que tuvo "+errors.size()+" errores \n");
@@ -534,6 +536,9 @@ public class CompilerUI {
 			public void actionPerformed(ActionEvent arg0) {
 				textArea.setText("");
 				textArea.setEnabled(false);
+				console.setText("");
+				btnArbol.setEnabled(false);
+				btnAssembler.setEnabled(false);
 				btnRun.setEnabled(false);
 				btnArbol.setEnabled(false);
 				clear();

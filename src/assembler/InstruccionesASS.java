@@ -7,7 +7,6 @@ public class InstruccionesASS {
 		
 		String codigo="";
 		codigo+=String.format(format,"\t MOV ax, " + izq, ";-------------  ADD USINT ---- ("+izq+"+"+der+") ");
-		//codigo += "\t MOV ax, " + izq + "\t \t ;------ ADD USINT --- ("+izq+"+"+der+") \n";
 		codigo += "\t ADD ax, " + der + "\n";
 		codigo += "\t MOV "+aux+", ax" + "\n";
 		codigo += "\t JO @LABEL_OVERFLOW" + "\n";
@@ -39,7 +38,6 @@ public class InstruccionesASS {
 		
 		String codigo="";
 		codigo += String.format(format,"\t MOV ax ," + der, ";-------------  ASIG USINT ---- ("+izq+":="+der+") ");
-		//codigo += "\t MOV ax, " + der + "\t \t ;---  ASIG USINT ---- ("+izq+":="+der+")\n";
 		codigo += "\t MOV " + izq + ", ax" + "\n";
 		return codigo;
 	}
@@ -47,8 +45,6 @@ public class InstruccionesASS {
 	public String asignacionDOUB(String izq, String der){
 		String codigo="";
 		codigo+=String.format(format,"\t FLD " + der, ";-------------  ASIG DOUBLE ---- ("+izq+"+"+der+") ");
-		//String codigo=";-------------  ASIG DOUBLE ---- ("+izq+":="+der+")\n";
-		//codigo += "\t FLD " + der + "\n";
 		codigo += "\t FSTP " + izq + "\n";
 		
 		return codigo;
@@ -57,17 +53,18 @@ public class InstruccionesASS {
 	public String restaUsinteger(String left, String rigth, String varAux) {
 		String codigo="";
 		codigo+=String.format(format,"\t MOV ax, " + left, ";-------------  SUB USINT ---- ("+left+"-"+rigth+")");
-		//codigo += "\t MOV ax, " + left + "\n";
+		
 		codigo += "\t SUB ax, " + rigth + "\n";
 		codigo += "\t MOV "+varAux+ ", ax" + "\n";
-		codigo += "\t JS @LABEL_PERDIDAINFO:"+ "\n";
+		codigo += "\t MOV ax, " + left + "\n";
+		codigo += "\t CMP ax, " + rigth + "\n";
+		codigo += "\t JB @LABEL_RESULTADO"+ "\n";
 		return codigo;
 	}
 
 	public String restaDouble(String left, String rigth, String varAux) {
 		String codigo="";
 		codigo+=String.format(format,"\t FLD " + left,";-------------  SUB DOUBLE ---- ("+left+"-"+rigth+")");
-		//codigo += "\t FLD " + left + "\n";
 		codigo += "\t FILD " + rigth + "\n";
 		codigo += "\t FSUB " + "\n";
 		codigo += "\t FSTP " + varAux + "\n";
@@ -114,7 +111,7 @@ public class InstruccionesASS {
 		String codigo="";
 		codigo+=String.format(format,"\t MOV ax, " + rigth ,";-------------  DIV USINT---- ("+left+"/"+rigth+")");
 		//codigo += "\t MOV ax, " + rigth  + "\n";
-		codigo += "\t CMP " + rigth +", @0" + "\n";
+		codigo += "\t CMP " + rigth +", 0" + "\n";
 		codigo += "\t JE @LABEL_DIVIDEZERO" + "\n";;
 		codigo += "\t MOV var_aux_dx, dx" + "\n";
 		codigo += "\t MOV ax, " + left  + "\n";
@@ -129,7 +126,6 @@ public class InstruccionesASS {
 	public String usintComparador(String left, String rigth) {
 		String codigo="";
 		codigo+=String.format(format,"\t MOV ax, " + left,";-------------  COMP USINT ---- ("+left+" comp "+rigth+")");
-		//codigo += "\t MOV ax, " + left + "\n";
 		codigo += "\t CMP ax, " + rigth + "\n";
 		return codigo;
 	}
