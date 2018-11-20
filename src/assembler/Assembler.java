@@ -454,7 +454,7 @@ public class Assembler {
 					auxiliares +=tr.getLexema() + "\t" + "dw ?" + "\n";  // 2 bytess - 16 bit 
 				}
 				if ((tr.getType() != null) && (tr.getType().equals("double"))){  //8 bytes - 64 bits
-					auxiliares += tr.getLexema() + "\t" + "real8 ?" + "\n";
+					auxiliares += tr.getLexema() + "\t" + "dq ?" + "\n";
 				}
 			}
 			
@@ -484,9 +484,9 @@ public class Assembler {
 				}
 				if ((tr.getType() != null) && (tr.getType().equals("double"))){
 					if (tr.getLexema().contains("@cte"))
-						auxiliares += tr.getLexema() + "\t" + "real8 " + tr.getLexema().replace("$",".").substring(4)+"\n";
+						auxiliares += tr.getLexema() + "\t" + "dq " + tr.getLexema().replace("$",".").substring(4)+"\n";
 					else
-						auxiliares +=tr.getLexema() + "\t" + "real8 ?" + "\n";
+						auxiliares +=tr.getLexema() + "\t" + "dq ?" + "\n";
 				}
 			}
 		}

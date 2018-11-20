@@ -84,7 +84,6 @@ public class InstruccionesASS {
 	public String multiplicaDouble(String left, String rigth, String varAux) {
 		String codigo="";
 		codigo+=String.format(format,"\t FLD " + left,";-------------  MULT DOUBLE ---- ("+left+"*"+rigth+")");
-		//codigo += "\t FLD " + left + "\n";
 		codigo += "\t FMUL " + rigth + "\n";
 		codigo += "\t FSTP " + varAux + "\n";
 		return codigo;

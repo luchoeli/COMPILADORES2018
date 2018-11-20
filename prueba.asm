@@ -29,32 +29,38 @@ resultadoNegativo db "Error en ejecucion: Usinteger negativo" , 0
 aux_mem_2bytes dw ?
 _d	dw ?
 _c	dw ?
-_b	real8 ?
-_a	real8 ?
+_b	dq ?
+_a	dq ?
 ;______________________VARIABLES AUXILIARES____________________
 var_aux_dx dw ?
 @0 dw 0
-@cte4$5	real8 4.5
 @cte6	dw 6
 @aux1	dw ?
+@cte0$	dq 0.
 @cte4	dw 4
-@aux0	real8 ?
-@cte3$5	real8 3.5
-@cte8$	real8 8.
+@aux0	dq ?
+@cte7$	dq 7.
+@cte3$	dq 3.
 
 ;_____________________________CODE_____________________________
 .code
 start:
 main proc 
-	 FLD @cte3$5            ;-------------  ASIG DOUBLE ---- (_a+@cte3$5) 
+	 FLD @cte3$             ;-------------  ASIG DOUBLE ---- (_a+@cte3$) 
 	 FSTP _a
-	 FLD @cte4$5            ;-------------  ASIG DOUBLE ---- (_b+@cte4$5) 
+	 FLD @cte0$             ;-------------  ASIG DOUBLE ---- (_b+@cte0$) 
 	 FSTP _b
-	 FLD _a                 ;-------------  SUB DOUBLE ---- (_a-_b)
-	 FILD _b
-	 FSUB 
+	 FLD _b                 ;-------------  DIV DOUBLE ---- (_a/_b)
+	 FLDZ
+	 FCOM
+	 FSTSW aux_mem_2bytes
+	 MOV ax , aux_mem_2bytes
+	 SAHF
+	 JE @LABEL_DIVIDEZERO
+	 FLD _a
+	 FDIV _b
 	 FSTP @aux0
-	 FLD @cte8$             ;-------------  COMP DOUBLE ---- (@aux0 comp @cte8$)
+	 FLD @cte7$             ;-------------  COMP DOUBLE ---- (@aux0 comp @cte7$)
 	 FLD @aux0
 	 FCOM
 	 FSTSW aux_mem_2bytes
