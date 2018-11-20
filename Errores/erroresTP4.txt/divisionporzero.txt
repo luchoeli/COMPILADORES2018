@@ -1,0 +1,4 @@
+usinteger _a;_b,
+_a:=2_ui,
+_b:=0_ui,
+_a:=_a/_b,
