@@ -44,7 +44,7 @@ public class InstruccionesASS {
 	
 	public String asignacionDOUB(String izq, String der){
 		String codigo="";
-		codigo+=String.format(format,"\t FLD " + der, ";-------------  ASIG DOUBLE ---- ("+izq+"+"+der+") ");
+		codigo+=String.format(format,"\t FLD " + der, ";-------------  ASIG DOUBLE ---- ("+izq+":="+der+") ");
 		codigo += "\t FSTP " + izq + "\n";
 		
 		return codigo;
@@ -65,8 +65,7 @@ public class InstruccionesASS {
 	public String restaDouble(String left, String rigth, String varAux) {
 		String codigo="";
 		codigo+=String.format(format,"\t FLD " + left,";-------------  SUB DOUBLE ---- ("+left+"-"+rigth+")");
-		codigo += "\t FILD " + rigth + "\n";
-		codigo += "\t FSUB " + "\n";
+		codigo += "\t FSUB " +rigth+ "\n";
 		codigo += "\t FSTP " + varAux + "\n";
 		return codigo;
 	}
@@ -78,6 +77,7 @@ public class InstruccionesASS {
 		codigo += "\t MOV bx, " + rigth + "\n";
 		codigo += "\t MUL bx" + "\n";
 		codigo += "\t MOV "+varAux+ ", ax" + "\n";
+		//codigo += "\t JO @LABEL_OVERFLOW" + "\n";
 		return codigo;
 	}
 
@@ -86,6 +86,7 @@ public class InstruccionesASS {
 		codigo+=String.format(format,"\t FLD " + left,";-------------  MULT DOUBLE ---- ("+left+"*"+rigth+")");
 		codigo += "\t FMUL " + rigth + "\n";
 		codigo += "\t FSTP " + varAux + "\n";
+		//codigo += "\t JC @LABEL_OVERFLOW" + "\n";
 		return codigo;
 	}
 

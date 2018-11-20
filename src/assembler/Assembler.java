@@ -148,7 +148,12 @@ public class Assembler {
 			Nodo subTree = raiz.getLeftSubTree();
 			//subTree.imprimirNodo();
 			System.out.println("-------------- SUBTREE "+subTree.getLexema());
-			
+//			try {
+//				Thread.sleep(2000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			Nodo nodoI=null,nodoD = null;
 			String left="",rigth="";
 			TableRecord trI=null,trD=null;
@@ -157,6 +162,7 @@ public class Assembler {
 				if (nodoI.getTableRec()!=null){
 					trI=nodoI.getTableRec();
 					left = dameValoresOids(trI);
+					
 					//if(trI.getType().equals("double"))
 						left = get_id_VarDouble(left);
 				}
@@ -166,11 +172,14 @@ public class Assembler {
 				if (nodoD.getTableRec()!=null){
 					trD = nodoD.getTableRec();
 					rigth=dameValoresOids(trD);	
-					//if(trD.getType().equals("double"))
-						rigth=get_id_VarDouble(rigth);
+					rigth=get_id_VarDouble(rigth);
 				}
 			}
-			
+
+			System.out.println("L valores oid: "+left);
+			System.out.println("L idvardoub: "+left);
+			System.out.println("R valores oid: "+rigth);
+			System.out.println("R idvardoub: "+rigth);
 			String varAux = null;
 			
 			
@@ -286,6 +295,20 @@ public class Assembler {
 				subTree.reemplazarSubtree(null);
 				break;
 			}
+			case "!="://-------------------------------------------------------------------------------------------------igualdad----///
+			{
+				if (trI.getType().equals("usinteger")){
+					codigo+= instrucciones.usintComparador(left,rigth);
+				
+				}
+				if (trI.getType().equals("double")){
+					codigo+=instrucciones.doubleComparador(left,rigth);
+				}
+				proxSalto="JE";
+				
+				subTree.reemplazarSubtree(null);
+				break;
+			}
 			case "<="://-------------------------------------------------------------------------------------------------igualdad----///
 			{
 				if (trI.getType().equals("usinteger")){
@@ -339,6 +362,7 @@ public class Assembler {
 				subTree.reemplazarSubtree(null);
 				break;
 			}
+			
 			
 			case "Condicion":
 			{	
@@ -412,12 +436,13 @@ public class Assembler {
 							nodoI = nodoI.getIzq();
 						}
 						left = dameValoresOids(nodoI.getTableRec());
+						left = get_id_VarDouble(left);
 						
 						if (trD.getType().equals("usinteger")){
 							codigo+=instrucciones.usintComparador(left, rigth);
 						}
 						if (trD.getType().equals("double")){
-							left = get_id_VarDouble(left);
+							//left = get_id_VarDouble(left);
 							codigo+=instrucciones.doubleComparador(left, rigth);
 						}
 						String label = dameNextLabel();
@@ -484,7 +509,7 @@ public class Assembler {
 				}
 				if ((tr.getType() != null) && (tr.getType().equals("double"))){
 					if (tr.getLexema().contains("@cte"))
-						auxiliares += tr.getLexema() + "\t" + "dq " + tr.getLexema().replace("$",".").substring(4)+"\n";
+						auxiliares += tr.getLexema() + "\t" + "dq " + tr.getLexema().replace("$n", "-").replace("$p",".").substring(4)+"\n";
 					else
 						auxiliares +=tr.getLexema() + "\t" + "dq ?" + "\n";
 				}
@@ -501,7 +526,7 @@ public class Assembler {
 			else{
 				TableRecord auxTR=null;
 				if (id_var.contains(".")){
-					aux = "@cte" + id_var.replace(".", "$").replace("+", "");
+					aux = "@cte" + id_var.replace(".", "$p").replace("+", "").replace("-", "$n");
 					auxTR = new TableRecord(aux, lexico.CTE);
 					auxTR.setType("double");
 					auxTR.setIdToken(lexico.ID);

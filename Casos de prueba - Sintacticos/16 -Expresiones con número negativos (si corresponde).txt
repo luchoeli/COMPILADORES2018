@@ -1,14 +1,25 @@
 __14 Expresiones con número negativos (si corresponde).
 
+__14 Expresiones con número negativos (si corresponde).
+
 double _a;_b;_c,
 
 _a:= 2.0 + -4.25,
+if (_a=-2.25){
+	print('se asigno bien'),
+ }end_if,
+ 
+_a:= 2.0 * 4.0 + -2.0 / 3.0,
+if (_a=2.0){
+	print('dio 2'),
+ }end_if,
+ 
 _b:= _c * -3.23D-2,
 _b:= -3.D-2*-2.23,
 
-_b:= 2.2250738585072014D-307,
-_a:= _c * -1.7976931348623157D307,
+__b:= 2.2250738585072014D-307,
+__a:= _c * -1.7976931348623157D307,
 
 __errores 
-_a:= _c * -1.7976931348623157D308,
-_b:= 2.2250738585072014D-308,
+__a:= _c * -1.7976931348623157D308,
+__b:= 2.2250738585072014D-308,

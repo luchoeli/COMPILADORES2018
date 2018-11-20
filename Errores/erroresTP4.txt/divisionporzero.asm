@@ -27,27 +27,35 @@ overflow db "Error en ejecucion: Ha ocurrido Overflow" , 0
 divideZero db "Error en ejecucion:Se ha intentado dividir por cero" , 0
 resultadoNegativo db "Error en ejecucion: Usinteger negativo" , 0
 aux_mem_2bytes dw ?
-_c	dq ?
-_b	dq ?
-_a	dq ?
+_b	dw ?
+_a	dw ?
 ;______________________VARIABLES AUXILIARES____________________
 var_aux_dx dw ?
 @0 dw 0
-@aux0	dq ?
-@cte18446744073709551615$p0	dq 18446744073709551615.0
-@cte234567$p0	dq 234567.0
+@aux0	dw ?
+@cte2	dw 2
+@cte0	dw 0
 
 ;_____________________________CODE_____________________________
 .code
 start:
 main proc 
-	 FLD @cte18446744073709551615$p0;-------------  ASIG DOUBLE ---- (_b:=@cte18446744073709551615$p0) 
-	 FSTP _b
-	 FLD _b                 ;-------------  MULT DOUBLE ---- (_b*@cte234567$p0)
-	 FMUL @cte234567$p0
-	 FSTP @aux0
-	 FLD @aux0              ;-------------  ASIG DOUBLE ---- (_b:=@aux0) 
-	 FSTP _b
+	 MOV ax ,@cte2          ;-------------  ASIG USINT ---- (_a:=@cte2) 
+	 MOV _a, ax
+	 MOV ax ,@cte0          ;-------------  ASIG USINT ---- (_b:=@cte0) 
+	 MOV _b, ax
+	 MOV ax, _b             ;-------------  DIV USINT---- (_a/_b)
+	 CMP _b, 0
+	 JE @LABEL_DIVIDEZERO
+	 MOV var_aux_dx, dx
+	 MOV ax, _a
+	 CWD
+	 MOV bx, _b
+	 DIV bx
+	 MOV dx, var_aux_dx
+	 MOV @aux0, ax
+	 MOV ax ,@aux0          ;-------------  ASIG USINT ---- (_a:=@aux0) 
+	 MOV _a, ax
 main endp 
 JMP @LABEL_END 
  

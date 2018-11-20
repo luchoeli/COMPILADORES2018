@@ -459,7 +459,7 @@ final static String yyrule[] = {
 "factor : ID",
 };
 
-//#line 646 "especificacion.y"
+//#line 650 "especificacion.y"
 /*******************************************************************************************************/
 private static final String FUNCION = "ID funcion";
 private static final String PARAMETRO = "ID parametro";
@@ -1624,9 +1624,9 @@ case 75:
 	   					this.addError("Error sintactico: usinteger no puede ser negativio ",((Token)val_peek(0).obj).getNroLine());
 	   					/*$$.obj = error;*/
 	   				}else{
-	   					updateTableNegative(   ((Token)val_peek(0).obj).getLexema()   );
+	   					TableRecord tr = updateTableNegative(   ((Token)val_peek(0).obj).getLexema()   );
 	   					Nodo nuevo = new Nodo(table.get("-"+((Token)val_peek(0).obj).getLexema()));
-						yyval.obj = new Token(0, "-"+((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(1).obj).getNroLine(), "", null,nuevo);
+						yyval.obj = new Token(lexico.CTE, "-"+((Token)val_peek(0).obj).getLexema(), ((Token)val_peek(1).obj).getNroLine(), "double", tr ,nuevo);
 	   				}
 
 	   			 }
@@ -1635,18 +1635,22 @@ case 76:
 //#line 625 "especificacion.y"
 { 
 	   
-	   			isDeclarated((Token)val_peek(0).obj);
-	   			/*TODO ¿chequeo ambito? ¿chequeo de declaracion?*/
-	   			System.out.println(((Token)val_peek(0).obj).getLexema());
-	   			TableRecord tr = table.get(((Token)val_peek(0).obj).getLexema());
-	   			Nodo nuevo = new Nodo(tr.getLexema(),null,null);
-	   			nuevo.setTableRec(tr);
-	   			((Token)val_peek(0).obj).setNodo(nuevo);
-	   			((Token)val_peek(0).obj).setRecord(tr);
+	   			if (isDeclarated((Token)val_peek(0).obj)){
+		   			/*TODO ¿chequeo ambito? ¿chequeo de declaracion?*/
+		   			System.out.println(((Token)val_peek(0).obj).getLexema());
+		   			TableRecord tr = table.get(((Token)val_peek(0).obj).getLexema());
+		   			Nodo nuevo = new Nodo(tr.getLexema(),null,null);
+		   			nuevo.setTableRec(tr);
+		   			((Token)val_peek(0).obj).setNodo(nuevo);
+		   			((Token)val_peek(0).obj).setRecord(tr);
+	   			}else{
+	   				Nodo nuevo = new Nodo("error",null,null);
+		   			((Token)val_peek(0).obj).setNodo(nuevo);
+	   			}
 	   			 
 	   		 }
 break;
-//#line 1573 "Parser.java"
+//#line 1577 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

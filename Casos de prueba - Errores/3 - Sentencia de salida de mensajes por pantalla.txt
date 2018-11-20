@@ -1,0 +1,9 @@
+print('hola-que-tal'),
+print('hola -
+que -
+tal'),
+
+__errores,
+print(3.0),
+print(_a),
+print(3_ui),

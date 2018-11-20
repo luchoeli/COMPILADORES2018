@@ -1,0 +1,36 @@
+double _a;_b;_c,
+usinteger _c;_d;_e,
+__Variables y funciones no declaradas.
+_a:=_x,
+_c:= 2_ui,
+__Chequeos de tipos para el case (si corresponde).
+case (_a){
+	1_ui : do { 	print('salio 1'), },
+	4.0 : do { 	print('salio 4.0'), },
+},
+__Expresiones con tipos compatibles y tipos no compatibles.
+_a:=4_ui,
+_d:= 3_ui + _a,
+_d:= 3_ui * _a,
+
+__Visibilidad de las variables declaradas en funciones (si corresponde).
+double _funcion1(double _parametro){
+	_parametro:=3.2,
+	double _x,
+	return (_parametro) 
+},
+_x:=2.,
+__Lectura y escritura de variables según diferentes permisos (si corresponde).
+
+__Visibilidad de las variables declaradas en funciones (si corresponde).
+double _funcion1(double _parametro){
+	_parametro:=3.2,
+	double _x,
+	return (_parametro) 
+},
+
+__Lectura y escritura de variables según diferentes permisos (si corresponde).
+
+_a:=_funcion1(_b;write)+,
+_a:= _funcion1(_b;pass)+,
+_a:= _funcion1(_b;write;pass)+,

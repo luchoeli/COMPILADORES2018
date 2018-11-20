@@ -615,23 +615,27 @@ factor : CTE 	{
 	   					this.addError("Error sintactico: usinteger no puede ser negativio ",((Token)val_peek(0).obj).getNroLine());
 	   					//$$.obj = error;
 	   				}else{
-	   					updateTableNegative(   ((Token)$2.obj).getLexema()   );
+	   					TableRecord tr = updateTableNegative(   ((Token)$2.obj).getLexema()   );
 	   					Nodo nuevo = new Nodo(table.get("-"+((Token)$2.obj).getLexema()));
-						$$.obj = new Token(0, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
+						$$.obj = new Token(lexico.CTE, "-"+((Token)$2.obj).getLexema(), ((Token)$1.obj).getNroLine(), "double", tr ,nuevo);
 	   				}
 
 	   			 }
 	   
 	   | ID  { 
 	   
-	   			isDeclarated((Token)$1.obj);
-	   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
-	   			System.out.println(((Token)$1.obj).getLexema());
-	   			TableRecord tr = table.get(((Token)$1.obj).getLexema());
-	   			Nodo nuevo = new Nodo(tr.getLexema(),null,null);
-	   			nuevo.setTableRec(tr);
-	   			((Token)$1.obj).setNodo(nuevo);
-	   			((Token)$1.obj).setRecord(tr);
+	   			if (isDeclarated((Token)$1.obj)){
+		   			//TODO ¿chequeo ambito? ¿chequeo de declaracion?
+		   			System.out.println(((Token)$1.obj).getLexema());
+		   			TableRecord tr = table.get(((Token)$1.obj).getLexema());
+		   			Nodo nuevo = new Nodo(tr.getLexema(),null,null);
+		   			nuevo.setTableRec(tr);
+		   			((Token)$1.obj).setNodo(nuevo);
+		   			((Token)$1.obj).setRecord(tr);
+	   			}else{
+	   				Nodo nuevo = new Nodo("error",null,null);
+		   			((Token)$1.obj).setNodo(nuevo);
+	   			}
 	   			 
 	   		 }
 	   ;
