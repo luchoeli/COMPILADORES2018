@@ -1,22 +1,22 @@
-__7-Sentencia IF con comparación entre expresiones aritméticas como condición, con bloque ELSE:
+double _a;_b,
 
-double _a;_b;_c,
+print('primero tenria que entrar al if y desp al else'),
+_a:=2.5,
+_b:=10.0,
 
-print('primero tenria que entrar al ELSE y desp al IF'),
-
-_a:=2.,
-_b:=5.5,
-_c:=10.0,
-
-if (_a*2.5>=_b+_c/2.0){
-	print('bloque if'),
+if (_a*4. - 2.0 = 8.0){
+	print('entro en if'),
 }else{
-	print('bloque else'),
+	 print('entro en else'),
+	
 }end_if,
 
-_a:=20.,
-if (_a*2.5>=_b+_c/2.0){
-	print('bloque if'),
+
+_a:=-2.3,
+_b:=10.0,
+if (_a>2.){
+	print('entro en if'),
 }else{
-	print('bloque else'),
+	 print('entro en else'),
 }end_if,
+

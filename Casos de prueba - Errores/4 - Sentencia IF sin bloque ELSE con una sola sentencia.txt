@@ -1,9 +1,0 @@
- __Sentencia IF sin bloque ELSE con una sola sentencia.
-
-double _a,
-_a:=2.,
-if (_a>2.){
-	 print('entro al if'),
-}end_if,
-print('fuera del if'),
-
