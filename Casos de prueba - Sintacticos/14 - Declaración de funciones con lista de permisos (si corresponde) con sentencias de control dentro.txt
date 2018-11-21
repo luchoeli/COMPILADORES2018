@@ -13,13 +13,3 @@ _a:=_funcion1(_parametro;write;pass)+,
 if (_a=3.2){
 	print('es igual'),
 }end_if,
-
-_funcion1(_parametro;readonly),
-_funcion1(_parametro;pass),
-_funcion1(_parametro;write),
-
-__errores
-_funcion1(_parametro;pass;write),
-_funcion1(_parametro;writeonly),
-
-

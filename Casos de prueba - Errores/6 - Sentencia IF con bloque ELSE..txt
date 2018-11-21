@@ -1,32 +1,5 @@
-double _a;_b,
-
-print('primero tenria que entrar al if y desp al else'),
-_a:=2.3,
-_b:=10.0,
-if (_a>2.){
-	_a:=2.23D+2,
-	print('entro en if'),
-	_b:=2_ui,
-}else{
-	_b:=_a+_b,
-	 print('entro en else'),
-	_a:= 2.3 * 3.5,
-}end_if,
-
-
-_a:=-2.3,
-_b:=10.0,
-if (_a>2.){
-	_a:=2.23D+2,
-	print('entro en if'),
-	_b:=2_ui,
-}else{
-	_b:=_a+_b,
-	 print('entro en else'),
-	_a:= 2.3 * 3.5,
-}end_if,
-
 __error
+double _a;_b,
 
 if (_a>2.){
 	_a:=2.23D+2,
