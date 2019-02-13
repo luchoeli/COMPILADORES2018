@@ -1,6 +1,5 @@
 package lexicalSource;
 
-import sintacticSource;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
