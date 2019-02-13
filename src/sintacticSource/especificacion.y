@@ -311,7 +311,7 @@ expresion : expresion '+' termino{
 									Nodo nuevo = new Nodo ("-",(Nodo)$1.obj,(Nodo)$3.obj);
 	   								$$.obj = new Token(0, ((Token)$1.obj).getLexema() + "-" +((Token)$3.obj).getLexema(), ((Token)$1.obj).getNroLine(), "", null,nuevo);
 								 }
-		  | termino	{
+		  | termino	{ if(isDeclarated((Token)$1.obj))
 		  				$$.obj = (Token)$1.obj;
 		  			}
 		  ;
@@ -335,13 +335,13 @@ imprimir	:	PRINT '('CADENA')'
 			;
 			
 asignacion 	:	ID ASIGNACION expresion {
-											if (isDeclarated((Token)$1.obj)){	
+											if (isDeclarated((Token)$1.obj) ){	
 												setRegla(((Token)$1.obj).getNroLine(), "Asignacion", ((Token)$1.obj).getLexema()+":="+((Token)$3.obj).getLexema());
 												Nodo nodoId = new Nodo(table.get(((Token)$1.obj).getLexema()));
 												Nodo nuevo = new Nodo(":=", nodoId, ((Token)$3.obj).getNodo());
-												$$.obj = nuevo;
-																								
+												$$.obj = nuevo;												
 											}
+											
 										}
 			|	ID ASIGNACION error {
 							System.out.println("ERROR"); 
