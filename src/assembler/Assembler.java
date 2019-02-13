@@ -1,5 +1,4 @@
 package assembler;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -148,12 +147,12 @@ public class Assembler {
 			Nodo subTree = raiz.getLeftSubTree();
 			//subTree.imprimirNodo();
 			System.out.println("-------------- SUBTREE "+subTree.getLexema());
-//			try {
-//				Thread.sleep(2000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			Nodo nodoI=null,nodoD = null;
 			String left="",rigth="";
 			TableRecord trI=null,trD=null;
@@ -492,7 +491,6 @@ public class Assembler {
 		String label = LABEL+nroLabel;
 		nroLabel++;
 		return label;
-		
 	}
 	private String declararVariablesAux() {
 		String auxiliares="";
