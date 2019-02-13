@@ -1,6 +1,5 @@
 package lexicalSource;
 
-import sintacticSource;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -378,7 +377,7 @@ public class LexicalAnalizer {
 		int column = -1;
 		boolean corte = false;
 		while(!corte){
-			if (isRead()){ //Si tengo que leer el ï¿½ltimo caracter.
+			if (isRead()){ //Si tengo que leer el último caracter.
 				if (posRead<in.length()){
 					this.lastChar = in.charAt(posRead);
 					posRead++;
@@ -477,7 +476,7 @@ public class LexicalAnalizer {
 	private TableRecord addConstanteToTable(TableRecord a){
 		String key = a.getLexema();
 		if (table.containsLexema(key)){
-			//Si existe incremento el nï¿½mero de referencias.
+			//Si existe incremento el número de referencias.
 			TableRecord out= table.get(key);
 			out.increment();
 			return out;
